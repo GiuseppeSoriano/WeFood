@@ -1,0 +1,64 @@
+Application Highlists:
+
+A user can upload posts with recipes;
+A user can review other users’ posts with stars or comments;
+A user can follow other users;
+A user can search for new recipes
+
+
+- Un utente può inserire una ricetta specificando gli ingredienti in essa contenuti e pubblicando una foto del risulato finale.
+- Un utente può commentare e valutare (voto da 1 a 5) le ricette pubblicate dagli altri utenti.
+- Un utente può seguire gli altri utenti iscritti.
+- L'amministratore ha la possibilità di visualizzare e modificare gli ingredienti di base con cui possono essere composte le varie ricette.
+- L'amministratore può gestire i profili degli utenti ed i relativi post.
+- Un utente può ricercare una ricetta sulla base degli ingredienti.
+- Un utente può cercare altri utenti e visualizzare le ricette pubblicate dagli stessi.
+- Un utente non registrato può solamente cercare le ricette per ingrediente
+
+Variety:
+- Ingredients and Calories: https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams
+- Recipes: https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv
+- Reviews (First Name and Last Name of the Users): https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv
+
+- Description: 
+[1]: Calories in Food Items (per 100 grams)
+[2]: Food.com Recipes and Interactions
+[3]: Food.com - Recipes and Reviews
+
+- (Current) Volume:
+1 GB:
+-2225 food items across 44 food categories
+-This dataset consists of 180K+ recipes and 700K+ recipe reviews covering 18 years of user interactions and uploads on Food.com
+-Data on over 500,000 recipes and 1,400,000 reviews from Food.com
+
+- (Future) Volume:
+||
+
+Velocity/Variability:  N/A
+
+
+Draw the UML Class Diagram
+- Users <- [Admin, Registered User, Unregistered User]
+- Recipes
+- Posts
+- Ingredients 
+- Reviews
+
+
+
+Software Architecture Preliminary Idea
+- Intellij
+- MongoDB
+- Neo4j
+- Angular
+- Tailwind CSS
+- Spring Boot JAVA
+
+
+Ingredients vengono memorizzati in cache locale del client?
+Possiamo farlo?
+
+
+
+
+
