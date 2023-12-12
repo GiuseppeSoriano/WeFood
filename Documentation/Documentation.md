@@ -66,14 +66,91 @@ The non-functional requirements for WeFood are as follows:
 
 # Dataset and Web Scraping
 
+See Data...
 
 
 # Statistics and Queries
 
+## CRUD operations
+
+### Create
+
+- Create a new user
+- Create a new post
+- Create a new recipe
+- Create a new comment
+- Create a new star ranking
+- Create a new following relationship
+- Create a new ingredient
+- Create a new user-ingredient relationship
+- Create a new ingredient-ingredient relationship
+
+### Read
+
+- Show users
+- Shows posts
+- Show comments
+- Show star ranking
+- Show ingredients
+
+### Update
+
+- Update user's information
+- Update post
+- Update recipe
+- Update comment
+- Update star ranking
+- Update ingredient
+- Update user-ingredient relationship
+- Update ingredient-ingredient relationship
+
+### Delete
+
+- Delete user
+- Delete post
+- Delete comment
+- Delete star ranking
+- Delete following relationship
+- Delete ingredient
+- Delete user-ingredient relationship
+- Delete ingredient-ingredient relationship
+
+### Query
+
+#### Analytics
+
+- Show most active users
+- Show most followed users
+- Show post with most comments
+- Show post with the highest/lowest star ranking
+- Show most/less used ingredients
+- Show most/less used ingredients by a user
+- To add others...
+
+
+#### Suggestions
+
+- Suggest users to follow (based on the user's friends)
+- Suggest users to follow (based on common ingredients)
+- Suggest users to follow (based on friends' followings)
+- Suggest most popular combination of ingredients
+- Suggest new set of ingredients based on friends’ usage
+- Suggest most followed users
+
 
 # UML Use Case Diagram
 
+
+Aggiungere tutti attributi anche dettagliati e per ogni attributo bisogna specificare il tipo in Java (es. String, int, ecc...).
+
+
+
+
+
 # UML Class Diagram
+
+
+
 
 
 # Load Estimation
