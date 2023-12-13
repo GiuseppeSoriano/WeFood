@@ -92,6 +92,9 @@ See Data...
 - Show comments
 - Show star ranking
 - Show ingredients
+- Show friends
+- Show followers
+- Show followings
 
 ### Update
 
@@ -141,14 +144,12 @@ See Data...
 # UML Use Case Diagram
 
 
-Aggiungere tutti attributi anche dettagliati e per ogni attributo bisogna specificare il tipo in Java (es. String, int, ecc...).
-
-
 
 
 
 # UML Class Diagram
 
+Aggiungere tutti attributi anche dettagliati e per ogni attributo bisogna specificare il tipo in Java (es. String, int, ecc...).
 
 
 
