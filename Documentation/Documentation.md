@@ -28,7 +28,8 @@ The actors that are involved in WeFood are:
     2.9. Evaluate by a star ranking a Post
     2.10. Browse most recent friends' Posts
     2.11. Browse most recent top rated Posts
-    2.12. Browse most recent Posts by ingredients
+    2.12. Browse most recent Posts by ingredients 
+    2.13a. Browse most recent Posts by calories 
     2.13. View his/her own profile
     2.14. View other Users' profiles
     2.15. View his/her Friends
@@ -37,6 +38,15 @@ The actors that are involved in WeFood are:
     2.18. Modify his/her own profile (e.g. change username and password)
     2.19. Delete his/her own profile
     2.20. Search for a User by username
+    2.21. View Total Calories of a Recipe
+    2.22. View Calories of an Ingredient
+    2.23. View Steps of a Recipe 
+    2.24. View Recipe of a Post
+    2.25. View Ingredients of a Recipe
+
+
+    
+
 
 3. Administrator:
     3.1 Log In
@@ -95,6 +105,11 @@ See Data...
 - Show friends
 - Show followers
 - Show followings
+- Show calories of an ingredient
+- Show steps of a Recipe 
+- Show recipe of a Post
+- Show ingredients of a Recipe
+
 
 ### Update
 
@@ -128,6 +143,7 @@ See Data...
 - Show post with the highest/lowest star ranking
 - Show most/less used ingredients
 - Show most/less used ingredients by a user
+- Show total amount of calories of a recipe
 - To add others...
 
 
@@ -153,12 +169,21 @@ Aggiungere tutti attributi anche dettagliati e per ogni attributo bisogna specif
 
 
 
-
 # Load Estimation
+
+
 
 # DataBase
 
+
 ## Document DB
+
+Collections:
+
+
+Structure of the collections:
+
+
 
 ### Collections
 
@@ -168,6 +193,17 @@ CRUD
 Statistics Queries
 
 ## Graph DB
+
+Entities:
+- User
+- Ingredient
+
+Relationships:
+- USER_:FOLLOWS_USER
+- USER_:USED_INGREDIENT
+- INGREDIENT_:USED-WITH_INGREDIENT (DUE RELAZIONI COSì ATTR: times_used_together)
+
+
 
 ### Queries
 

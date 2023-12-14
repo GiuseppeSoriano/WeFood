@@ -1,0 +1,52 @@
+<mxfile host="app.diagrams.net" modified="2023-12-14T13:53:31.412Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0" etag="9DlN3_56mfiWnpfTNDmS" version="22.1.8" type="device">
+  <diagram name="Pagina-1" id="rsW22kZGa7a1XgGhSe4M">
+    <mxGraphModel dx="1621" dy="589" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2336" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="FYORlZUPq5VcJdLz5Bnz-5" value="Ricetta1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="760" y="200" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="FYORlZUPq5VcJdLz5Bnz-6" value="Ingredient2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="320" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="FYORlZUPq5VcJdLz5Bnz-7" value="Ingredient1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="200" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="FYORlZUPq5VcJdLz5Bnz-10" value="User1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="520" y="440" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="FYORlZUPq5VcJdLz5Bnz-11" value="Ricetta2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="760" y="360" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="FYORlZUPq5VcJdLz5Bnz-12" value="Ingredient3" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="440" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="FYORlZUPq5VcJdLz5Bnz-13" value="User2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="520" y="160" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="FYORlZUPq5VcJdLz5Bnz-15" value="" style="curved=1;endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="FYORlZUPq5VcJdLz5Bnz-13" target="FYORlZUPq5VcJdLz5Bnz-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="600" y="199.97" as="sourcePoint" />
+            <mxPoint x="650" y="149.97" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="560" y="100" />
+              <mxPoint x="1040" y="100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="FYORlZUPq5VcJdLz5Bnz-17" value="" style="curved=1;endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="FYORlZUPq5VcJdLz5Bnz-6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="799.98" y="359.97" as="sourcePoint" />
+            <mxPoint x="1280" y="399.97" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="800" y="300" />
+              <mxPoint x="1280" y="300" />
+              <mxPoint x="1280" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
