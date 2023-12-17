@@ -1,7 +1,6 @@
 import csv
 import pandas as pd
-import csv
-import pandas as pd
+
 
 def read_csv_file(file_name):
     data = {}

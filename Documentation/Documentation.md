@@ -79,13 +79,178 @@ The non-functional requirements for WeFood are as follows:
 See Data...
 
 
+# UML Use Case Diagram
+
+
+# UML Class Diagram
+
+The UML Class Diagram is shown in the following figure:
+
+
+
+Details about the UML Class Diagram:
+
+Admin:
+- username: String
+- password: String (hashed)
+
+RegisteredUser:
+- username: String
+- password: String (hashed)
+- name: String
+- surname: String
+- posts: List<Post>
+
+Post:
+- description: String
+- timestamp: Date
+- comments: List<Comment>
+- starRankings: List<StarRanking>
+- recipe: Recipe
+
+Comment:
+- user: RegisteredUser
+- text: String
+- timestamp: Date
+
+StarRanking:
+- user: RegisteredUser
+- vote: Double
+- timestamp: Date (?)
+
+Recipe:
+- name: String
+- image: String_URL
+- steps: List<String> (or String)
+- ingredients: Map<Ingredient, Double>
+
+Ingredient:
+- name: String
+- calories: Double
+
+(# Load Estimation)
+
+# DataBase
+
+
+## Document DB
+
+Entities:
+- User
+- Post
+- Comment
+- StarRanking
+- Recipe
+
+Collections:
+- User
+- Post
+
+
+### Collections
+
+Structure of the collections:
+
+User
+{
+    _id: #,
+    type: enum {Admin, RegisteredUser},
+    username: String,
+    password: String,
+    name: String, # Not applicable for Admin
+    surname: String, # Not applicable for Admin
+    posts: [{
+                _idPost: #,
+                name: String, [R]
+                image: String_URL [R]
+    }, ...]
+}
+
+Post
+{
+    _id: #,
+    _idUser: #, 
+    username: String, [R]
+    description: String,
+    timestamp: Timestamp,
+    recipe: {
+                name: String,
+                image: String_URL,
+                steps: [String, ...],
+                totalCalories: Double, [R]
+                ingredients: [{
+                                name: String,
+                                quantity: Double, 
+                }, ...]
+    },
+    avgStarRanking: Double, [R]
+    starRankings: [{
+                        _idUser: #,
+                        username: String, [R]
+                        vote: Double,
+                        (timestamp: Timestamp)
+    }, ...],
+    comments: [{
+                _idUser: #,
+                username: String, [R]
+                text: String,
+                timestamp: Timestamp
+    }, ...]
+}
+
+
+
+## Key-Value DB
+
+Entities:
+- Ingredient
+
+Bucket Ingredients:
+
+EntityName:Attribute=Value
+    Ingredient:Calories=X
+
+e.g.
+    Pasta:Calories=100
+
+
+## Graph DB
+
+Entities:
+- User:
+    - (PK) == _id (PK of User in Document DB)
+    - username [R]
+  
+- Recipe:
+    - (PK) == _idPost (PK of Post in Document DB)
+    - name [R]
+
+
+- Ingredient:
+    - (PK) == nameOfIngredient (PK of Ingredient in Key-Value DB)
+    
+
+Relationships:
+- User --> :FOLLOWS --> User
+
+- User --> :USED --> Ingredient
+           (times: int) [R]
+Here times keeps track of the fact that the relationship with the ingredient still exists in other recipes after the deletion of a recipe. If times = 0, even then the relationship can be deleted.
+
+- Ingredient --> :USED_WITH --> Ingredient  
+                 (times: int) [R]
+[This relationship is bidirectional]
+
+- Recipe --> :CONTAINS --> Ingredient
+
+
 # Statistics and Queries
 
 ## CRUD operations
 
 ### Create
 
-- Create a new user
+- Create a new user 
 - Create a new post
 - Create a new recipe
 - Create a new comment
@@ -157,60 +322,120 @@ See Data...
 - Suggest most followed users
 
 
-# UML Use Case Diagram
-
-
-
-
-
-# UML Class Diagram
-
-Aggiungere tutti attributi anche dettagliati e per ogni attributo bisogna specificare il tipo in Java (es. String, int, ecc...).
-
-
-
-# Load Estimation
-
-
-
-# DataBase
-
-
-## Document DB
-
-Collections:
-
-
-Structure of the collections:
-
-
-
-### Collections
-
-### Queries
-
-CRUD
-Statistics Queries
-
-## Graph DB
-
-Entities:
-- User
-- Ingredient
-
-Relationships:
-- USER_:FOLLOWS_USER
-- USER_:USED_INGREDIENT
-- INGREDIENT_:USED-WITH_INGREDIENT (DUE RELAZIONI COSì ATTR: times_used_together)
-
-
-
-### Queries
-
-CRUD
-Statistics Queries
-
 # Redundancies
+
+
+Where is the Redundancy | Reason | Original Value
+-----------------------|--------|----------------
+
+User{
+    posts: [{
+                name,
+                image
+    }]
+}
+Reason: to avoid joins 
+Oringinal Value: Post{
+                       recipe:{
+                                name,
+                                image
+                       }
+                     }
+
+--- 
+
+Post{
+    username
+}
+Reason: to avoid joins
+Original Value: User{
+                        username
+                    }
+
+---
+
+Post{
+    recipe:{
+                totalCalories
+           }
+}
+Reason: to avoid computing the total calories of a recipe every time that a post is shown
+Original Value: It is possibile to compute the total calories of a recipe by summing the calories of each ingredient of the recipe  (retrieving the calories of each ingredient from the Key-Value DB)
+
+---
+
+Post{
+    avgStarRanking
+}
+Reason: to avoid computing the average star ranking of a post every time that a post is shown
+Original Value: It is possibile to compute the average star ranking of a post by summing the star rankings of each user and dividing by the number of users that voted for the post
+
+---
+
+Post{
+    starRankings: [{
+                        username,
+    }]
+}
+Reason: to avoid joins
+Original Value: User{
+                        username
+                    }
+
+---
+
+Post{
+    comments: [{
+                    username,
+    }]
+}
+Reason: to avoid joins
+Original Value: User{
+                        username
+                    }
+
+---
+
+GraphDB: The redundancies inside the GraphDB are necessary to avoid joins with the DocumentDB. In this way we can show partial information.
+
+User:
+    - username
+Reason: to avoid joins with the DocumentDB
+Original Value: User{
+                        username
+                    }
+
+---
+
+Recipe:
+    - name
+
+Reason: to avoid joins with the DocumentDB
+Original Value: Post{
+                        recipe:{
+                                    name
+                               }
+                    }
+
+---
+
+:USED:
+    - times
+
+Reason: to avoid computing the number of times that an ingredient is used every time that is needed.
+Original Value: it is possible to compute the number of times that an ingredient is used by counting the number of times that a user has used an ingredient in his/her recipes (retrieving the information from the DocumentDB).
+
+---
+
+:USED_WITH:
+    - times
+
+Reason: to avoid computing the number of times that an ingredient is used with another ingredient every time that is needed.
+Original Value: it is possible to compute the number of times that an ingredient is used with another ingredient by counting the number of times that a user has used an ingredient with another ingredient in his/her recipes (retrieving the information from the DocumentDB).
+
+
+
+
 
 # Document DataBase Index Design
 
