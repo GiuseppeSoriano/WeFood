@@ -1,0 +1,43 @@
+Canned Fruit: 100-500
+Fruits: 50-300
+Tropical & Exotic Fruits: 50-300
+Potato Products: 100-500
+Vegetables: 50-400
+Fast Food: 50-500
+Pizza: 100-600
+Cheese: 50-200
+Cream Cheese: 50-200
+Milk & Dairy Products: 100-500
+Sliced Cheese: 50-200
+Yogurt: 100-250
+Beef & Veal: 100-500
+Cold Cuts & Lunch Meat: 50-200
+Meat: 100-500
+Offal & Giblets: 50-200
+Pork: 100-500
+Poultry & Fowl: 100-500
+Sausage: 100-300
+Venison & Game: 100-500
+Candy & Sweets: 30-100
+Ice Cream: 50-200
+(Fruit) Juices: 100-300
+Alcoholic Drinks & Beverages: 30-100
+Beer: 100-300
+Non-Alcoholic Drinks & Beverages: 100-300
+Soda & Soft Drinks: 100-300
+Wine: 50-200
+Cereal Products: 50-200
+Oatmeal, Muesli & Cereals: 50-200
+Pasta & Noodles: 100-400
+Dishes & Meals: 100-500
+Soups: 100-500
+Legumes: 50-300
+Nuts & Seeds: 30-100
+Oils & Fats: 10-100
+Vegetable Oils: 10-100
+Baking Ingredients: 5-200
+Fish & Seafood: 100-400
+Herbs & Spices: 1-10
+Pastries, Breads & Rolls: 100-500
+Sauces & Dressings: 10-100
+Spreads: 10-50
