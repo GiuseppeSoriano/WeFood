@@ -76,6 +76,112 @@ The non-functional requirements for WeFood are as follows:
 
 # Dataset and Web Scraping
 
+Step #1:
+- Inside the the file called calories.csv we have the following structure:
+    FoodCategory,FoodItem,per100grams,Cals_per100grams,KJ_per100grams
+- Since quantities are missing in the file RAW_recipes.csv (we saw that in the second dataset, in the file recipes.csv there were numbers related to quantities but these one were really difficutl to understand, because there were no unit of measures and only little numebrs as 1, 2/3 etc. Furthermore no documentation was provided about the meaning of these numbers), we decided to generate meaningful ranges of values for each FoodCategory of the file calories.csv (with the support of ChatGPT). In this way we can associate to each ingriedient of a recipe a random number extracted from a uniform distribution in the range of values of the FoodCategory of that ingredient. In this way we can generate a recipe with random quantities of ingredients, that are meaningful and realistic (i.e. we can't have 500g of salt in a recipe).
+
+```
+Canned Fruit: 100-500
+Fruits: 50-300
+Tropical & Exotic Fruits: 50-300
+Potato Products: 100-500
+Vegetables: 50-400
+Fast Food: 50-500
+Pizza: 100-600
+Cheese: 50-200
+Cream Cheese: 50-200
+Milk & Dairy Products: 100-500
+Sliced Cheese: 50-200
+Yogurt: 100-250
+Beef & Veal: 100-500
+Cold Cuts & Lunch Meat: 50-200
+Meat: 100-500
+Offal & Giblets: 50-200
+Pork: 100-500
+Poultry & Fowl: 100-500
+Sausage: 100-300
+Venison & Game: 100-500
+Candy & Sweets: 30-100
+Ice Cream: 50-200
+(Fruit) Juices: 100-300
+Alcoholic Drinks & Beverages: 30-100
+Beer: 100-300
+Non-Alcoholic Drinks & Beverages: 100-300
+Soda & Soft Drinks: 100-300
+Wine: 50-200
+Cereal Products: 50-200
+Oatmeal, Muesli & Cereals: 50-200
+Pasta & Noodles: 100-400
+Dishes & Meals: 100-500
+Soups: 100-500
+Legumes: 50-300
+Nuts & Seeds: 30-100
+Oils & Fats: 10-100
+Vegetable Oils: 10-100
+Baking Ingredients: 5-200
+Fish & Seafood: 100-400
+Herbs & Spices: 1-10
+Pastries, Breads & Rolls: 100-500
+Sauces & Dressings: 10-100
+Spreads: 10-50
+```
+
+
+- Then we updated the file calories.csv by adding two new columns with the min and max values of the range of values for each FoodCategory. Here's the new structure of the file:
+    FoodCategory,FoodItem,per100grams,Cals_per100grams,KJ_per100grams,MinQuantity,MaxQuantity
+
+```python
+# First, let's read the contents of the 'quantities.txt' file to understand its structure
+file_path_quantities = 'quantities.txt'
+
+with open(file_path_quantities, 'r') as file:
+    quantities_content = file.read()
+
+# Parsing the quantities.txt content to create a dictionary mapping each food category to its quantity range
+quantities_dict = {}
+
+# Splitting the content into lines and then processing each line
+for line in quantities_content.split('\n'):
+    if line:
+        category, quantities = line.split(': ')
+        min_quantity, max_quantity = quantities.split('-')
+        quantities_dict[category] = (int(min_quantity), int(max_quantity))
+import pandas as pd
+
+# Next, let's read the contents of the 'calories.csv' file to understand its structure
+file_path_calories = 'calories.csv'
+
+# Reading the CSV file
+calories_df = pd.read_csv(file_path_calories)
+# Now, we will add the 'quantity_min' and 'quantity_max' columns to the calories dataframe based on the food category from the quantities dictionary
+# Function to extract quantity range from the dictionary
+def get_quantity_range(food_category, quantities_dict):
+    return quantities_dict.get(food_category, (None, None))
+
+# Applying the function to each row in the dataframe
+calories_df['quantity_min'], calories_df['quantity_max'] = zip(*calories_df['FoodCategory'].apply(lambda x: get_quantity_range(x, quantities_dict)))
+
+# The 'FoodCategory' values in the CSV file seem to have no spaces (e.g., 'CannedFruit' instead of 'Canned Fruit')
+# We need to adjust the key matching in the quantities dictionary accordingly
+# Adjusting the dictionary keys to match the format in the CSV
+adjusted_quantities_dict = {''.join(key.split()): value for key, value in quantities_dict.items()}
+
+# Reapplying the function with the adjusted dictionary
+calories_df['quantity_min'], calories_df['quantity_max'] = zip(*calories_df['FoodCategory'].apply(lambda x: get_quantity_range(x, adjusted_quantities_dict)))
+
+# Specifying the path for the new CSV file
+new_csv_file_path = 'updated_calories.csv'
+
+# Saving the dataframe to a CSV file
+calories_df.to_csv(new_csv_file_path, index=False)
+```
+
+
+Fare unique su updated_calories.csv su FoodItem (controlla esempio Bacon)
+Rieseguire il fuzzywuzzy script e vedere se ci sono duplicati su raw_ingr
+
+
 See Data...
 
 
@@ -154,7 +260,7 @@ Structure of the collections:
 User
 {
     _id: #,
-    type: enum {Admin, RegisteredUser},
+    type: "Admin", # Applicable only for Admin
     username: String,
     password: String,
     name: String, # Not applicable for Admin
@@ -180,15 +286,14 @@ Post
                 totalCalories: Double, [R]
                 ingredients: [{
                                 name: String,
-                                quantity: Double, 
+                                quantity: Double 
                 }, ...]
     },
     avgStarRanking: Double, [R]
     starRankings: [{
                         _idUser: #,
                         username: String, [R]
-                        vote: Double,
-                        (timestamp: Timestamp)
+                        vote: Double
     }, ...],
     comments: [{
                 _idUser: #,
@@ -198,37 +303,30 @@ Post
     }, ...]
 }
 
-
-
-## Key-Value DB
-
-Entities:
-- Ingredient
-
-Bucket Ingredients:
-
-EntityName:Attribute=Value
-    Ingredient:Calories=X
-
-e.g.
-    Pasta:Calories=100
+Ingredient
+{
+    _id: #,
+    name: String, [:unique]
+    calories: Double
+}
 
 
 ## Graph DB
 
 Entities:
 - User:
-    - (PK) == _id (PK of User in Document DB)
+    - _id (PK of User in Document DB)
     - username [R]
   
 - Recipe:
-    - (PK) == _idPost (PK of Post in Document DB)
+    - _id (PK of Post in Document DB)
     - name [R]
 
 
 - Ingredient:
-    - (PK) == nameOfIngredient (PK of Ingredient in Key-Value DB)
-    
+    - _id (PK of Ingredient in Document DB)
+    - name [R]
+
 
 Relationships:
 - User --> :FOLLOWS --> User
@@ -241,6 +339,7 @@ Here times keeps track of the fact that the relationship with the ingredient sti
                  (times: int) [R]
 [This relationship is bidirectional]
 
+
 - Recipe --> :CONTAINS --> Ingredient
 
 
@@ -251,21 +350,147 @@ Here times keeps track of the fact that the relationship with the ingredient sti
 ### Create
 
 - Create a new user 
-- Create a new post
-- Create a new recipe
+- Create a new post / recipe
 - Create a new comment
 - Create a new star ranking
-- Create a new following relationship
 - Create a new ingredient
+- Create a new following relationship
+- Create a new recipe-ingredient relationship
 - Create a new user-ingredient relationship
 - Create a new ingredient-ingredient relationship
+
+#### MongoDB
+
+- Create a new user 
+```javascript
+db.User.insertOne({
+    username: String,
+    password: hashedString,
+    name: String,
+    surname: String,
+})
+```
+
+- Create a new post
+```javascript
+db.Post.insertOne({
+    idUser: #,
+    username: String,
+    description: String,
+    timestamp: Timestamp,
+    recipe: {
+                name: String,
+                image: String_URL,
+                steps: [String, ...],
+                totalCalories: Double,
+                ingredients: [{
+                                name: String,
+                                quantity: Double, 
+                }, ...]
+    }
+})
+```
+
+- Create a new comment
+```javascript   
+db.Post.updateOne({
+    _id: #,
+}, {
+    $push: {
+        comments: {
+            idUser: #,
+            username: String,
+            text: String,
+            timestamp: Timestamp
+        }
+    }
+})
+```
+
+- Create a new star ranking
+```javascript
+db.Post.updateOne({
+    _id: #,
+}, {
+    $push: {
+        starRankings: {
+            idUser: #,
+            username: String,
+            vote: Double,
+        }
+    }
+})
+```
+
+- Create a new ingredient
+```javascript
+db.Ingredient.insertOne({
+    name: String,
+    calories: Double,
+})
+```
+
+#### Neo4j
+
+- Create a new user 
+```javascript
+CREATE (u:User {
+    username: String
+})
+```
+
+- Create a new recipe
+```javascript
+CREATE (r:Recipe {
+    name: String
+})
+```
+
+- Create a new ingredient
+```javascript
+CREATE (i:Ingredient {
+    name: String
+})
+```
+
+- Create a new following relationship
+```javascript
+MATCH (u1:User {username: String}), (u2:User {username: String})
+CREATE (u1)-[:FOLLOWS]->(u2)
+```
+
+- Create a new recipe-ingredient relationship
+```javascript
+MATCH (r:Recipe {name: String}), (i:Ingredient {name: String})
+CREATE (r)-[:CONTAINS]->(i)
+```
+
+- Create a new user-ingredient relationship
+  - Check if the relationship already exists
+  - If it exists, increment the times attribute
+  - If it doesn't exist, create the relationship
+```javascript
+MATCH (u:User {username: String}), (i:Ingredient {name: String})
+MERGE (u)-[r:USED]->(i) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1
+```
+
+(Done after the creation of a Recipe)
+- Create a new ingredient-ingredient relationship
+  - Check if the relationship already exists
+  - If it exists, increment the times attribute
+  - If it doesn't exist, create the relationship
+```javascript
+MATCH (i1:Ingredient {name: String}), (i2:Ingredient {name: String})
+MERGE (i1)-[r:USED_WITH]->(i2) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1
+```
+
 
 ### Read
 
 - Show users
 - Shows posts
-- Show comments
-- Show star ranking
+- Show comments of a Post
+- Show star ranking of a Post
 - Show ingredients
 - Show friends
 - Show followers
@@ -274,85 +499,536 @@ Here times keeps track of the fact that the relationship with the ingredient sti
 - Show steps of a Recipe 
 - Show recipe of a Post
 - Show ingredients of a Recipe
+- Show recipes filtering by the ingredients
+- Show recipes filtering by the calories (lower bound and upper bound) (if the totalCalories is the same, we show the ones with the highest star ranking)
+- Show the most/least recent posts (timestamp) 
+
+
+#### MongoDB
+
+- Show users
+```javascript
+db.User.find()
+```
+
+- Show posts
+```javascript
+db.Post.find()
+```
+
+- Show comments
+```javascript
+db.Post.find({
+    _id: #,
+}, {
+    comments: 1
+})
+```
+
+- Show star ranking of a Post
+```javascript
+db.Post.find({
+    _id: #,
+}, {
+    starRankings: 1
+})
+```
+
+- Show ingredients
+```javascript
+db.Ingredient.find()
+```
+
+- Show calories of an ingredient
+```javascript
+db.Ingredient.find({
+    name: String,
+}, {
+    calories: 1
+})
+```
+
+- Show steps of a Recipe 
+```javascript
+db.Post.find({
+    _id: #,
+}, {
+    recipe: {
+        steps: 1
+    }
+})
+```
+
+- Show recipe of a Post
+```javascript
+db.Post.find({
+    _id: #,
+}, {
+    recipe: {
+        name: 1,
+        image: 1,
+        steps: 1,
+        totalCalories: 1,
+        ingredients: 1
+    }
+})
+```
+
+- Show ingredients of a Recipe
+```javascript
+db.Post.find({
+    _id: #,
+}, {
+    recipe: {
+        ingredients: 1
+    }
+})
+```
+
+- Show recipes filtering by the calories (lower bound and upper bound) (if the totalCalories is the same, we show the ones with the highest star ranking)
+```javascript
+db.Post.find({
+    recipe: {
+        totalCalories: {
+            $gte: lowerBound,
+            $lte: upperBound
+        }
+    }
+}).sort({
+    avgStarRanking: -1
+})
+```
+
+- Show the most recent posts (timestamp)
+```javascript
+db.Post.find().sort({
+    timestamp: -1
+})
+```
+- Show the least recent posts (timestamp)
+```javascript
+db.Post.find().sort({
+    timestamp: 1
+})
+```
+
+
+
+#### Neo4j
+
+- Show followings
+```javascript
+MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)
+RETURN u2
+```
+
+- Show followers
+```javascript
+MATCH (u1:User)-[:FOLLOWS]->(u2:User {username: String})
+RETURN u1
+```
+
+- Show friends
+```javascript
+MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u1)
+RETURN u2
+```
+
+- Show recipes filtering by the ingredients
+```javascript
+MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)
+WHERE i.name IN [String, ...]   # List of ingredients
+RETURN r
+```
+
 
 
 ### Update
 
 - Update user's information
-- Update post
-- Update recipe
+  - [username] : we have to mantain the consistency
+  - password
+  - name
+  - surname
+
+- Update post 
+  - description   
+ 
+- [Update recipe] : we have to mantain the consistency
+
 - Update comment
-- Update star ranking
-- Update ingredient
-- Update user-ingredient relationship
-- Update ingredient-ingredient relationship
+
+- [Update user-ingredient relationship] (it is done in the create operation)
+
+- [Update ingredient-ingredient relationship] (it is done in the create operation)
+
+
+#### MongoDB
+
+- Update user's information
+
+- Update password
+```javascript
+db.User.updateOne({
+    _id: #,
+}, {
+    $set: {
+        password: hashedString,
+    }
+})
+```
+- Update name
+```javascript
+db.User.updateOne({
+    _id: #,
+}, {
+    $set: {
+        name: String,
+    }
+})
+```
+
+- Update surname
+```javascript
+db.User.updateOne({
+    _id: #,
+}, {
+    $set: {
+        surname: String,
+    }
+})
+```
+
+- Update post 
+
+- description   
+```javascript
+db.Post.updateOne({
+    _id: #,
+}, {
+    $set: {
+        description: String,
+    }
+})
+```
+
+- Update comment
+```javascript
+db.Post.updateOne({
+    _id: #,
+    comments: {
+        $elemMatch: {
+            _idUser: #,
+            timestamp: Timestamp,
+        }
+    }
+}, {
+    $set: {
+        "comments.$.text": String,
+    }
+})
+```
+
 
 ### Delete
 
-- Delete user
+- [Delete user] : no because otherwise we would lose all the information about the user (e.g. posts, comments, star rankings, etc.)
+
 - Delete post
+
 - Delete comment
 - Delete star ranking
 - Delete following relationship
-- Delete ingredient
-- Delete user-ingredient relationship
-- Delete ingredient-ingredient relationship
+
+- [Delete ingredient] : no because otherwise we would lose all the information about the ingredient (e.g. recipes, etc.)
+- 
+- Delete user-ingredient relationship (see delete a post)
+  
+- Delete ingredient-ingredient relationship (see delete a post)
+
+#### MongoDB
+
+- Delete post
+Before deleting a post we have to mantain the consistency of the DBs
+
+We need to delete the post from the User collection
+```javascript
+db.User.updateOne({
+    _id: #,
+}, {
+    $pull: {
+        posts: {
+            _idPost: #,
+        }
+    }
+})
+```
+
+We need to delete all the relationships of the recipe contained in the post from Neo4j
+```javascript
+MATCH (r:Recipe {name: String})-[r:CONTAINS]->(i:Ingredient)
+DELETE r
+```
+
+We need to update the times attribute of the relationships of the ingredients used together in the recipe contained in the post from Neo4j
+```javascript
+MATCH (i1:Ingredient {name: String})-[r:USED_WITH]->(i2:Ingredient {name: String})
+SET r.times = r.times - 1
+IF r.times = 0 THEN
+    DELETE r
+END IF
+``` [DA PROVARE]
+
+We need to update the relationships among the user and the ingredients used in the recipe contained in the post from Neo4j
+```javascript
+MATCH (u:User {username: String})-[r:USED]->(i:Ingredient {name: String})
+SET r.times = r.times - 1
+IF r.times = 0 THEN
+    DELETE r
+END IF
+``` [DA PROVARE]
+
+Now we can delete the post from the Post collection
+```javascript
+db.Post.deleteOne({
+    _id: #,
+})
+```
+
+- Delete comment
+```javascript
+db.Post.updateOne({
+    _id: #,
+}, {
+    $pull: {
+        comments: {
+            _idUser: #,
+            timestamp: Timestamp,
+        }
+    }
+})
+```
+
+- Delete star ranking
+```javascript
+db.Post.updateOne({
+    _id: #,
+}, {
+    $pull: {
+        starRankings: {
+            _idUser: #,
+        }
+    }
+})
+```
+
+#### Neo4j
+
+- Delete following relationship
+```javascript
+MATCH (u1:User {username: String})-[r:FOLLOWS]->(u2:User {username: String})
+DELETE r
+```
+
 
 ### Query
 
 #### Analytics
 
-- Show most active users (da vedere)
+- Show most active users (da vedere) (DA ELIMINARE)
 - Show most followed users
-- Show post with most comments
-- Show post with the highest/lowest star ranking
-- Show most/less used ingredients
-- Show most/less used ingredients by a user
+- [Show post with most comments] (Ci serve veramente?)
+- Show posts with the highest/lowest star ranking
+- Show most/least used ingredients
+- Show most/least used ingredients by a user
 - Show total amount of calories of a recipe
+- Show the average of the avgStarRanking of a User's posts
+- Average amount of grams of ingredients used in equal set of ingredients.
 - To add others...
 
+
+##### MongoDB
+
+- Show posts with the highest star ranking (if the avgStarRanking is the same, we show the most recent one)
+```javascript
+db.Post.find().sort({
+    avgStarRanking: -1,
+    timestamp: -1
+})
+```
+
+- Show total amount of calories of a recipe
+```javascript
+db.Post.find({
+    _id: #,
+}, {
+    recipe: {
+        totalCalories: 1
+    }
+})
+```
+
+- Show the average of the avgStarRanking of a User's posts
+```javascript
+db.Post.aggregate([
+    {
+        $match: {
+            _idUser: #,
+        }
+    },
+    {
+        $group: {
+            _id: null,
+            avgOfAvgStarRanking: {
+                $avg: "$avgStarRanking"
+            }
+        }
+    }
+])
+```
+
+- Average amount of grams of ingredients used in equal set of ingredients.
+(Da implementare)
+
+
+##### Neo4j
+
+- Show most followed users
+```javascript
+MATCH (u1:User)-[:FOLLOWS]->(u2:User)
+RETURN u2, COUNT(u1) AS followers
+ORDER BY followers DESC
+LIMIT 5
+```
+
+- Show most used ingredients
+```javascript
+MATCH (u:User)-[r:USED]->(i:Ingredient)
+RETURN i, SUM(r.times) AS times 
+ORDER BY times DESC
+LIMIT 5
+```
+
+- Show least used ingredients
+```javascript
+MATCH (u:User)-[r:USED]->(i:Ingredient)
+RETURN i, SUM(r.times) AS times
+ORDER BY times ASC
+LIMIT 5
+```
+
+- Show most used ingredients by a user
+```javascript
+MATCH (u:User {username: String})-[r:USED]->(i:Ingredient)
+RETURN i, r.times AS times
+ORDER BY times DESC
+LIMIT 5
+```
+
+- Show least used ingredients by a user
+```javascript
+MATCH (u:User {username: String})-[r:USED]->(i:Ingredient)
+RETURN i, r.times AS times
+ORDER BY times ASC
+LIMIT 5
+```
 
 #### Suggestions
 
 - Suggest users to follow (based on the user's friends)
 - Suggest users to follow (based on common ingredients)
-- Suggest users to follow (based on friends' followings)
 - Suggest most popular combination of ingredients
-- Suggest new set of ingredients based on friends’ usage
+- Suggest new ingredients based on friends’ usage
 - Suggest most followed users
+
+##### Neo4j
+
+- Suggest users to follow (based on the user's friends)
+```javascript
+MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u3:User)
+WHERE (u2)-[:FOLLOWS]->(u1)
+AND NOT (u1)-[:FOLLOWS]->(u3)
+RETURN u3
+```
+
+- Suggest users to follow (based on common ingredients)
+```javascript
+MATCH (u1:User {username: String})-[r1:USED]->(i:Ingredient)<-[r2:USED]-(u2:User)
+WHERE NOT (u1)-[:FOLLOWS]->(u2)
+RETURN u2
+```
+
+- Suggest most popular combination of ingredients
+```javascript
+MATCH (i1:Ingredient)-[r:USED_WITH]->(i2:Ingredient)
+RETURN i1, i2, r.times AS times
+ORDER BY times DESC
+LIMIT 5
+```
+
+- Suggest new ingredients based on friends’ usage
+```javascript
+MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[r:USED]->(i:Ingredient)
+WHERE (u2)-[:FOLLOWS]->(u1)
+AND NOT (u1)-[:USED]->(i)
+RETURN i, r.times AS times
+ORDER BY times DESC
+LIMIT 5
+```
+
+- Suggest most followed users
+```javascript
+MATCH (u1:User)-[:FOLLOWS]->(u2:User)
+RETURN u2, COUNT(u1) AS followers
+ORDER BY followers DESC
+LIMIT 5
+```
+
+
+
+DEFINIRE 3 AGGREGATIONS importanti!
+
+
+
+Possible Indexes:
+
+- Ingredient: name
+
+- Post: timestamp
+
+- Post: recipe: totalCalories combined with Post: avgStarRanking
+
+- Post: avgStarRanking combined with Post: timestamp
+
+Reason: since the user is the actor of the social network that performs the most number of operations and most of these operations are find operations (e.g. showing posts with different filters) we decided to implement indexes on the above fields. In this way we can speed up the find operations. We estimate that the number of find operations done by the admin will be negligible compared to the number of find operations done by the users.
+
+
+## Distributed Database Design
+
+According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.
+
+
+## Sharding
+In our application as it is implemented it is not useful to design the sharding approach. The main reason behind this decision is that we give the users the possibility to find the posts using completely uncorrelated filters that are not linked by a particular relationship (i.e. such as a common field). Ineed if for example we decided to shard the post collection by the field timestamp, we would have a lot of problems when we have to find the posts using other filters (e.g. by totalCalories). Indeed we would have to query all the shards and then merge the results. This would be a very inefficient approach. For this reason we decided to not implement the sharding approach.
+
+We do not consider the sharding approach for the User collection because we do not expect the users to grow as much as the posts. Indeed we expect that the number of users will be much lower than the number of posts. For this reason we decided to not implement the sharding approach at all.
+
+
 
 
 # Redundancies
 
 
-Where is the Redundancy | Reason | Original Value
------------------------|--------|----------------
+| Where                     | Reason              | Raw Value                   |
+|---------------            |---------------------|------------------           |
+|DocumentDB:User:posts:name | To avoid joins      | DocumentDB:Post:recipe:name |
+|DocumentDB:User:posts:image | To avoid joins      | DocumentDB:Post:recipe:image |
+|DocumentDB:Post:username | To avoid joins      | DocumentDB:User:username |
+|DocumentDB:Post:recipe:totalCalories | To avoid computing the total calories of a recipe every time a post is shown | XXX |
+|DocumentDB:Post:avgStarRanking | To avoid computing the average star ranking of a post every time is shown | It is possible to compute the average star ranking of a post by summing the  DocumentDB:User:username XXX|
 
-User{
-    posts: [{
-                name,
-                image
-    }]
-}
-Reason: to avoid joins 
-Oringinal Value: Post{
-                       recipe:{
-                                name,
-                                image
-                       }
-                     }
 
---- 
 
-Post{
-    username
-}
-Reason: to avoid joins
-Original Value: User{
-                        username
-                    }
-
----
 
 Post{
     recipe:{
@@ -433,15 +1109,19 @@ Original Value: it is possible to compute the number of times that an ingredient
 Reason: to avoid computing the number of times that an ingredient is used with another ingredient every time that is needed.
 Original Value: it is possible to compute the number of times that an ingredient is used with another ingredient by counting the number of times that a user has used an ingredient with another ingredient in his/her recipes (retrieving the information from the DocumentDB).
 
+Ingredient:
+    - name
+Reason: to avoid joins with the DocumentDB
+Original Value Ingredient:name in DocumentDB
 
+# Document DataBase Index Design [X]
 
-
-
-# Document DataBase Index Design
 
 # Graph DataBase Indexes and Constraints Design
 
 # System Architecture
+
+
 
 ## General description
 
@@ -451,7 +1131,7 @@ Original Value: it is possible to compute the number of times that an ingredient
 
 # PERFORMANCE TEST
 
-# CONSISTENCY, AVAILABILITY AND PARTITION TOLERANCE
+# CONSISTENCY, AVAILABILITY AND PARTITION TOLERANCE [X]
 
 # USER MANUAL
 
