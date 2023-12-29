@@ -222,7 +222,6 @@ Comment:
 StarRanking:
 - user: RegisteredUser
 - vote: Double
-- timestamp: Date (?)
 
 Recipe:
 - name: String
@@ -261,7 +260,7 @@ User
 {
     _id: #,
     type: "Admin", # Applicable only for Admin
-    username: String,
+    username: String, [:unique]
     password: String,
     name: String, # Not applicable for Admin
     surname: String, # Not applicable for Admin
@@ -275,7 +274,7 @@ User
 Post
 {
     _id: #,
-    _idUser: #, 
+    _idUser: #,
     username: String, [R]
     description: String,
     timestamp: Timestamp,
@@ -483,6 +482,8 @@ MERGE (u)-[r:USED]->(i) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times
 MATCH (i1:Ingredient {name: String}), (i2:Ingredient {name: String})
 MERGE (i1)-[r:USED_WITH]->(i2) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1
 ```
+Dobbiamo farlo in entrambi i versi!
+
 
 
 ### Read
@@ -732,8 +733,8 @@ db.Post.updateOne({
 
 ### Delete
 
-- [Delete user] : no because otherwise we would lose all the information about the user (e.g. posts, comments, star rankings, etc.)
-
+- [Delete user] : we give the possibility to the user to delete his/her own profile.
+   
 - Delete post
 
 - Delete comment
@@ -741,12 +742,48 @@ db.Post.updateOne({
 - Delete following relationship
 
 - [Delete ingredient] : no because otherwise we would lose all the information about the ingredient (e.g. recipes, etc.)
-- 
+  
 - Delete user-ingredient relationship (see delete a post)
   
 - Delete ingredient-ingredient relationship (see delete a post)
 
 #### MongoDB
+
+- Delete user
+Before deleting a user we have to call delete post for each post of the user
+But before we can have to delete the recipes inside the posts of the user from Neo4j (calling the delete recipe operation)
+After this operation we can delete the user from Neo4j
+```javascript
+MATCH (u:User {username: String})
+DELETE u
+```
+
+Now we can delete evry post of the user from the Post collection (delete post operation)
+
+At this point we can delete all the fields from the user collection, leaving only the username
+```javascript
+db.User.updateOne({
+    _id: #,
+}, {
+    $unset: {
+        password: "",
+        name: "",
+        surname: "",
+        posts: "",
+    }
+})
+```
+
+Now we have to add a field called deleted to the user collection
+```javascript
+db.User.updateOne({
+    _id: #,
+}, {
+    $set: {
+        deleted: true,
+    }
+})
+```
 
 - Delete post
 Before deleting a post we have to mantain the consistency of the DBs
@@ -844,6 +881,7 @@ DELETE r
 - Show total amount of calories of a recipe
 - Show the average of the avgStarRanking of a User's posts
 - Average amount of grams of ingredients used in equal set of ingredients.
+- Find recipes filtering the name
 - To add others...
 
 
@@ -890,6 +928,11 @@ db.Post.aggregate([
 - Average amount of grams of ingredients used in equal set of ingredients.
 (Da implementare)
 
+
+- Find recipes filtering the name
+```javascript
+db.Post.find( { "recipe.name": { $regex: "pork", $options: "i" } } )
+```
 
 ##### Neo4j
 
@@ -986,44 +1029,259 @@ LIMIT 5
 
 
 
-DEFINIRE 3 AGGREGATIONS importanti!
+### Aggregations
+
+- (#1)Show the ratio of interactions (number of comments / number of Posts  and  number of star rankings / number of Posts) and the average of avgStarRanking distinguishing among posts with and without images (i.e. no field image inside recipe)
+
+```javascript
+db.Post.aggregate([
+    {
+        $project: {
+            _id: 1,
+            hasImage: {
+                $cond: {
+                    if: {
+                         $eq: [{ $type: "$recipe.image" }, "missing"]
+                    },
+                    then: false,
+                    else: true
+                }
+            },
+            comments: {
+                $size: {
+                    $ifNull: ["$comments", []]
+                }
+            },
+            starRankings: {
+                $size: {
+                    $ifNull: ["$starRankings", []]
+                }
+            },
+            avgStarRanking: {
+                $ifNull: ["$avgStarRanking", 0]
+            }
+        }
+    },
+    {
+        $group: {
+            _id: "$hasImage",
+            numberOfPosts: {
+                $sum: 1
+            },
+            totalComments: {
+                $sum: "$comments"
+            },
+            totalStarRankings: {
+                $sum: "$starRankings"
+            },
+            avgOfAvgStarRanking: {
+                $avg: "$avgStarRanking"
+            }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            hasImage: "$_id",
+            ratioOfComments: {
+                $divide: ["$totalComments", "$numberOfPosts"]
+            },
+            ratioOfStarRankings: {
+                $divide: ["$totalStarRankings", "$numberOfPosts"]
+            },
+            avgOfAvgStarRanking: 1
+        }
+    }
+])
+```
+
+- (#2)Given a User, show the number of comments he/she has done, the number of star rankings he/she has done and the average of this star rankings
+
+```javascript
+db.Post.aggregate([
+    {
+        $match: {
+            $or: [
+                {"comments.username": "cody_cisneros_28"},
+                {"starRankings.username": "cody_cisneros_28"}
+            ]
+        }
+    },
+    {
+        $project: {
+            filteredComments: {
+                $filter: {
+                    input: "$comments",
+                    as: "comment",
+                    cond: {$eq: ["$$comment.username", "cody_cisneros_28"]}
+                }
+            },
+            filteredStarRankings: {
+                $filter: {
+                    input: "$starRankings",
+                    as: "starRanking",
+                    cond: {$eq: ["$$starRanking.username", "cody_cisneros_28"]}
+                }
+            }
+        }
+    },
+    {
+        $group: {
+            _id: null,
+            avgOfStarRankings: {
+                $avg: {$sum: "$filteredStarRankings.vote"}
+            },
+            numberOfStarRankings: {
+                $sum: {$size: "$filteredStarRankings"}
+            },
+            numberOfComments: {
+                $sum: {$size: "$filteredComments"}
+            }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            numberOfComments: 1,
+            numberOfStarRankings: 1,
+            avgOfStarRankings: 1
+        }
+    }
+])
+```
+
+- (#3)After filtering recipes by name, retrieve the average amount of calories of first 10 recipes ordered by descending avgStarRanking
+
+```javascript
+db.Post.aggregate([
+    {
+        $match: {
+            "recipe.name": { $regex: "pork", $options: "i" }
+        }
+    },
+    {
+        $sort: {
+            avgStarRanking: -1
+        }
+    },
+    {
+        $limit: 10
+    },
+    {
+        $group: {
+            _id: null,
+            avgOfTotalCalories: {
+                $avg: "$recipe.totalCalories"
+            }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            avgOfTotalCalories: 1
+        }
+    }
+])
+```
+
+We can use this to show when a post is shown, the average amount of calories of the recipes with similar name 
 
 
 
-Possible Indexes:
+Others...
 
-- Ingredient: name
+- Dato utente vediamo calorie medie per ricette pubblicate da lui
+    
+```javascript  
+db.Post.aggregate([ { $match: { username: "cody_cisneros_28" } }, { $project: { recipeCalories: "$recipe.totalCalories" } }, { $group: { _id: null, avgCalories: { $avg: "$recipeCalories" } } }] )
+```
 
-- Post: timestamp
+- Given a User, show among the posts he/she has done, the one with the highest avgStarRanking
+  
+```javascript
+db.Post.aggregate([
+    {
+        $match: {
+            username: #,
+        }
+    },
+    {
+        $sort: {
+            avgStarRanking: -1
+        }
+    },
+    {
+        $limit: 1
+    },
+    {
+        $project: {
+            _id: 0,
+            post: {
+                _id: "$_id",
+                description: "$description",
+                timestamp: "$timestamp",
+                recipe: "$recipe",
+                avgStarRanking: "$avgStarRanking",
+                starRankings: "$starRankings",
+                comments: "$comments"
+            }
+        }
+    }
+])
+```
 
-- Post: recipe: totalCalories combined with Post: avgStarRanking
+- Average number of TotalCalories for recipes that contains a specific set of ingredients that have an average Star ranking greater than a given value
 
-- Post: avgStarRanking combined with Post: timestamp
-
-Reason: since the user is the actor of the social network that performs the most number of operations and most of these operations are find operations (e.g. showing posts with different filters) we decided to implement indexes on the above fields. In this way we can speed up the find operations. We estimate that the number of find operations done by the admin will be negligible compared to the number of find operations done by the users.
-
-
-## Distributed Database Design
-
-According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.
-
-
-## Sharding
-In our application as it is implemented it is not useful to design the sharding approach. The main reason behind this decision is that we give the users the possibility to find the posts using completely uncorrelated filters that are not linked by a particular relationship (i.e. such as a common field). Ineed if for example we decided to shard the post collection by the field timestamp, we would have a lot of problems when we have to find the posts using other filters (e.g. by totalCalories). Indeed we would have to query all the shards and then merge the results. This would be a very inefficient approach. For this reason we decided to not implement the sharding approach.
-
-We do not consider the sharding approach for the User collection because we do not expect the users to grow as much as the posts. Indeed we expect that the number of users will be much lower than the number of posts. For this reason we decided to not implement the sharding approach at all.
-
-
+```javascript
+db.Post.aggregate([
+    {
+        $match: {
+            recipe: {
+                ingredients: {
+                    $elemMatch: {
+                        name: {
+                            $in: [String, ...]   # List of ingredients
+                        }
+                    }
+                }
+            },
+            avgStarRanking: {
+                $gte: Double
+            }
+        }
+    },
+    {
+        $group: {
+            _id: null,
+            avgOfTotalCalories: {
+                $avg: "$recipe.totalCalories"
+            }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            avgOfTotalCalories: 1
+        }
+    }
+])
+```
 
 
 # Redundancies
 
 
-| Where                     | Reason              | Raw Value                   |
+
+
+| Where                     | Reason              | Original/Raw Value                   |
 |---------------            |---------------------|------------------           |
 |DocumentDB:User:posts:name | To avoid joins      | DocumentDB:Post:recipe:name |
 |DocumentDB:User:posts:image | To avoid joins      | DocumentDB:Post:recipe:image |
 |DocumentDB:Post:username | To avoid joins      | DocumentDB:User:username |
+|DocumentDB:Post:recipe:totalCalories | To avoid joins and to avoid computing the total calories of a recipe every time a post is shown | It is possible to compute the total calories of a recipe by summing the calories of the ingredients contained in the recipe, in particular: $\sum_i \left( quantity_i\cdot\frac{calories100g_i}{100} \right)$ where $quantity_i$ is the quantity of the $i$th ingredient contained in the recipe, $calories100g_i$ is the number of calories of the $i$th ingredient per 100 grams that can be retrieved from the Ingredient collection |
+
+
+
 |DocumentDB:Post:recipe:totalCalories | To avoid computing the total calories of a recipe every time a post is shown | XXX |
 |DocumentDB:Post:avgStarRanking | To avoid computing the average star ranking of a post every time is shown | It is possible to compute the average star ranking of a post by summing the  DocumentDB:User:username XXX|
 
@@ -1114,13 +1372,151 @@ Ingredient:
 Reason: to avoid joins with the DocumentDB
 Original Value Ingredient:name in DocumentDB
 
-# Document DataBase Index Design [X]
 
 
-# Graph DataBase Indexes and Constraints Design
+# CONSISTENCY, AVAILABILITY AND PARTITION TOLERANCE [X]
+## Distributed Database Design
+
+According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.
+
+### Replicas
+We deployed mongoDB and neo4j with the following configuration:
+- MongoDB: 3 nodes (1 primary and 2 replicas DA VEDERE SE FARE 3 repliche con stessi poteri)
+- Neo4j: 1 node (1 primary) (we didn't implement the replicas because we would have needed the enterprise edition)
+
+Read Operations:
+In WeFood, as in every Social Network, read operations are the most frequent and critical operations. For this reason we have to guarantee the lowest response time possible even if data is not updated to the latest version. So we decided to provide a response from the first available replica.
+
+Write Operations:
+To ensure the low latency that we discussed before, write operations are considered successful 
+when just a replica node (da sistemare dopo che si è scelta configurazione) wrote the data. 
+
+### Handling inter database consistency
+Using two different databases implemented redundancy of data, so for this reason any fail in insertion/up-date/deletion of data can cause inconsistencies between these to DBs, for this reason, in case of exceptions during write operations on one of the databases causes a rollback.
+If the operation succeeds on MongoDB, a success response is sent to the user, and the graph db becomes eventually consistent: if an exception occurs after this phase, a rollback operation starts bringing back the DBs in a state of consistency.
+Check write operations in the Replicas!
+
+## Sharding
+
+In our application as it is implemented it is not useful to design the sharding approach. The main reason behind this decision is that we give the users the possibility to find the posts using completely uncorrelated filters that are not linked by a particular relationship (i.e. such as a common field). Indeed if for example we decided to shard the post collection by the timestamp field, we would have latency issues when we have to find the posts using other filters (e.g. by totalCalories). Indeed we would have to query all the shards and then merge the results. This would be a very inefficient approach. For this reason we decided to not implement the sharding approach.
+
+For example if WeFood were implemented by considering a category for each recipe, where the category could be chosen from a fixed set of categories (e.g. geographic area, culture, ..), we could have decided to shard the post collection by the category field of the recipe. In this way we would have reached a good balancing of the load among the shards. But we decided not to proceed in this direction because we wanted to give the users the possibility to explore different recipes without any constraint.
+
+We do not consider the sharding approach for the User collection because we do not expect the users to grow as much as the posts. Indeed we expect that the number of users will be much lower than the number of posts. For this reason we decided to not implement the sharding approach at all.
+
+## Configuration of MongoDB (ReplicaSet)
+
+j = false (we do not handle sensitive data and there is no need to wait for the journal to be written to disk)
+w = 1 (write concern)
+wtimeout = 0 (handled in Server Java code)
+
+Read Preferences
+
+// Read Preferences at client level
+MongoClient mongoClient = MongoClients.create(
+"mongodb: //localhost: 27018, localhost: 27019, localhost: 27020/" +
+"?readPreference=nearest");
+
+NEAREST because in this way we can access the node with the lowest latency
+(Read from any member node from the set of nodes which respond the fastest. (Responsiveness measured in pings))
+
+
+// Read Preferences at DB Level
+MongoDatabase db = mongoClient.getDatabase( s: "LSMDB")
+.withReadPreference(ReadPreference. secondary ());
+
+// Read Preferences at collection level
+MongoCollection<Document> myColl = db.getCollection( s: "students")
+.withReadPreference(ReadPreference. secondary ());
+
+
+
+## Indexes and Constraints
+
+### MongoDB
+
+Possible Indexes:
+
+- Ingredient: name
+
+db.Ingredient.createIndex( { "name": 1 }, { unique: true } )
+
+In this way we also ensure the unique constraint on the name field
+
+
+Find Ingredient by name
+
+| Index | nReturned | executionTimeMillis | totalKeysExamined | totalDocsExamined |
+|-------|-----------|---------------------|-------------------|-------------------|
+| No    | 1         | 4                   | 0                 | 1911              |
+| Yes   | 1         | 0                   | 1                 | 1                 |
+
+
+We can clearly see that by adding an index on the name field we can speed up the find operation. We do not have any disadvantage in adding this index because the writing operations are not frequent on the Ingredient collection. Because the admin is the only one that can add new ingredients and we do not expect that the admin will add new ingredients very frequently.
+
+
+- Post: timestamp
+
+Find the 100 most recent posts
+
+| Index | nReturned | executionTimeMillis | totalKeysExamined | totalDocsExamined |
+|-------|-----------|---------------------|-------------------|-------------------|
+| No    | 100       | 109                 | 0                 | 231323            |
+| Yes   | 100       | 3                   | 100               | 100               |
+
+
+Reason: we expect to have more read operations than write operations. And furthermore the writing operations are already ordered because posts are published in a chronological order. 
+
+
+- Post: recipe: totalCalories 
+
+
+| Index | nReturned | executionTimeMillis | totalKeysExamined | totalDocsExamined |
+|-------|-----------|---------------------|-------------------|-------------------|
+| No    | 100       | 144                 | 0                 | 231323            |
+| Yes   | 100       | 7                   | 100               | 100               |
+
+
+
+- User: username
+
+db.User.createIndex( { "username": 1 }, { unique: true } )
+
+In this way we also ensure the unique constraint on the username field
+
+
+| Index | nReturned | executionTimeMillis | totalKeysExamined | totalDocsExamined |
+|-------|-----------|---------------------|-------------------|-------------------|
+| No    | 1         | 78                  | 0                 | 27901             |
+| Yes   | 1         | 2                   | 1                 | 1                 |
+
+
+Reason: since the user is the actor of the social network that performs the most number of operations and most of these operations are find operations (e.g. showing posts with different filters) we decided to implement indexes on the above fields. In this way we can speed up the find operations. We estimate that the number of find operations done by the admin will be negligible compared to the number of find operations done by the users.
+
+
+try {
+    // Prova ad inserire il documento
+    collection.insertOne(nuovoDocumento);
+} catch (MongoWriteException e) {
+    // Controlla se è un errore di duplicazione chiave
+    if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+        System.out.println("Impossibile inserire il documento: il valore è già presente.");
+    } else {
+        System.out.println("Errore durante l'inserimento del documento: " + e.getMessage());
+    }
+}
+
+## Indexes of Neo4j
+
+Da discutere dopo aver caricato tutti i dati ed eventualmente prevedere indice per ricette che sono davvero tante
+
 
 # System Architecture
 
+MVC
+
+
+## Backend
 
 
 ## General description
@@ -1131,7 +1527,6 @@ Original Value Ingredient:name in DocumentDB
 
 # PERFORMANCE TEST
 
-# CONSISTENCY, AVAILABILITY AND PARTITION TOLERANCE [X]
 
 # USER MANUAL
 
