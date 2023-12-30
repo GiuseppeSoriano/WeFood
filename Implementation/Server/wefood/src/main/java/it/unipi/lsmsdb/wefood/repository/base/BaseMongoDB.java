@@ -19,26 +19,38 @@ import org.json.JSONObject;
 
 public abstract class BaseMongoDB {
     
-    private static final String MONGODB_HOST = "10.1.1.25:27017,10.1.1.24:27017"; // ,10.1.1.23:27017";
+    // private static final String MONGODB_HOST = "10.1.1.25:27017,10.1.1.24:27017"; // ,10.1.1.23:27017";
+    private static final String MONGODB_HOST = "localhost:27017";
     private static final String MONGODB_DATABASE = "WeFood";
-    // format: mongodb://<host>:<port>/<db_name>
-    private static String mongoString = String.format("mongodb://%s/%s", 
-                                                      MONGODB_HOST,
-                                                      MONGODB_DATABASE);
-    
-    private static MongoClient client;
+    private static final String mongoString = String.format("mongodb://%s/%s", MONGODB_HOST, MONGODB_DATABASE);
 
-    public static MongoClient getMongoClient() throws MongoException {
-        MongoClient client = MongoClients.create(mongoString);
+    private static volatile MongoClient client;
+
+    // Singleton pattern for MongoClient
+    public static MongoClient getMongoClient() {
+        if (client == null) {
+            synchronized (BaseMongoDB.class) {
+                if (client == null) {
+                    try {
+                        client = MongoClients.create(mongoString);
+                        System.out.println("MongoDB client created successfully");
+                    } catch (MongoException e) {
+                        System.err.println("Something went wrong while creating the MongoDB client. Error: " + e.getMessage());
+                        throw e;
+                    }
+                }
+            }
+        }
+        System.out.println("MongoDB client returned successfully");
         return client;
     }
 
-    public static void closeMongoClient(){
-        if (client != null){
+    public static void closeMongoClient() {
+        if (client != null) {
             try {
                 client.close();
+                client = null;  // Reset the client after closing
             } catch (MongoException e) {
-                //Something went wrong
                 System.err.println("Something went wrong while closing the MongoDB client. Error: " + e.getMessage());
             }
         }
@@ -85,7 +97,7 @@ public abstract class BaseMongoDB {
 
     // FIND 
     
-    public List<Document> execute_find(String collectionName, Document query_find, Document query_sort, long query_limit) {
+    public static List<Document> execute_find(String collectionName, Document query_find, Document query_sort, long query_limit) {
         List<Document> documents = new ArrayList<>(); 
 
         // Se query_sort come stringa è null, passo quella di default
@@ -93,7 +105,7 @@ public abstract class BaseMongoDB {
 
         try {
             MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-            try (MongoCursor<Document> cursor = collection.find(query_find).iterator()) {
+            try (MongoCursor<Document> cursor = collection.find(query_find).sort(query_sort).limit((int) query_limit).iterator()) {
                 while (cursor.hasNext()) {
                     Document document = cursor.next();
                     documents.add(document);
@@ -106,7 +118,7 @@ public abstract class BaseMongoDB {
         return documents;
     }
     
-    public List<Document> find(String collectionName, String find, String sort, String limit) {
+    public static List<Document> find(String collectionName, String find, String sort, String limit) {
         Document query_find = Document.parse(find);
         if(sort == null){
             sort = "{}";
@@ -116,13 +128,17 @@ public abstract class BaseMongoDB {
             limit = "0";
         }
         long query_limit = Long.parseLong(limit);
-        
+
+        System.out.println("Query Find: " + query_find.toJson());
+        System.out.println("Query Sort: " + query_sort.toJson());
+        System.out.println("Query Limit: " + query_limit);
+
         return execute_find(collectionName, query_find, query_sort, query_limit);
     }    
 
     // AGGREGATIONS
 
-    private Bson handleGroupOperation(JSONObject groupJson) {
+    private static Bson handleGroupOperation(JSONObject groupJson) {
         // Rimuovi '_id' se è null e crea accumulatori di campo
         List<BsonField> fieldAccumulators = new ArrayList<>();
         for (String key : groupJson.keySet()) {
@@ -134,29 +150,30 @@ public abstract class BaseMongoDB {
         return Aggregates.group(groupJson.isNull("_id") ? null : groupJson.get("_id"), fieldAccumulators.toArray(new BsonField[0]));
     }
 
-    public List<Bson> translateAggregations(String queryString) {
+    public static List<Bson> translateAggregations(String queryString) {
         JSONArray queryArray = new JSONArray(queryString);
         List<Bson> bsonList = new ArrayList<>();
 
         for (int i = 0; i < queryArray.length(); i++) {
             JSONObject queryPart = queryArray.getJSONObject(i);
             String key = queryPart.keys().next();
-            JSONObject value = queryPart.getJSONObject(key);
+
             switch (key) {
                 case "$match":
-                    bsonList.add(Aggregates.match(new Document(value.toMap())));
+                    bsonList.add(Aggregates.match(new Document(queryPart.getJSONObject(key).toMap())));
                     break;
                 case "$sort":
-                    bsonList.add(Aggregates.sort(new Document(value.toMap())));
+                    bsonList.add(Aggregates.sort(new Document(queryPart.getJSONObject(key).toMap())));
                     break;
                 case "$limit":
-                    bsonList.add(Aggregates.limit(value.getInt("$limit")));
+                    // Estrai direttamente il valore intero per $limit
+                    bsonList.add(Aggregates.limit(queryPart.getInt(key)));
                     break;
                 case "$group":
-                    bsonList.add(handleGroupOperation(value));
+                    bsonList.add(handleGroupOperation(queryPart.getJSONObject(key)));
                     break;
                 case "$project":
-                    bsonList.add(Aggregates.project(new Document(value.toMap())));
+                    bsonList.add(Aggregates.project(new Document(queryPart.getJSONObject(key).toMap())));
                     break;
                 // Aggiungi altri casi per altri tipi di operazioni di aggregazione
             }
@@ -164,7 +181,8 @@ public abstract class BaseMongoDB {
         return bsonList;
     }
 
-    public List<Document> aggregate(String collectionName, String query) {
+
+    public static List<Document> aggregate(String collectionName, String query) {
         List<Document> documents = new ArrayList<>();
 
         try {
@@ -270,12 +288,23 @@ public abstract class BaseMongoDB {
 
                 System.out.println("sortDoc: " + sortDoc);
                 System.out.println("limitDoc: " + limitDoc);
+
+                List<Document> result = find(collectionName, operationDoc, sortDoc, limitDoc);
+
+                for(Document doc : result){
+                    System.out.println(doc.toJson());
+                }
                 
                 // return find(collectionName, operationDoc, sortDoc, limitDoc);
                 break;
         
             case "aggregate": // aggregate
-                
+                result = aggregate(collectionName, operationDoc);
+
+                System.out.println();
+                for(Document doc : result){
+                    System.out.println(doc.toJson());
+                }
                 // return aggregate(collectionName, operationDoc);
                 break;
             
@@ -303,17 +332,41 @@ public abstract class BaseMongoDB {
 
     // TEST MAIN
     public static void main(String[] args) {
-     
-        String mongosh_string = "db.Post.find({\r\n" + //
-                "    recipe: {\r\n" + //
-                "        totalCalories: {\r\n" + //
-                "            $gte: lowerBound,\r\n" + //
-                "            $lte: upperBound\r\n" + //
-                "        }\r\n" + //
-                "    }\r\n" + //
-                "}).sort({ciao})";
-        executeOnMongo(mongosh_string);
-        
+        try {
+            getMongoClient(); // Ensure client is created
+            String mongosh_string = "db.Post.aggregate([\n" +
+                    "    {\n" +
+                    "        $match: {\n" +
+                    "            username: \"cody_cisneros_28\",\n" +
+                    "        }\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "        $sort: {\n" +
+                    "            avgStarRanking: -1\n" +
+                    "        }\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "        $limit: 1\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "        $project: {\n" +
+                    "            _id: 0,\n" +
+                    "            post: {\n" +
+                    "                _id: \"$_id\",\n" +
+                    "                description: \"$description\",\n" +
+                    "                timestamp: \"$timestamp\",\n" +
+                    "                recipe: \"$recipe\",\n" +
+                    "                avgStarRanking: \"$avgStarRanking\",\n" +
+                    "                starRankings: \"$starRankings\",\n" +
+                    "                comments: \"$comments\"\n" +
+                    "            }\n" +
+                    "        }\n" +
+                    "    }\n" +
+                    "])";
+            executeOnMongo(mongosh_string);
+        } finally {
+            closeMongoClient(); // Ensure client is closed
+        }
     }
 
 }
