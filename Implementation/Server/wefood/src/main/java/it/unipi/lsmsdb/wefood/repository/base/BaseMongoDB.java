@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+
+import org.bson.BsonValue;
 import org.bson.Document;
 
 import org.bson.conversions.Bson;
@@ -15,6 +17,14 @@ import com.mongodb.client.model.BsonField;
 import com.mongodb.client.model.Aggregates;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
+
 
 
 public abstract class BaseMongoDB {
@@ -114,10 +124,14 @@ public abstract class BaseMongoDB {
         } catch(MongoException e) {
             //Something went wrong
             System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
+            return null;
         } 
         return documents;
     }
     
+    // If query succeeds, returns a list of documents containing the result of the find
+    // If query fails, returns null
+
     public static List<Document> find(String collectionName, String find, String sort, String limit) {
         Document query_find = Document.parse(find);
         if(sort == null){
@@ -136,7 +150,7 @@ public abstract class BaseMongoDB {
         return execute_find(collectionName, query_find, query_sort, query_limit);
     }    
 
-    // AGGREGATIONS
+    // AGGREGATE
 
     private static Bson handleGroupOperation(JSONObject groupJson) {
         // Rimuovi '_id' se è null e crea accumulatori di campo
@@ -181,7 +195,8 @@ public abstract class BaseMongoDB {
         return bsonList;
     }
 
-
+    // If query succeeds, returns a list of documents containing the result of the aggregation
+    // If query fails, returns null
     public static List<Document> aggregate(String collectionName, String query) {
         List<Document> documents = new ArrayList<>();
 
@@ -201,51 +216,162 @@ public abstract class BaseMongoDB {
         return documents;
     }
 
-
-    // anche queste dovrebbero ritornare una lista di document o no?
-
     // INSERT
 
-    public boolean insertOne(String collectionName, Document document) {
-        
-        return true;
+    // If query succeeds, returns a list of documents containing the inserted ID
+    // If query fails, returns null
+    public static List<Document>  insertOne(String collectionName, String query) {
+        Document query_insert = Document.parse(query);
+        List<Document> documents = new ArrayList<>(); 
+
+
+        try {
+            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
+            InsertOneResult result = collection.insertOne(query_insert);
+            // Ottieni l'ID del documento inserito
+            BsonValue insertedId = result.getInsertedId();
+
+            // Converti l'ID del documento in un oggetto Document
+            documents.add(new Document("_id", insertedId));
+            
+            return documents;
+        }
+        catch(MongoException e) {
+            //Something went wrong
+            System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
+            return null;
+        }
     }
 
     // UPDATE
 
-    public boolean updateOne(String collectionName, Document document) {
+    public static List<Document> updateOne(String collectionName, String query) {
+        // Possible operations: $set, $unset, $push, $pull
+        String set_regex = "\\$set:";
+        String unset_regex = "\\$unset:";
+        String push_regex = "\\$push:";
+        String pull_regex = "\\$pull:";
+
+        Matcher set_matcher = Pattern.compile(set_regex).matcher(query);
+        Matcher unset_matcher = Pattern.compile(unset_regex).matcher(query);
+        Matcher push_matcher = Pattern.compile(push_regex).matcher(query);
+        Matcher pull_matcher = Pattern.compile(pull_regex).matcher(query);
+
+
+        Document filter = null;
+        Document update = null;
+        Document[] tmp = null;
+        if (set_matcher.find()) {
+            tmp = extractDocument(query, set_regex);
+        }
+        else if (unset_matcher.find()) {
+            tmp = extractDocument(query, unset_regex);
+        }
+        else if (push_matcher.find()) {
+            tmp = extractDocument(query, push_regex);
+        }
+        else if (pull_matcher.find()) {
+            tmp = extractDocument(query, pull_regex);
+        }
+        else {
+            throw new IllegalArgumentException("Invalid MongoDB update operation: " + query);
+        }
         
-        return true;
+        filter = tmp[0];
+        update = tmp[1];
+        
+        if(filter == null || update == null){
+            throw new IllegalArgumentException("Invalid MongoDB update operation: " + query);
+        }
+
+        List<Document> documents = new ArrayList<>(); 
+
+        try {
+            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
+            UpdateResult result = collection.updateOne(filter, update);
+            
+            // Converti l'ID del documento in un oggetto Document
+            documents.add(new Document("result", result.toString()));
+            
+            return documents;
+        }
+        catch(MongoException e) {
+            //Something went wrong
+            System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
+            return null;
+        }
+
+    }
+
+    private static Document[] extractDocument(String query, String operation) {
+        Pattern filterPattern = Pattern.compile("\\{(.*?)\\}", Pattern.DOTALL);
+        Pattern updatePattern = Pattern.compile("\\{\\s*" + operation +  " \\{[\\s\\S]*?}}", Pattern.DOTALL);
+
+        Matcher filterMatcher = filterPattern.matcher(query);
+        Matcher updateMatcher = updatePattern.matcher(query);
+
+        if (filterMatcher.find()) {
+            System.out.println("filter = \"" + filterMatcher.group() + "\"");
+        }
+
+        if (updateMatcher.find()) {
+            System.out.println("update = \"" + updateMatcher.group() + "\"");
+        }
+
+        String filterString = filterMatcher.group(1).trim();
+        String updateString = updateMatcher.group(1).trim();
+
+        Document [] documents = {Document.parse(filterString), Document.parse(updateString)};
+
+        return documents;
     }
 
     // DELETE
 
-    public boolean deleteOne(String collectionName, Document document) {
-        
-        return true;
+    // If query succeeds, returns a list of documents containing the deleted count
+    // If query fails, returns null
+    public static List<Document> deleteOne(String collectionName, String query) {
+        Document query_insert = Document.parse(query);
+        List<Document> documents = new ArrayList<>(); 
+
+        try {
+            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
+            DeleteResult result = collection.deleteOne(query_insert);
+            // Ottieni l'ID del documento inserito
+            long deletedCount = result.getDeletedCount();
+
+            // Converti l'ID del documento in un oggetto Document
+            documents.add(new Document("deleted_count", deletedCount));
+            
+            return documents;
+        }
+        catch(MongoException e) {
+            //Something went wrong
+            System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
+            return null;
+        }
     }
     
 
-    // public List<Document>
-    public static void executeOnMongo(String mongosh_string){
+    public static List<Document> executeOnMongo(String mongosh_string){
         // String[] operations = {"find", "aggregate", "insertOne", "updateOne", "deleteOne"};
+       
+        List<Document> result;
 
         // Getting the collection name from the mongosh_string 
         // db.collectionName.FIRSToperation(document).SECONDoperation(document).THIRDoperation(document)
         // SECOND can only be sort
         // THIRD can only be limit
-        String second = "sort";
-        String third = "limit";
+        String sort = "sort";
+        String limit = "limit";
 
         String collectionName = new String(mongosh_string.split("\\.")[1]);
-
-        // String[] risultato = inputString.split("\\(|\\)");
 
         // Getting the operation from the mongosh_string
         String operationWithDocument = new String(mongosh_string.split("\\.")[2]);
         
         String operation = new String(operationWithDocument.split("\\(")[0]);
-        String operationDoc = new String(operationWithDocument.split("\\(")[1].split("\\)")[0]);
+        String operationDoc = mongosh_string.substring(mongosh_string.indexOf("(")+1, mongosh_string.indexOf(")"));
 
         System.out.println("Collection: " + collectionName);
         System.out.println("Operation: " + operation);
@@ -257,76 +383,49 @@ public abstract class BaseMongoDB {
                 // Now we check if mongosh_string contains sort and limit
                 String sortDoc;
                 String limitDoc;
-                if(mongosh_string.split("\\.").length > 3){
-                    
-                    if(mongosh_string.split("\\.").length == 5){
-                        // We have SECOND and THIRD operation
-                        sortDoc = new String(mongosh_string.split("\\.")[3].split("\\(")[1].split("\\)")[0]);
-                        limitDoc = new String(mongosh_string.split("\\.")[4].split("\\(")[1].split("\\)")[0]);
-                    }
-                    else{
-                        // We have only SECOND operation
-                        if(mongosh_string.split("\\.")[3].contains(second)){
-                            sortDoc = new String(mongosh_string.split("\\.")[3].split("\\(")[1].split("\\)")[0]);
-                            limitDoc = null;
-                        }
-                        else if(mongosh_string.split("\\.")[3].contains(third)){
-                            sortDoc = null;
-                            limitDoc = new String(mongosh_string.split("\\.")[3].split("\\(")[1].split("\\)")[0]);
-                        }
-                        else{
-                            throw new IllegalArgumentException("Invalid SECOND operation. Expected 'sort' or 'limit', instead received: " + mongosh_string.split("\\.")[3].split("\\(")[0]);
-                        }
-                    }
-                }
-                else{
-                    // No SECOND and THIRD operation
 
-                    sortDoc = null;
-                    limitDoc = null;
-                }
+                // Regex for extracting the document inside SECOND
+                String sortRegex = sort+"\\((.+?)\\)";
+                sortDoc = extractPattern(mongosh_string, sortRegex);
+
+                // Regex for extracting the document inside THIRD
+                String limitRegex = limit+"\\((\\d+)\\)";
+                limitDoc = extractPattern(mongosh_string, limitRegex);
 
                 System.out.println("sortDoc: " + sortDoc);
                 System.out.println("limitDoc: " + limitDoc);
 
-                List<Document> result = find(collectionName, operationDoc, sortDoc, limitDoc);
-
-                for(Document doc : result){
-                    System.out.println(doc.toJson());
-                }
-                
-                // return find(collectionName, operationDoc, sortDoc, limitDoc);
-                break;
+                return find(collectionName, operationDoc, sortDoc, limitDoc);
         
             case "aggregate": // aggregate
-                result = aggregate(collectionName, operationDoc);
-
-                System.out.println();
-                for(Document doc : result){
-                    System.out.println(doc.toJson());
-                }
-                // return aggregate(collectionName, operationDoc);
-                break;
+               
+                return aggregate(collectionName, operationDoc);
             
             case "insertOne": // insertOne
                 
-                // return insertOne(collectionName, operationDoc);
-                break;
+                return insertOne(collectionName, operationDoc);
             
             case "updateOne": // updateOne
                 
-                // return updateOne(collectionName, operationDoc);
-                break;
-            
+                return updateOne(collectionName, operationDoc);
+                            
             case "deleteOne": // deleteOne
 
-                // return deleteOne(collectionName, operationDoc);
-                break;
-
+                return deleteOne(collectionName, operationDoc);
+                
             default:
                 throw new IllegalArgumentException("Invalid MongoDB operation: " + operation);
         }
 
+    }
+
+    private static String extractPattern(String input, String regex) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+        return null;
     }
 
 
@@ -363,10 +462,17 @@ public abstract class BaseMongoDB {
                     "        }\n" +
                     "    }\n" +
                     "])";
-            executeOnMongo(mongosh_string);
+            List<Document> result =executeOnMongo(mongosh_string);
+
+            for(Document doc : result){
+                System.out.println(doc.toJson());
+            }
+
         } finally {
             closeMongoClient(); // Ensure client is closed
         }
+        
     }
 
 }
+
