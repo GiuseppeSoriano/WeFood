@@ -589,11 +589,9 @@ db.Post.find({
 - Show recipes filtering by the calories (lower bound and upper bound) (if the totalCalories is the same, we show the ones with the highest star ranking)
 ```javascript
 db.Post.find({
-    recipe: {
-        totalCalories: {
-            $gte: lowerBound,
-            $lte: upperBound
-        }
+    "recipe.totalCalories": {
+        $gte: lowerBound,
+        $lte: upperBound
     }
 }).sort({
     avgStarRanking: -1

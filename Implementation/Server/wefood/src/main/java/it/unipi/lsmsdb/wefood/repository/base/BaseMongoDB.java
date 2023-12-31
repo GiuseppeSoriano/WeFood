@@ -18,13 +18,16 @@ import com.mongodb.client.model.Aggregates;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
+import com.mongodb.client.model.Updates;
 
+import static com.mongodb.client.model.Updates.set;
 
 
 public abstract class BaseMongoDB {
@@ -257,38 +260,54 @@ public abstract class BaseMongoDB {
         Matcher push_matcher = Pattern.compile(push_regex).matcher(query);
         Matcher pull_matcher = Pattern.compile(pull_regex).matcher(query);
 
-
         Document filter = null;
         Document update = null;
         Document[] tmp = null;
+        Bson updateOperation = new Document();
+
         if (set_matcher.find()) {
-            tmp = extractDocument(query, set_regex);
+            tmp = extractFilterAndUpdate(query);
+            filter = tmp[0];
+            update = tmp[1];
+            for (String key : update.keySet()) {
+                updateOperation = Updates.combine(updateOperation, Updates.set(key, update.get(key)));
+            }
         }
         else if (unset_matcher.find()) {
-            tmp = extractDocument(query, unset_regex);
+            tmp = extractFilterAndUpdate(query);
+            filter = tmp[0];
+            update = tmp[1];
+            for (String key : update.keySet()) {
+                updateOperation = Updates.combine(updateOperation, Updates.unset(key));
+            }
         }
         else if (push_matcher.find()) {
-            tmp = extractDocument(query, push_regex);
+            tmp = extractFilterAndUpdate(query);
+            filter = tmp[0];
+            update = tmp[1];
+            for (String key : update.keySet()) {
+                Document value = update.get(key, Document.class);
+                updateOperation = Updates.combine(updateOperation, Updates.push(key, value));
+            }
         }
         else if (pull_matcher.find()) {
-            tmp = extractDocument(query, pull_regex);
+            tmp = extractFilterAndUpdate(query);
+            filter = tmp[0];
+            update = tmp[1];
+            for (String key : update.keySet()) {
+                Document value = update.get(key, Document.class);
+                updateOperation = Updates.combine(updateOperation, Updates.pull(key, value));
+            }
         }
         else {
-            throw new IllegalArgumentException("Invalid MongoDB update operation: " + query);
-        }
-        
-        filter = tmp[0];
-        update = tmp[1];
-        
-        if(filter == null || update == null){
-            throw new IllegalArgumentException("Invalid MongoDB update operation: " + query);
+            throw new IllegalArgumentException("Invalid MongoDB update operation" + query);
         }
 
         List<Document> documents = new ArrayList<>(); 
 
         try {
             MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-            UpdateResult result = collection.updateOne(filter, update);
+            UpdateResult result = collection.updateOne(filter, updateOperation);
             
             // Converti l'ID del documento in un oggetto Document
             documents.add(new Document("result", result.toString()));
@@ -304,39 +323,87 @@ public abstract class BaseMongoDB {
     }
 
     private static Document[] extractDocument(String query, String operation) {
-        Pattern filterPattern = Pattern.compile("\\{(.*?)\\}", Pattern.DOTALL);
-        Pattern updatePattern = Pattern.compile("\\{\\s*" + operation +  " \\{[\\s\\S]*?}}", Pattern.DOTALL);
+        Pattern filterPattern = Pattern.compile("\\{([^}]+)\\}", Pattern.DOTALL);
+        Pattern updatePattern = Pattern.compile(operation + "\\s*([^)]+?)\\)", Pattern.DOTALL);
 
         Matcher filterMatcher = filterPattern.matcher(query);
         Matcher updateMatcher = updatePattern.matcher(query);
 
+        String filterString = "";
+        String updateString = "";
+
         if (filterMatcher.find()) {
-            System.out.println("filter = \"" + filterMatcher.group() + "\"");
+            filterString = filterMatcher.group();
+            System.out.println("filter = \"" + filterString + "\"");
         }
 
         if (updateMatcher.find()) {
-            System.out.println("update = \"" + updateMatcher.group() + "\"");
+            updateString = updateMatcher.group();
+            updateString = updateString.replaceFirst(operation+"\\s*", "");
+            System.out.println("update = \"" + updateString + "\"");
         }
 
-        String filterString = filterMatcher.group(1).trim();
-        String updateString = updateMatcher.group(1).trim();
+        Document doc1 = Document.parse(filterString);
+        System.out.println("doc1 = " + doc1.toString());
 
-        Document [] documents = {Document.parse(filterString), Document.parse(updateString)};
+        Document doc2 = Document.parse(updateString);
+        System.out.println("doc2 = " + doc2.toString());
+
+        Document[] documents = {Document.parse(filterString), Document.parse(updateString)};
 
         return documents;
     }
+
+    public static Document[] extractFilterAndUpdate(String query) {
+        String[] result = new String[2];
+        result[0] = "";
+        result[1] = "";
+        int braceCount = 0;
+        int startOuter = -1;
+        int startInner = -1;
+
+        for (int i = 0; i < query.length(); i++) {
+            if (query.charAt(i) == '{') {
+                braceCount++;
+                if (braceCount == 1 && startOuter == -1) {
+                    startOuter = i; // Inizio della prima sottostringa
+                } else if (braceCount == 2 && startInner == -1) {
+                    startInner = i; // Inizio della sottostringa interna
+                }
+            } else if (query.charAt(i) == '}') {
+                if (braceCount == 2) {
+                    // Fine della sottostringa interna
+                    result[1] = query.substring(startInner, i + 1);
+                    startInner = -1; // Reimposta l'inizio per la prossima sottostringa interna
+                }
+                braceCount--;
+                if (braceCount == 0 && startOuter != -1) {
+                    // Fine della sottostringa esterna
+                    if (result[0].isEmpty()) {
+                        result[0] = query.substring(startOuter, i + 1);
+                        startOuter = -1; // Reimposta l'inizio per la prossima sottostringa esterna
+                    }
+                }
+            }
+        }
+
+        return new Document[]{Document.parse(result[0]), Document.parse(result[1])};
+    }
+
+
+
 
     // DELETE
 
     // If query succeeds, returns a list of documents containing the deleted count
     // If query fails, returns null
     public static List<Document> deleteOne(String collectionName, String query) {
-        Document query_insert = Document.parse(query);
+        Document query_delete = Document.parse(query);
         List<Document> documents = new ArrayList<>(); 
 
         try {
             MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-            DeleteResult result = collection.deleteOne(query_insert);
+            DeleteResult result = collection.deleteOne(query_delete);
             // Ottieni l'ID del documento inserito
             long deletedCount = result.getDeletedCount();
 
@@ -433,37 +500,16 @@ public abstract class BaseMongoDB {
     public static void main(String[] args) {
         try {
             getMongoClient(); // Ensure client is created
-            String mongosh_string = "db.Post.aggregate([\n" +
-                    "    {\n" +
-                    "        $match: {\n" +
-                    "            username: \"cody_cisneros_28\",\n" +
-                    "        }\n" +
-                    "    },\n" +
-                    "    {\n" +
-                    "        $sort: {\n" +
-                    "            avgStarRanking: -1\n" +
-                    "        }\n" +
-                    "    },\n" +
-                    "    {\n" +
-                    "        $limit: 1\n" +
-                    "    },\n" +
-                    "    {\n" +
-                    "        $project: {\n" +
-                    "            _id: 0,\n" +
-                    "            post: {\n" +
-                    "                _id: \"$_id\",\n" +
-                    "                description: \"$description\",\n" +
-                    "                timestamp: \"$timestamp\",\n" +
-                    "                recipe: \"$recipe\",\n" +
-                    "                avgStarRanking: \"$avgStarRanking\",\n" +
-                    "                starRankings: \"$starRankings\",\n" +
-                    "                comments: \"$comments\"\n" +
-                    "            }\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "])";
+            String mongosh_string = "db.Ingredient.updateOne({\n" +
+                    "   \"name\": \"Pippo\"\n" +
+                    "}," +
+                    "{$unset: {\"comments\": \"\" }}" +
+                    ")";
+
             List<Document> result =executeOnMongo(mongosh_string);
 
+            System.out.println();
+            System.out.println("Result: ");
             for(Document doc : result){
                 System.out.println(doc.toJson());
             }
@@ -471,7 +517,6 @@ public abstract class BaseMongoDB {
         } finally {
             closeMongoClient(); // Ensure client is closed
         }
-        
     }
 
 }
