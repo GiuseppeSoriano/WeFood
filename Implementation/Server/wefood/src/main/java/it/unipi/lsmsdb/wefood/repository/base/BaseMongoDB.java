@@ -19,6 +19,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +39,79 @@ public abstract class BaseMongoDB {
     private static final String MONGODB_DATABASE = "WeFood";
     private static final String mongoString = String.format("mongodb://%s/%s", MONGODB_HOST, MONGODB_DATABASE);
 
+    private static final String SET_REGEX = "\\$set:";
+    private static final String UNSET_REGEX = "\\$unset:";
+    private static final String PUSH_REGEX = "\\$push:";
+    private static final String PULL_REGEX = "\\$pull:";
+
+
     private static volatile MongoClient client;
+
+    private static enum QueryType {
+        UNSET_COMMENT(
+                "db.Ingredient.updateOne({\n" +
+                        "   \"name\": \"Pippo\"\n" +
+                        "}," +
+                        "{$unset: {\"comments\": \"\" }}" +
+                        ")"
+        ),
+        SET_COMMENT(
+                "db.Ingredient.updateOne({\n" +
+                        "   \"name\": \"Pippo\"\n" +
+                        "}," +
+                        "{$set: {\"comments\": [{\"author\": \"pippo\"}] }}" +
+                        ")"
+        ),
+        PUSH_COMMENT(
+                "db.Ingredient.updateOne({\n" +
+                        "   \"name\": \"Pippo\"\n" +
+                        "}," +
+                        "{$push: {\"comments\": {\"author\": \"pluto\"} }}" +
+                        ")"
+        ),
+        PULL_COMMENT(
+                "db.Ingredient.updateOne({\n" +
+                        "   \"name\": \"Pippo\"\n" +
+                        "}," +
+                        "{$pull: {\"comments\": {\"author\": \"pippo\"} }}" +
+                        ")"
+        ),
+        FIND(
+                "db.Ingredient.find({\n" +
+                        "   \"name\": \"Pippo\"\n" +
+                        "}," +
+                        "sort({\"name\": 1}), limit(1)" +
+                        ")"
+        ),
+        AGGREGATE(
+                "db.Ingredient.aggregate([\n" +
+                        "   {$match: {\"name\": \"Pippo\"}},\n" +
+                        "   {$sort: {\"name\": 1}},\n" +
+                        "   {$limit: 1}\n" +
+                        "])"
+        ),
+        INSERT_ONE(
+                "db.Ingredient.insertOne({\n" +
+                        "   \"name\": \"Pippo\"\n" +
+                        "})"
+        ),
+        DELETE_ONE(
+                "db.Ingredient.deleteOne({\n" +
+                        "   \"name\": \"Pippo\"\n" +
+                        "})"
+        );
+
+        private final String query;
+
+        QueryType(String query) {
+            this.query = query;
+        }
+
+        public String getQuery() {
+            return query;
+        }
+    };
+
 
     // Singleton pattern for MongoClient
     public static MongoClient getMongoClient() {
@@ -54,7 +128,6 @@ public abstract class BaseMongoDB {
                 }
             }
         }
-        System.out.println("MongoDB client returned successfully");
         return client;
     }
 
@@ -69,105 +142,62 @@ public abstract class BaseMongoDB {
         }
     }
 
-
-    public List<Document> query(String collectionName, String query) throws MongoException {
-        List<Document> result = new ArrayList<>();
-        try {
-            MongoCursor<Document> cursor = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName).find().iterator();
-            while (cursor.hasNext()) {
-                Document doc = cursor.next();
-                result.add(doc);
-            }
-        } catch (MongoException e) {
-            //Something went wrong
-            System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
-        }
-        return result;
-    }
-
-    
-
-
-    public List<Document> query(String collectionName, Document query) {
-        List<Document> documents = new ArrayList<>();
-
-        try {
-            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-            try (MongoCursor<Document> cursor = collection.find(query).iterator()) {
-                while (cursor.hasNext()) {
-                    Document document = cursor.next();
-                    documents.add(document);
-                }
-            }
-        } catch(MongoException e) {
-            //Something went wrong
-        } /*finally {
-            mongoClient.close();
-        }
-        */
-        return documents;
-    }
-
-    // FIND 
-    
-    public static List<Document> execute_find(String collectionName, Document query_find, Document query_sort, long query_limit) {
-        List<Document> documents = new ArrayList<>(); 
-
-        // Se query_sort come stringa è null, passo quella di default
-        // Se query_limit è null, passo quella di default
-
-        try {
-            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-            try (MongoCursor<Document> cursor = collection.find(query_find).sort(query_sort).limit((int) query_limit).iterator()) {
-                while (cursor.hasNext()) {
-                    Document document = cursor.next();
-                    documents.add(document);
-                }
-            }
-        } catch(MongoException e) {
-            //Something went wrong
-            System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
-            return null;
-        } 
-        return documents;
-    }
-    
+    // FIND
     // If query succeeds, returns a list of documents containing the result of the find
-    // If query fails, returns null
+    // If query fails, throws an exception. Here excpetions that can be thrown:
+    // - MongoException: high level exception used to deal with errors linked to database operations
+    // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
+    // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
 
-    public static List<Document> find(String collectionName, String find, String sort, String limit) {
+    public static List<Document> find(String collectionName, String find, String sort, String limit) 
+            throws MongoException, IllegalArgumentException, IllegalStateException {
+
         Document query_find = Document.parse(find);
-        if(sort == null){
-            sort = "{}";
-        }
-        Document query_sort = Document.parse(sort);
-        if(limit == null){
-            limit = "0";
-        }
-        long query_limit = Long.parseLong(limit);
-
-        System.out.println("Query Find: " + query_find.toJson());
-        System.out.println("Query Sort: " + query_sort.toJson());
-        System.out.println("Query Limit: " + query_limit);
+        Document query_sort = (sort==null) ? Document.parse("{}") : Document.parse(sort);   // If sort is null, default value is passed
+        long query_limit = (limit==null) ? 0 : Long.parseLong(limit);                           // If limit is null, default value is passed
 
         return execute_find(collectionName, query_find, query_sort, query_limit);
-    }    
+    }
+
+    public static List<Document> execute_find(String collectionName, Document query_find, Document query_sort, long query_limit) 
+            throws MongoException, IllegalArgumentException, IllegalStateException {
+
+        List<Document> documents = new ArrayList<>(); 
+
+        MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
+        MongoCursor<Document> cursor = collection.find(query_find).sort(query_sort).limit((int) query_limit).iterator();
+        while (cursor.hasNext()) {
+            Document document = cursor.next();
+            documents.add(document);
+        }
+        return documents;
+    }
+    
 
     // AGGREGATE
 
-    private static Bson handleGroupOperation(JSONObject groupJson) {
-        // Rimuovi '_id' se è null e crea accumulatori di campo
-        List<BsonField> fieldAccumulators = new ArrayList<>();
-        for (String key : groupJson.keySet()) {
-            if (!"_id".equals(key) || !groupJson.isNull(key)) {
-                fieldAccumulators.add(new BsonField(key, new Document(groupJson.getJSONObject(key).toMap())));
-            }
+    // If query succeeds, returns a list of documents containing the result of the aggregation
+    // If query fails, throws an exception. Here excpetions that can be thrown:
+    // - MongoException: high level exception used to deal with errors linked to database operations
+    // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
+    // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
+    public static List<Document> aggregate(String collectionName, String query) 
+            throws MongoException, IllegalArgumentException, IllegalStateException {
+
+        List<Document> documents = new ArrayList<>();
+
+        MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
+        List<Bson> bsonList = translateAggregations(query);
+        MongoCursor<Document> cursor = collection.aggregate(bsonList).iterator();
+        while (cursor.hasNext()) {
+            Document document = cursor.next();
+            documents.add(document);
         }
 
-        return Aggregates.group(groupJson.isNull("_id") ? null : groupJson.get("_id"), fieldAccumulators.toArray(new BsonField[0]));
+        return documents;
     }
 
-    public static List<Bson> translateAggregations(String queryString) {
+    public static List<Bson> translateAggregations(String queryString) throws IllegalArgumentException {
         JSONArray queryArray = new JSONArray(queryString);
         List<Bson> bsonList = new ArrayList<>();
 
@@ -192,169 +222,103 @@ public abstract class BaseMongoDB {
                 case "$project":
                     bsonList.add(Aggregates.project(new Document(queryPart.getJSONObject(key).toMap())));
                     break;
-                // Aggiungi altri casi per altri tipi di operazioni di aggregazione
             }
         }
         return bsonList;
     }
 
-    // If query succeeds, returns a list of documents containing the result of the aggregation
-    // If query fails, returns null
-    public static List<Document> aggregate(String collectionName, String query) {
-        List<Document> documents = new ArrayList<>();
+    private static Bson handleGroupOperation(JSONObject groupJson) throws IllegalArgumentException {
 
-        try {
-            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-            List<Bson> bsonList = translateAggregations(query);
-            try (MongoCursor<Document> cursor = collection.aggregate(bsonList).iterator()) {
-                while (cursor.hasNext()) {
-                    Document document = cursor.next();
-                    documents.add(document);
-                }
+        List<BsonField> fieldAccumulators = new ArrayList<>();
+        for (String key : groupJson.keySet()) {
+            if (!"_id".equals(key) || !groupJson.isNull(key)) {
+                fieldAccumulators.add(new BsonField(key, new Document(groupJson.getJSONObject(key).toMap())));
             }
-        } catch(MongoException e) {
-            //Something went wrong
-            System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
-        } 
-        return documents;
+        }
+
+        return Aggregates.group(groupJson.isNull("_id") ? null : groupJson.get("_id"), fieldAccumulators.toArray(new BsonField[0]));
     }
+
+
 
     // INSERT
 
     // If query succeeds, returns a list of documents containing the inserted ID
-    // If query fails, returns null
-    public static List<Document>  insertOne(String collectionName, String query) {
+    // If query fails, throws an exception. Here excpetions that can be thrown:
+    // - MongoException: high level exception used to deal with errors linked to database operations
+    // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
+    // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
+    public static List<Document>  insertOne(String collectionName, String query) 
+            throws MongoException, IllegalArgumentException, IllegalStateException {
         Document query_insert = Document.parse(query);
-        List<Document> documents = new ArrayList<>(); 
+        List<Document> documents = new ArrayList<>();
 
+        MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
+        InsertOneResult result = collection.insertOne(query_insert);
+        
+        // Ottieni l'ID del documento inserito
+        BsonValue insertedId = result.getInsertedId();
 
-        try {
-            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-            InsertOneResult result = collection.insertOne(query_insert);
-            // Ottieni l'ID del documento inserito
-            BsonValue insertedId = result.getInsertedId();
-
-            // Converti l'ID del documento in un oggetto Document
-            documents.add(new Document("_id", insertedId));
+        // Converti l'ID del documento in un oggetto Document
+        documents.add(new Document("_id", insertedId));
             
-            return documents;
-        }
-        catch(MongoException e) {
-            //Something went wrong
-            System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
-            return null;
-        }
+        return documents;
     }
 
     // UPDATE
 
-    public static List<Document> updateOne(String collectionName, String query) {
+    public static List<Document> updateOne(String collectionName, String query) 
+            throws MongoException, IllegalArgumentException, IllegalStateException{
         // Possible operations: $set, $unset, $push, $pull
-        String set_regex = "\\$set:";
-        String unset_regex = "\\$unset:";
-        String push_regex = "\\$push:";
-        String pull_regex = "\\$pull:";
-
-        Matcher set_matcher = Pattern.compile(set_regex).matcher(query);
-        Matcher unset_matcher = Pattern.compile(unset_regex).matcher(query);
-        Matcher push_matcher = Pattern.compile(push_regex).matcher(query);
-        Matcher pull_matcher = Pattern.compile(pull_regex).matcher(query);
 
         Document filter = null;
         Document update = null;
         Document[] tmp = null;
         Bson updateOperation = new Document();
+        List<Document> documents = new ArrayList<>(); 
+
+        Matcher set_matcher = Pattern.compile(SET_REGEX).matcher(query);
+        Matcher unset_matcher = Pattern.compile(UNSET_REGEX).matcher(query);
+        Matcher push_matcher = Pattern.compile(PUSH_REGEX).matcher(query);
+        Matcher pull_matcher = Pattern.compile(PULL_REGEX).matcher(query);
+
+        tmp = extractFilterAndUpdate(query);
+        filter = tmp[0];
+        update = tmp[1];
 
         if (set_matcher.find()) {
-            tmp = extractFilterAndUpdate(query);
-            filter = tmp[0];
-            update = tmp[1];
             for (String key : update.keySet()) {
                 updateOperation = Updates.combine(updateOperation, Updates.set(key, update.get(key)));
             }
         }
         else if (unset_matcher.find()) {
-            tmp = extractFilterAndUpdate(query);
-            filter = tmp[0];
-            update = tmp[1];
             for (String key : update.keySet()) {
                 updateOperation = Updates.combine(updateOperation, Updates.unset(key));
             }
         }
         else if (push_matcher.find()) {
-            tmp = extractFilterAndUpdate(query);
-            filter = tmp[0];
-            update = tmp[1];
             for (String key : update.keySet()) {
                 Document value = update.get(key, Document.class);
                 updateOperation = Updates.combine(updateOperation, Updates.push(key, value));
             }
         }
         else if (pull_matcher.find()) {
-            tmp = extractFilterAndUpdate(query);
-            filter = tmp[0];
-            update = tmp[1];
             for (String key : update.keySet()) {
                 Document value = update.get(key, Document.class);
                 updateOperation = Updates.combine(updateOperation, Updates.pull(key, value));
             }
         }
-        else {
-            throw new IllegalArgumentException("Invalid MongoDB update operation" + query);
-        }
 
-        List<Document> documents = new ArrayList<>(); 
-
-        try {
-            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-            UpdateResult result = collection.updateOne(filter, updateOperation);
-            
-            // Converti l'ID del documento in un oggetto Document
-            documents.add(new Document("result", result.toString()));
-            
-            return documents;
-        }
-        catch(MongoException e) {
-            //Something went wrong
-            System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
-            return null;
-        }
-
-    }
-
-    private static Document[] extractDocument(String query, String operation) {
-        Pattern filterPattern = Pattern.compile("\\{([^}]+)\\}", Pattern.DOTALL);
-        Pattern updatePattern = Pattern.compile(operation + "\\s*([^)]+?)\\)", Pattern.DOTALL);
-
-        Matcher filterMatcher = filterPattern.matcher(query);
-        Matcher updateMatcher = updatePattern.matcher(query);
-
-        String filterString = "";
-        String updateString = "";
-
-        if (filterMatcher.find()) {
-            filterString = filterMatcher.group();
-            System.out.println("filter = \"" + filterString + "\"");
-        }
-
-        if (updateMatcher.find()) {
-            updateString = updateMatcher.group();
-            updateString = updateString.replaceFirst(operation+"\\s*", "");
-            System.out.println("update = \"" + updateString + "\"");
-        }
-
-        Document doc1 = Document.parse(filterString);
-        System.out.println("doc1 = " + doc1.toString());
-
-        Document doc2 = Document.parse(updateString);
-        System.out.println("doc2 = " + doc2.toString());
-
-        Document[] documents = {Document.parse(filterString), Document.parse(updateString)};
-
+        MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
+        UpdateResult result = collection.updateOne(filter, updateOperation);
+        
+        // Converti l'ID del documento in un oggetto Document
+        documents.add(new Document("result", result.toString()));
+        
         return documents;
     }
 
-    public static Document[] extractFilterAndUpdate(String query) {
+    public static Document[] extractFilterAndUpdate(String query) throws IllegalArgumentException {
         String[] result = new String[2];
         result[0] = "";
         result[1] = "";
@@ -390,48 +354,38 @@ public abstract class BaseMongoDB {
         return new Document[]{Document.parse(result[0]), Document.parse(result[1])};
     }
 
-
-
-
     // DELETE
 
     // If query succeeds, returns a list of documents containing the deleted count
-    // If query fails, returns null
-    public static List<Document> deleteOne(String collectionName, String query) {
+    // If query fails, throws an exception. Here excpetions that can be thrown:
+    // - MongoException: high level exception used to deal with errors linked to database operations
+    // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
+    // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
+    public static List<Document> deleteOne(String collectionName, String query)
+            throws MongoException, IllegalArgumentException, IllegalStateException {
         Document query_delete = Document.parse(query);
         List<Document> documents = new ArrayList<>(); 
 
-        try {
-            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-            DeleteResult result = collection.deleteOne(query_delete);
-            // Ottieni l'ID del documento inserito
-            long deletedCount = result.getDeletedCount();
-
-            // Converti l'ID del documento in un oggetto Document
-            documents.add(new Document("deleted_count", deletedCount));
+        MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
+        DeleteResult result = collection.deleteOne(query_delete);
+        // Get how many documents were deleted
+        long deletedCount = result.getDeletedCount();
+        // Create document with the deleted count to be returned
+        documents.add(new Document("deleted_count", deletedCount));
             
-            return documents;
-        }
-        catch(MongoException e) {
-            //Something went wrong
-            System.err.println("Something went wrong while querying the MongoDB database. Error: " + e.getMessage());
-            return null;
-        }
+        return documents;
     }
-    
 
-    public static List<Document> executeOnMongo(String mongosh_string){
-        // String[] operations = {"find", "aggregate", "insertOne", "updateOne", "deleteOne"};
+    // If query fails, throws an exception. Here excpetions that can be thrown:
+    // - MongoException: high level exception used to deal with errors linked to database operations
+    // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
+    // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
+
+    public static List<Document> executeQuery(String mongosh_string) 
+        throws IllegalArgumentException, IllegalStateException, MongoException {
+        // OPERATIONS IMPLEMENTED = {"find", "aggregate", "insertOne", "updateOne", "deleteOne"};
        
-        List<Document> result;
-
-        // Getting the collection name from the mongosh_string 
-        // db.collectionName.FIRSToperation(document).SECONDoperation(document).THIRDoperation(document)
-        // SECOND can only be sort
-        // THIRD can only be limit
-        String sort = "sort";
-        String limit = "limit";
-
+        // Getting the collection name from the mongosh_string
         String collectionName = new String(mongosh_string.split("\\.")[1]);
 
         // Getting the operation from the mongosh_string
@@ -440,36 +394,22 @@ public abstract class BaseMongoDB {
         String operation = new String(operationWithDocument.split("\\(")[0]);
         String operationDoc = mongosh_string.substring(mongosh_string.indexOf("(")+1, mongosh_string.indexOf(")"));
 
-        System.out.println("Collection: " + collectionName);
-        System.out.println("Operation: " + operation);
-        System.out.println("OperationDoc: " + operationDoc);
-
         switch (operation) {
             case "find": // find
 
-                // Now we check if mongosh_string contains sort and limit
-                String sortDoc;
-                String limitDoc;
-
-                // Regex for extracting the document inside SECOND
-                String sortRegex = sort+"\\((.+?)\\)";
-                sortDoc = extractPattern(mongosh_string, sortRegex);
-
-                // Regex for extracting the document inside THIRD
-                String limitRegex = limit+"\\((\\d+)\\)";
-                limitDoc = extractPattern(mongosh_string, limitRegex);
-
-                System.out.println("sortDoc: " + sortDoc);
-                System.out.println("limitDoc: " + limitDoc);
+                // Regex for extracting the document inside sort
+                String sortDoc = extractPattern(mongosh_string, "sort\\((.+?)\\)");
+                // Regex for extracting the document inside limit
+                String limitDoc = extractPattern(mongosh_string, "limit\\((\\d+)\\)");
 
                 return find(collectionName, operationDoc, sortDoc, limitDoc);
         
             case "aggregate": // aggregate
-               
+
                 return aggregate(collectionName, operationDoc);
             
             case "insertOne": // insertOne
-                
+
                 return insertOne(collectionName, operationDoc);
             
             case "updateOne": // updateOne
@@ -481,9 +421,8 @@ public abstract class BaseMongoDB {
                 return deleteOne(collectionName, operationDoc);
                 
             default:
-                throw new IllegalArgumentException("Invalid MongoDB operation: " + operation);
+                throw new IllegalArgumentException("Invalid MongoDB operation: " + mongosh_string);
         }
-
     }
 
     private static String extractPattern(String input, String regex) {
@@ -495,18 +434,13 @@ public abstract class BaseMongoDB {
         return null;
     }
 
-
     // TEST MAIN
     public static void main(String[] args) {
         try {
             getMongoClient(); // Ensure client is created
-            String mongosh_string = "db.Ingredient.updateOne({\n" +
-                    "   \"name\": \"Pippo\"\n" +
-                    "}," +
-                    "{$unset: {\"comments\": \"\" }}" +
-                    ")";
+            String mongosh_string = QueryType.DELETE_ONE.getQuery();
 
-            List<Document> result =executeOnMongo(mongosh_string);
+            List<Document> result =executeQuery(mongosh_string);
 
             System.out.println();
             System.out.println("Result: ");
@@ -520,4 +454,6 @@ public abstract class BaseMongoDB {
     }
 
 }
+
+
 
