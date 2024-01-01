@@ -15,16 +15,13 @@ public abstract class BaseNeo4j {
     private static final String NEO4J_HOST = "10.1.1.24";
     private static final String NEO4J_PORT = "7687";
 
-    private static String URI = String.format("bolt://%s:/%s", 
-                                              NEO4J_HOST,
-                                              NEO4J_PORT);
+    private static String URI = String.format("bolt://%s:/%s", NEO4J_HOST, NEO4J_PORT);
 
     private static final String NEO4J_USERNAME = "neo4j";
     private static final String NEO4J_PASSWORD = "password";
     
     private static Driver driver;
 
-    
     public static Driver getNeo4jDriver() {
         try {
             driver = GraphDatabase.driver(URI, AuthTokens.basic(NEO4J_USERNAME, NEO4J_PASSWORD));
@@ -42,7 +39,7 @@ public abstract class BaseNeo4j {
         }
     }
 
-    public List<Record> query(String query) {
+    public List<Record> executeQuery(String query) {
         if (driver == null) {
             throw new IllegalStateException("Driver not initialized!");
         }

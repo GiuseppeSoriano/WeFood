@@ -18,9 +18,6 @@ import com.mongodb.client.model.Aggregates;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +26,6 @@ import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
 import com.mongodb.client.model.Updates;
 
-import static com.mongodb.client.model.Updates.set;
 
 
 public abstract class BaseMongoDB {

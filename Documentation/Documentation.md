@@ -25,11 +25,14 @@ The actors that are involved in WeFood are:
     2.6. Modify an uploaded Post
     2.7. Delete an uploaded Post
     2.8. Comment a Post
+         Modify his/her own comments
+         Delete his/her own comments
     2.9. Evaluate by a star ranking a Post
-    2.10. Browse most recent friends' Posts
+         Delete his/her own star rankings
+    2.10. Browse most recent friends' Posts (we do not have this information in the graph DB. The alternative is to show the most recent Posts)
     2.11. Browse most recent top rated Posts
     2.12. Browse most recent Posts by ingredients 
-    2.13a. Browse most recent Posts by calories 
+    2.13a. Browse most recent Posts by calories (lower bound and upper bound)
     2.13. View his/her own profile
     2.14. View other Users' profiles
     2.15. View his/her Friends
@@ -51,10 +54,13 @@ The actors that are involved in WeFood are:
 3. Administrator:
     3.1 Log In
     3.2 Log Out
-    3.3. Ban a User
+    3.3. Ban/Unban a User
     3.4. Delete a Post
     3.5. Delete a Comment
     3.6. See statistics about the usage of WeFood
+    3.7. Create a new Ingredient
+    3.8. (Modify an Ingredient) (Too complex)
+
 
 A User can follow a user and can be followed by other users.
 A User has a friend when he/she follows another user and the other user follows him/her back.

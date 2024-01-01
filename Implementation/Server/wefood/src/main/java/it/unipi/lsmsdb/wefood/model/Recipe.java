@@ -9,11 +9,14 @@ public class Recipe {
     private List<String> steps;
     private Map<Ingredient, Double> ingredients;
 
-    public Recipe(String name, String image, List<String> steps, Map<Ingredient, Double> ingredients) {
+    private Double totalCalories;
+
+    public Recipe(String name, String image, List<String> steps, Map<Ingredient, Double> ingredients, Double totalCalories) {
         this.name = name;
         this.image = image;
         this.steps = steps;
         this.ingredients = ingredients;
+        this.totalCalories = totalCalories;
     }
 
     public String getName() {
@@ -47,4 +50,14 @@ public class Recipe {
     public void setIngredients(Map<Ingredient, Double> ingredients) {
         this.ingredients = ingredients;
     }
+
+    public Double getTotalCalories() {
+        return totalCalories;
+    }
+
+    public void setTotalCalories(Double totalCalories) {
+        this.totalCalories = totalCalories;
+    }
+
+
 }
