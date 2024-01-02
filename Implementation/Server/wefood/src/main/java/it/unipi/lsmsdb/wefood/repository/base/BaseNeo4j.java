@@ -22,24 +22,24 @@ public abstract class BaseNeo4j {
     
     private static Driver driver;
 
-    public static Driver getNeo4jDriver() {
+    public static void openNeo4jDriver() {
         try {
             driver = GraphDatabase.driver(URI, AuthTokens.basic(NEO4J_USERNAME, NEO4J_PASSWORD));
-            return driver;
+           
         } 
         catch (Neo4jException e) {
             System.out.println("Failed to create the driver: " + e.getMessage());
-            return null;
+            
         }
     }
 
-    public void closeNeo4jDriver() {
+    public static void closeNeo4jDriver() {
         if (driver != null) {
             driver.close();
         }
     }
 
-    public List<Record> executeQuery(String query) {
+    public static List<Record> executeQuery(String query) {
         if (driver == null) {
             throw new IllegalStateException("Driver not initialized!");
         }

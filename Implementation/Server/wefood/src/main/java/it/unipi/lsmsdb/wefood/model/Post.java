@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Post {
 
+    //aggiungere id e tutti i metodi di conseguenza
     private String description;
     private Date timestamp;
     private List<Comment> comments;

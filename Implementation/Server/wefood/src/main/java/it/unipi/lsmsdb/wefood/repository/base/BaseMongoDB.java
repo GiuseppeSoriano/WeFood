@@ -110,7 +110,7 @@ public abstract class BaseMongoDB {
 
 
     // Singleton pattern for MongoClient
-    public static MongoClient getMongoClient() {
+    public static void openMongoClient() {
         if (client == null) {
             synchronized (BaseMongoDB.class) {
                 if (client == null) {
@@ -124,7 +124,6 @@ public abstract class BaseMongoDB {
                 }
             }
         }
-        return client;
     }
 
     public static void closeMongoClient() {
@@ -433,7 +432,7 @@ public abstract class BaseMongoDB {
     // TEST MAIN
     public static void main(String[] args) {
         try {
-            getMongoClient(); // Ensure client is created
+            openMongoClient(); // Ensure client is created
             String mongosh_string = QueryType.DELETE_ONE.getQuery();
 
             List<Document> result =executeQuery(mongosh_string);

@@ -17,6 +17,10 @@ public class RegisteredUser extends User {
         this.surname = surname;
         this.posts = new ArrayList<Post>();
     }
+    public RegisteredUser(String username) {
+        this.username = username;
+        this.posts = new ArrayList<Post>();
+    }
 
     public String getUsername() {
         return username;

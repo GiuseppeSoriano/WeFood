@@ -13,7 +13,7 @@ public interface PostMongoDBInterface {
     boolean deletePost(RegisteredUser user, Post post);
 
     List<Post> browseMostRecentTopRatedPosts();
-    List<Post> browseMostRecentTopRatedPosts(List<Ingredient> ingredients);
+    List<Post> browseMostRecentTopRatedPostsByIngredients(List<Ingredient> ingredients);
     List<Post> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories);
     
     Post findPostById(String id);
