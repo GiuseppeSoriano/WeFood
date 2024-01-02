@@ -1279,89 +1279,18 @@ db.Post.aggregate([
 
 | Where                     | Reason              | Original/Raw Value                   |
 |---------------            |---------------------|------------------           |
-|DocumentDB:User:posts:name | To avoid joins      | DocumentDB:Post:recipe:name |
-|DocumentDB:User:posts:image | To avoid joins      | DocumentDB:Post:recipe:image |
-|DocumentDB:Post:username | To avoid joins      | DocumentDB:User:username |
-|DocumentDB:Post:recipe:totalCalories | To avoid joins and to avoid computing the total calories of a recipe every time a post is shown | It is possible to compute the total calories of a recipe by summing the calories of the ingredients contained in the recipe, in particular: $\sum_i \left( quantity_i\cdot\frac{calories100g_i}{100} \right)$ where $quantity_i$ is the quantity of the $i$th ingredient contained in the recipe, $calories100g_i$ is the number of calories of the $i$th ingredient per 100 grams that can be retrieved from the Ingredient collection |
+|`DocumentDB:User:posts:name` | To avoid joins      | `DocumentDB:Post:recipe:name` |
+|`DocumentDB:User:posts:image` | To avoid joins      | `DocumentDB:Post:recipe:image` |
+|`DocumentDB:Post:username` | To avoid joins      | `DocumentDB:User:username` |
+|`DocumentDB:Post:recipe:totalCalories` | To avoid joins and to avoid computing the total calories of a recipe every time a post is shown | It is possible to compute the total calories of a recipe by summing the calories of the ingredients contained in the recipe, in particular: $\sum_i \left( quantity_i\cdot\frac{calories100g_i}{100} \right)$ where $quantity_i$ is the quantity of the $i$th ingredient contained in the recipe, $calories100g_i$ is the number of calories of the $i$th ingredient per 100 grams that can be retrieved from the Ingredient collection |
+|`DocumentDB:Post:avgStarRanking` | To avoid computing the average star ranking of a post every time is shown | It is possible to compute the average star ranking of a post by averaging the values contained in `DocumentDB:Post:starRankings:vote` |
+|`DocumentDB:Post:starRankings:username` | To avoid joins | `DocumentDB:User:username` |
+|`DocumentDB:Post:comments:username` | To avoid joins | `DocumentDB:User:username` |
+|`GraphDB:(User):username` | To avoid joins with the DocumentDB | `DocumentDB:User:username` |
+|`GraphDB:(Recipe):name` | To avoid joins with the DocumentDB | `DocumentDB:Post:recipe:name` |
+|`GraphDB:(Ingredient):name` | To avoid joins with the DocumentDB | `DocumentDB:Ingredient:name` |
+|`GraphDB:(User)-[:USED]->(Ingredient):times` | To avoid computing the total number of times that a User used an Ingredient | It is possible to compute the total number of times that a User used an Ingredient by counting the number of times that a User used that Ingredient in his/her recipes (information that can be retrieved from the DocumentDB) |
 
-
-
-|DocumentDB:Post:recipe:totalCalories | To avoid computing the total calories of a recipe every time a post is shown | XXX |
-|DocumentDB:Post:avgStarRanking | To avoid computing the average star ranking of a post every time is shown | It is possible to compute the average star ranking of a post by summing the  DocumentDB:User:username XXX|
-
-
-
-
-Post{
-    recipe:{
-                totalCalories
-           }
-}
-Reason: to avoid computing the total calories of a recipe every time that a post is shown
-Original Value: It is possibile to compute the total calories of a recipe by summing the calories of each ingredient of the recipe  (retrieving the calories of each ingredient from the Key-Value DB)
-
----
-
-Post{
-    avgStarRanking
-}
-Reason: to avoid computing the average star ranking of a post every time that a post is shown
-Original Value: It is possibile to compute the average star ranking of a post by summing the star rankings of each user and dividing by the number of users that voted for the post
-
----
-
-Post{
-    starRankings: [{
-                        username,
-    }]
-}
-Reason: to avoid joins
-Original Value: User{
-                        username
-                    }
-
----
-
-Post{
-    comments: [{
-                    username,
-    }]
-}
-Reason: to avoid joins
-Original Value: User{
-                        username
-                    }
-
----
-
-GraphDB: The redundancies inside the GraphDB are necessary to avoid joins with the DocumentDB. In this way we can show partial information.
-
-User:
-    - username
-Reason: to avoid joins with the DocumentDB
-Original Value: User{
-                        username
-                    }
-
----
-
-Recipe:
-    - name
-
-Reason: to avoid joins with the DocumentDB
-Original Value: Post{
-                        recipe:{
-                                    name
-                               }
-                    }
-
----
-
-:USED:
-    - times
-
-Reason: to avoid computing the number of times that an ingredient is used every time that is needed.
-Original Value: it is possible to compute the number of times that an ingredient is used by counting the number of times that a user has used an ingredient in his/her recipes (retrieving the information from the DocumentDB).
 
 ---
 
@@ -1370,11 +1299,6 @@ Original Value: it is possible to compute the number of times that an ingredient
 
 Reason: to avoid computing the number of times that an ingredient is used with another ingredient every time that is needed.
 Original Value: it is possible to compute the number of times that an ingredient is used with another ingredient by counting the number of times that a user has used an ingredient with another ingredient in his/her recipes (retrieving the information from the DocumentDB).
-
-Ingredient:
-    - name
-Reason: to avoid joins with the DocumentDB
-Original Value Ingredient:name in DocumentDB
 
 
 

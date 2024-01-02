@@ -20,7 +20,7 @@ public class PostMongoDB implements PostMongoDBInterface{
                                             "\", surname: \"" + post.getRecipe().toString() + "\"})"; //aggiungere recipe toString()
         //BaseMongoDB.getMongoClient();
         List<Document> result = BaseMongoDB.executeQuery(query);
-        if(result == null) {
+        if(result.isEmpty()) {
             return false;
         } else {
             return true;
@@ -33,7 +33,7 @@ public class PostMongoDB implements PostMongoDBInterface{
     public List<Post> browseMostRecentTopRatedPostsByIngredients(List<Ingredient> ingredients) {};
     public List<Post> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories) {};
     
-    public Post findPostById(String id) {}; //Dovrebbe essere by user per fare delete e modify
+    public Post findPostById(String _id) {}; //Dovrebbe essere by user per fare delete e modify
     //altrimenti non hai l'informazione sull'id fino a quando un utente non effettua un operazione di
     //modifica o cancellazione
 }

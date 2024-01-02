@@ -9,6 +9,7 @@ import it.unipi.lsmsdb.wefood.repository.base.BaseMongoDB;
 import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserMongoDBInterface;
 
 public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
+    
     private final String collectionName = "User";
 
 
@@ -16,10 +17,11 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         String query = "db."+collectionName+".find({username: \"" + username + "\", password: \"" + password + "\"})";
         //BaseMongoDB.getMongoClient();
         List<Document> registeredUserDocument = BaseMongoDB.executeQuery(query);
-        if(registeredUserDocument.size() == 0) {
+        if(registeredUserDocument.isEmpty()) {
             return null;
         } else {
             RegisteredUser registeredUser = new RegisteredUser(
+                registeredUserDocument.get(0).getString("_id"),
                 registeredUserDocument.get(0).getString("username"),
                 registeredUserDocument.get(0).getString("password"),
                 registeredUserDocument.get(0).getString("name"),
@@ -34,10 +36,30 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         String query = "db."+collectionName+".find({username: \"" + username + "\"})";
         //BaseMongoDB.getMongoClient();
         List<Document> registeredUserDocument = BaseMongoDB.executeQuery(query);
-        if(registeredUserDocument.size() == 0) {
+        if(registeredUserDocument.isEmpty()) {
             return null;
         } else {
             RegisteredUser registeredUser = new RegisteredUser(
+                registeredUserDocument.get(0).getString("_id"),
+                registeredUserDocument.get(0).getString("username"),
+                registeredUserDocument.get(0).getString("password"),
+                registeredUserDocument.get(0).getString("name"),
+                registeredUserDocument.get(0).getString("surname")
+            );
+
+            return registeredUser;
+        }
+    };
+
+    public RegisteredUser findRegisteredUserById(String _id) {
+        String query = "db."+collectionName+".find({_id: \"" + _id + "\"})";
+        //BaseMongoDB.getMongoClient();
+        List<Document> registeredUserDocument = BaseMongoDB.executeQuery(query);
+        if(registeredUserDocument.isEmpty()) {
+            return null;
+        } else {
+            RegisteredUser registeredUser = new RegisteredUser(
+                registeredUserDocument.get(0).getString("_id"),
                 registeredUserDocument.get(0).getString("username"),
                 registeredUserDocument.get(0).getString("password"),
                 registeredUserDocument.get(0).getString("name"),
@@ -54,10 +76,28 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     };
 
     public boolean deleteUser(RegisteredUser user) {
-        // String query = "db."+collectionName+".deleteOne({username: \"" + user.getUsername() + "\"})";
-        //BaseMongoDB.getMongoClient();
+        String query = "db."+collectionName+".deleteOne({username: \"" + user.getUsername() + "\"})";
         List<Document> result = BaseMongoDB.executeQuery(query);
-        if (result == null) {
+        if (result.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    public boolean banUser(RegisteredUser user) {
+        String query = "";
+        List<Document> result = BaseMongoDB.executeQuery(query);
+        if(result == null) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+    public boolean unbanUser(RegisteredUser user) {
+        String query = "";
+        List<Document> result = BaseMongoDB.executeQuery(query);
+        if(result == null) {
             return false;
         } else {
             return true;

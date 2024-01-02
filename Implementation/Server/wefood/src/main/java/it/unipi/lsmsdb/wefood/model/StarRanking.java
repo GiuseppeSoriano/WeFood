@@ -1,6 +1,7 @@
 package it.unipi.lsmsdb.wefood.model;
 
 public class StarRanking {
+    
     private RegisteredUser user;
     private Double vote;
 

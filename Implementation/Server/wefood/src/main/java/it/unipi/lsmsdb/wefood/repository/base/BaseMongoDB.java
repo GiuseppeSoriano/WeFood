@@ -144,7 +144,7 @@ public abstract class BaseMongoDB {
     // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
     // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
 
-    public static List<Document> find(String collectionName, String find, String sort, String limit) 
+    private static List<Document> find(String collectionName, String find, String sort, String limit) 
             throws MongoException, IllegalArgumentException, IllegalStateException {
 
         Document query_find = Document.parse(find);
@@ -154,7 +154,7 @@ public abstract class BaseMongoDB {
         return execute_find(collectionName, query_find, query_sort, query_limit);
     }
 
-    public static List<Document> execute_find(String collectionName, Document query_find, Document query_sort, long query_limit) 
+    private static List<Document> execute_find(String collectionName, Document query_find, Document query_sort, long query_limit) 
             throws MongoException, IllegalArgumentException, IllegalStateException {
 
         List<Document> documents = new ArrayList<>(); 
@@ -176,7 +176,7 @@ public abstract class BaseMongoDB {
     // - MongoException: high level exception used to deal with errors linked to database operations
     // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
     // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
-    public static List<Document> aggregate(String collectionName, String query) 
+    private static List<Document> aggregate(String collectionName, String query) 
             throws MongoException, IllegalArgumentException, IllegalStateException {
 
         List<Document> documents = new ArrayList<>();
@@ -192,7 +192,7 @@ public abstract class BaseMongoDB {
         return documents;
     }
 
-    public static List<Bson> translateAggregations(String queryString) throws IllegalArgumentException {
+    private static List<Bson> translateAggregations(String queryString) throws IllegalArgumentException {
         JSONArray queryArray = new JSONArray(queryString);
         List<Bson> bsonList = new ArrayList<>();
 
@@ -243,7 +243,7 @@ public abstract class BaseMongoDB {
     // - MongoException: high level exception used to deal with errors linked to database operations
     // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
     // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
-    public static List<Document>  insertOne(String collectionName, String query) 
+    private static List<Document>  insertOne(String collectionName, String query) 
             throws MongoException, IllegalArgumentException, IllegalStateException {
         Document query_insert = Document.parse(query);
         List<Document> documents = new ArrayList<>();
@@ -262,7 +262,7 @@ public abstract class BaseMongoDB {
 
     // UPDATE
 
-    public static List<Document> updateOne(String collectionName, String query) 
+    private static List<Document> updateOne(String collectionName, String query) 
             throws MongoException, IllegalArgumentException, IllegalStateException{
         // Possible operations: $set, $unset, $push, $pull
 
@@ -313,7 +313,7 @@ public abstract class BaseMongoDB {
         return documents;
     }
 
-    public static Document[] extractFilterAndUpdate(String query) throws IllegalArgumentException {
+    private static Document[] extractFilterAndUpdate(String query) throws IllegalArgumentException {
         String[] result = new String[2];
         result[0] = "";
         result[1] = "";
@@ -356,7 +356,7 @@ public abstract class BaseMongoDB {
     // - MongoException: high level exception used to deal with errors linked to database operations
     // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
     // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
-    public static List<Document> deleteOne(String collectionName, String query)
+    private static List<Document> deleteOne(String collectionName, String query)
             throws MongoException, IllegalArgumentException, IllegalStateException {
         Document query_delete = Document.parse(query);
         List<Document> documents = new ArrayList<>(); 

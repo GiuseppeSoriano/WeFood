@@ -6,19 +6,28 @@ import java.util.List;
 
 public class Post {
 
-    //aggiungere id e tutti i metodi di conseguenza
+    private String username;
     private String description;
     private Date timestamp;
     private List<Comment> comments;
     private List<StarRanking> starRankings;
     private Recipe recipe;
 
-    public Post(String description, Date timestamp, Recipe recipe) {
+    public Post(String username, String description, Date timestamp, Recipe recipe) {
+        this.username = username;
         this.description = description;
         this.timestamp = timestamp;
         this.comments = new ArrayList<Comment>();
         this.starRankings = new ArrayList<StarRanking>();
         this.recipe = recipe;
+    }
+
+    public String getUserName() {
+        return this.username;
+    }
+
+    public void setUserName(String username) {
+        this.username = username;
     }
 
     public String getDescription() {

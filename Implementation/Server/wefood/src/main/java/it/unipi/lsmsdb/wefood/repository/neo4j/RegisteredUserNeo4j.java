@@ -5,16 +5,20 @@ import java.util.List;
 import org.neo4j.driver.Record;
 
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
+import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.repository.base.BaseNeo4j;
 import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserNeo4jInterface;
 
+    //correggere le etichette con le nuove info
 public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
+
+    //aggiungere un metodo create user all'atto di login per la consistenza
+
     public boolean followUser(RegisteredUser user, RegisteredUser userToFollow) {
         String query = "MATCH (u1:User {username: "+user.getUsername()+"}), (u2:User {username: "+userToFollow.getUsername()+"})" +
                         "CREATE (u1)-[:FOLLOWS]->(u2)";
-        //BaseNeo4j.getNeo4jDriver();
         List<Record> results = BaseNeo4j.executeQuery(query);
-        if (results == null) {
+        if (results.isEmpty()) {
             return false;
         } else {
             return true;
@@ -23,19 +27,17 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
     public boolean unfollowUser(RegisteredUser user, RegisteredUser userToUnfollow) {
         String query = "MATCH (u1:User {username: "+user.getUsername()+"})-[r:FOLLOWS]->(u2:User {username: "+userToUnfollow.getUsername()+"})" +
                         "DELETE r";
-        //BaseNeo4j.getNeo4jDriver();
         List<Record> results = BaseNeo4j.executeQuery(query);
-        if (results == null) {
+        if (results.isEmpty()) {
             return false;
         } else {
             return true;
         }
     };
 
-    public List<RegisteredUser> findFriends(RegisteredUser user) {
+    public List<RegisteredUserDTO> findFriends(RegisteredUser user) {
         String query = "MATCH (u1:User {username: "+user.getUsername()+"})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u1)" +
                         "RETURN u2";
-        //BaseNeo4j.getNeo4jDriver();
         List<Record> results = BaseNeo4j.executeQuery(query);
         LinkedList<Record> resultsList = new LinkedList<Record>(results);
         List<RegisteredUser> friends = new LinkedList<RegisteredUser>();
@@ -46,10 +48,9 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         }
         return friends;
     };
-    public List<RegisteredUser> findFollowers(RegisteredUser user) {
+    public List<RegisteredUserDTO> findFollowers(RegisteredUser user) {
         String query = "MATCH (u1:User)-[:FOLLOWS]->(u2:User {username: "+user.getUsername()+"})" +
                         "RETURN u1";
-        //BaseNeo4j.getNeo4jDriver();
         List<Record> results = BaseNeo4j.executeQuery(query);
         LinkedList<Record> resultsList = new LinkedList<Record>(results);
         List<RegisteredUser> followers = new LinkedList<RegisteredUser>();
@@ -60,23 +61,30 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         }
         return followers;
     };
-    public List<RegisteredUser> findFollowed(RegisteredUser user) {
+    public List<RegisteredUserDTO> findFollowed(RegisteredUser user) {
         String query = "MATCH (u1:User {username: "+user.getUsername()+"})-[:FOLLOWS]->(u2:User)" +
                         "RERURN u2";
-        //BaseNeo4j.getNeo4jDriver();
         List<Record> results = BaseNeo4j.executeQuery(query);
         LinkedList<Record> resultsList = new LinkedList<Record>(results);
-        List<RegisteredUser> followed = new LinkedList<RegisteredUser>();
+        /*
+            Quello che viene dopo va corretto in tutti
+            rendendo coerente il tipo della lista e inserendo
+            nel costruttore le info corrette 
+        */
+        List<RegisteredUserDTO> followed = new LinkedList<RegisteredUserDTO>();
         while (resultsList.iterator().hasNext()) {
             Record result = resultsList.iterator().next();
-            RegisteredUser followedUser = new RegisteredUser(result.get("username").asString());
+            /*
+                Qua bisogna mettere nel costruttore del DTO le info corrette
+                RegisteredUserDTO followedUser = new RegisteredUserDTO(result.get("username").asString()); 
+            */
             followed.add(followedUser);
         }
         return followed;
     };
 
-    public boolean modifyPersonalProfile(RegisteredUser user) { //Tra l'altro hanno lo stesso nome
-        //come garantire la consistenza?                 //Dovrebbero per forza stare in due classi diverse
-        return false;                                    //A questo punto, che senso ha questa classe?
+    public boolean modifyPersonalProfile(RegisteredUser user) { 
+        //come garantire la consistenza?                 
+        return false;                                   
     };
 }

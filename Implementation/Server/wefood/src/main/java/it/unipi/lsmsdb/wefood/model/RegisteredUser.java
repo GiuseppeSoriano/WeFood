@@ -1,25 +1,31 @@
 package it.unipi.lsmsdb.wefood.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class RegisteredUser extends User {
+
+    private String _id;
     private String username;
     private String password;
     private String name;
     private String surname;
-    private List<Post> posts;
 
-    public RegisteredUser(String username, String password, String name, String surname) {
+
+    public RegisteredUser(String _id, String username, String password, String name, String surname) {
+        this._id = _id;
         this.username = username;
         this.password = password;
         this.name = name;
         this.surname = surname;
-        this.posts = new ArrayList<Post>();
     }
     public RegisteredUser(String username) {
         this.username = username;
-        this.posts = new ArrayList<Post>();
+    }
+
+    public String getId() {
+        return _id;
+    }
+
+    public void setId(String id) {
+        this._id = id;
     }
 
     public String getUsername() {
@@ -32,10 +38,6 @@ public class RegisteredUser extends User {
 
     public String getPassword() {
         return password;
-    }
-
-    public List<Post> getPosts() {
-        return posts;
     }
 
     public void setPassword(String password) {
@@ -56,14 +58,6 @@ public class RegisteredUser extends User {
 
     public void setSurname(String surname) {
         this.surname = surname;
-    }
-    
-    public void addPost(Post post) {
-        this.posts.add(post);
-    }
-    
-    public void removePost(Post post) {
-        this.posts.remove(post);
     }
 
 }
