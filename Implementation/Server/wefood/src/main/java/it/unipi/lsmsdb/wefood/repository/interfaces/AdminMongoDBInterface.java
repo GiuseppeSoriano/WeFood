@@ -6,5 +6,4 @@ public interface AdminMongoDBInterface {
 
     Admin loginAdmin(String username, String password);
     
-
 }

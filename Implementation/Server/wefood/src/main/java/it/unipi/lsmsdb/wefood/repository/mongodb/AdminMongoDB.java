@@ -8,6 +8,7 @@ import org.bson.Document;
 
 import com.mongodb.MongoException;
 
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 public class AdminMongoDB implements AdminMongoDBInterface {
 
@@ -17,18 +18,28 @@ public class AdminMongoDB implements AdminMongoDBInterface {
         List<Document> result = BaseMongoDB.executeQuery(query);
         if(result.isEmpty()){
             // It does not exist a user with this username
+            return null;
         }
         else{
             // It exists a user with this username
-            
-            // check if user is an admin (TYPE)
-            // check if the password is correct
-            // https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/crypto/bcrypt/BCrypt.html
-            // ...
+            Document admin = result.get(0);
+
+            if (admin.containsKey("type") && admin.getString("type").equals("Admin")) {
+                // The user is an Admin
+                if(BCrypt.checkpw(password, admin.getString("password"))){
+                    // The password is correct
+                    return new Admin(admin.getString("username"), admin.getString("password"));
+                } 
+                else {
+                    // The password is not correct
+                    return null;
+                }
+            } else {
+                // The user is not an Admin
+                return null;
+            }
 
         }
-        //ritornare l'admin
-        return null;
     };
     
 }

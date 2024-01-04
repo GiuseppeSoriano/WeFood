@@ -1,86 +1,253 @@
+---
+header-includes: |
+    \usepackage{graphicx}
+    \usepackage{seqsplit}
+    \usepackage{fvextra}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+    \usepackage{caption}
+    \usepackage{subcaption}
+    \usepackage{xcolor}
+    \usepackage{lscape}
+
+    \usepackage{tabularx}
+    \usepackage{booktabs}
+    \usepackage{caption}
+    \usepackage{geometry}
+    \usepackage{xltabular}
+
+---
+
+
+\pagenumbering{gobble}
+
+\renewcommand*\contentsname{Index}
+\tableofcontents
+
+
+\newpage
+
+\pagenumbering{arabic}
 
 # Introduction
-WeFood is a Social Network where users can share their recipes and
-provide feedbacks about other users' recipes through comments and star rankings. 
+*WeFood* is a Social Network where users can share their recipes and provide feedbacks about other users' recipes through comments and star rankings. It manages in a completely automatic way the calories of the recipes, so the users do not have to worry about that when they post a new recipe. Using the search engine, users can discover new top rated recipes to amaze their friends, filtering by ingredients or calories. Furthermore, users can follow other users and get suggestions about new users to follow.
 
 # Requirements
-
+Describing the requirements it is important to distinguish between functional and non-functional requirements.
 
 ## Functional Requirements
-The actors that are involved in WeFood are:
-1. Unregistered Users;
-2. Registered Users;
-3. Administrator.
+The main functional requirements for *WeFood* can be organized by the actor that is involved in the use case.
 
-1. Unregistered Users:
-    1.1. Browse *recent* recipes published by influencers (?)
-    1.2. Registration
-
-2. Registered Users:
-    2.1. Log In
-    2.2. Log Out
-    2.3. Follow a User
-    2.4. Unfollow a User
-    2.5. Upload a Post
-    2.6. Modify an uploaded Post
-    2.7. Delete an uploaded Post
-    2.8. Comment a Post
-         Modify his/her own comments
-         Delete his/her own comments
-    2.9. Evaluate by a star ranking a Post
-         Delete his/her own star rankings
-    2.10. Browse most recent friends' Posts (we do not have this information in the graph DB. The alternative is to show the most recent Posts)
-    2.11. Browse most recent top rated Posts
-    2.12. Browse most recent Posts by ingredients 
-    2.13a. Browse most recent Posts by calories (lower bound and upper bound)
-    2.13. View his/her own profile
-    2.14. View other Users' profiles
-    2.15. View his/her Friends
-    2.16. View his/her Followers
-    2.17. View his/her Followed Users
-    2.18. Modify his/her own profile (e.g. change username and password)
-    2.19. Delete his/her own profile
-    2.20. Search for a User by username
-    2.21. View Total Calories of a Recipe
-    2.22. View Calories of an Ingredient
-    2.23. View Steps of a Recipe 
-    2.24. View Recipe of a Post
-    2.25. View Ingredients of a Recipe
-
-
+1. **Unregistered User**:
     
+    1.1. Browse *recent* recipes;
 
+    1.2. Sign Up.
 
-3. Administrator:
-    3.1 Log In
-    3.2 Log Out
-    3.3. Ban/Unban a User
-    3.4. Delete a Post
-    3.5. Delete a Comment
-    3.6. See statistics about the usage of WeFood
-    3.7. Create a new Ingredient
-    3.8. (Modify an Ingredient) (Too complex)
+2. **Registered User**:
+   
+    2.1. Log In;
 
+    2.2. Log Out;
 
-A User can follow a user and can be followed by other users.
-A User has a friend when he/she follows another user and the other user follows him/her back.
+    2.3. Upload a Post (Recipe);
+
+    2.4. Modify his/her Posts;
+
+    2.5. Delete his/her Posts;
+
+    2.6. Comment a Post;
+
+    2.7. Modify his/her own comments;
+
+    2.8. Delete his/her own comments or comments on his/her Posts;
+
+    2.9. Evaluate by a star ranking a Post;
+
+    2.10. Delete his/her own star rankings;
+
+    2.11. View the Recipe of a Post;
+
+    2.12. View the Total Calories of a Recipe;
+
+    2.13. View the Steps of a Recipe;
+
+    2.14. View the Ingredients of a Recipe;
+
+    2.15. View the Calories of an Ingredient;
+
+    2.16. Browse most recent Posts;
+
+    2.17. Browse most recent top rated Posts;
+
+    2.18. Browse most recent Posts by ingredients;
+
+    2.19. Browse most recent Posts by calories (minCalories and maxCalories);
+
+    2.20. View his/her own personal profile;
+
+    2.21. Modify his/her own personal profile (e.g. change Name, Surname, Password);
+
+    2.22. Delete his/her own personal profile;
+
+    2.23. Find a User by username;
+
+    2.24. View other Users' profiles;
+
+    2.25. Follow a User;
+
+    2.26. Unfollow a User;
+
+    2.27. View his/her Friends (i.e. the Users he/she follows and that follow him/her);
+
+    2.28. View his/her Followers;
+
+    2.29. View his/her Followed Users.
+
+3. **Admin**:
+    
+    3.1 Log In;
+
+    3.2 Log Out;
+
+    3.3. Browse all the Users;
+
+    3.4. Browse all the Posts;
+
+    3.5. Ban a User;
+
+    3.6. Unban a banned User;
+
+    3.7. Delete a Post;
+
+    3.8. Delete a Comment;
+
+    3.9. See statistics about the usage of *WeFood*;
+
+    3.10. Add a new Ingredient.
 
 ## Non-Functional Requirements
-The non-functional requirements for WeFood are as follows:
+The non-functional requirements for *WeFood* are as follows.
 
-1. Performance: the system must be able to handle a request in less than 1.5 seconds.
+1. **Performance**: the overall system must be able to handle a request in less than `1.5` seconds, because the user experience would be negatively affected by a longer response time. Being a social network, it is necessary to have a good performance in order to provide a good user experience.
 
-2. Availability: the system must be available 24/7.
+2. **Availability**: the system must be available 24/7 for allowing users to use it at any time.
 
-3. Security: the system must be secure and protect users' data by hashing passwords.
+3. **Security**: the system must be secure and protect users' data even from possible attacks. In particular, the information transmitted between client and server must be over HTTPS. Furthermore, the system must protect users' passwords by hashing them before the storing in the database.
 
-4. Reliability: the system must be reliable and not lose data (e.g. by doing a daily backup).
+4. **Reliability**: the system must be reliable and must not lose the information uploaded by the users. It must be caple of recovering from a crash and restore the data in a consistent state, exploiting the replicas of the database.
 
-5. Usability: the system must be easy to use and intuitive. Each user should be able to use the system without any training and in about 15 minutes.
+5. **Usability**: the GUI offered to the users must be easy to use and intuitive. Each user should be able to use the application without any training and in about 15 minutes.
 
-6. Java: the back-end must be written in Java.
+6. The **Back-End** must be written in Java.
 
-# Dataset and Web Scraping
+# Design
+After having defined the requirements, we can proceed with the design of the system. 
+
+## Use Case Diagram
+Translating the requirements into a graphical representation we obtain the *UML Use Case Diagram* shown in Figure \ref{fig:use_case_diagram}.
+
+\begin{landscape}
+\begin{figure}
+    \centering
+    \includegraphics[height=0.70\textheight]{Resources/"use_case_diagram.jpg"}
+    \caption{UML Use Case Diagram.}
+    \label{fig:use_case_diagram}
+\end{figure}
+\end{landscape}
+
+## Class Diagram
+The *UML Class Diagram* shown in Figure \ref{fig:class_diagram} represents the main entities of the system and their relationships.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\textwidth]{Resources/"class_diagram.jpg"}
+    \caption{UML Class Diagram.}
+    \label{fig:class_diagram}
+\end{figure}
+
+More details on the classes and their attributes are as follows.
+
+**Admin**:
+
+- username: `String`
+- password: `String` (hashed)
+
+
+**RegisteredUser**:
+
+- username: `String`
+- password: `String` (hashed)
+- name: `String`
+- surname: `String`
+
+
+**Post**:
+
+- user: `RegisteredUser`
+- description: `String`
+- timestamp: `Date`
+- comments: `List<Comment>`
+- starRankings: `List<StarRanking>`
+- recipe: `Recipe`
+
+
+**Comment**:
+
+- user: `RegisteredUser`
+- text: `String`
+- timestamp: `Date`
+
+
+**StarRanking**:
+
+- user: `RegisteredUser`
+- vote: `Double`
+
+
+**Recipe**:
+
+- name: `String`
+- image: `String`
+- steps: `List<String>`
+- ingredients: `Map<Ingredient, Double>`
+
+
+**Ingredient**:
+
+- name: `String`
+- calories: `Double`
+
+
+# Dataset
+For the population of the databases with a large amount of realistic data, we used datasets from Kaggle.
+
+## Raw Dataset
+The raw datasets from which we started are related to the main functionalities of *WeFood*. In particular we found datasets about recipes and ingredients.
+
+Source:
+Calories.info - Calories in Food Items (per 100 grams) https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams
+Food.com - Recipes and Interactions https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv
+Food.com - Recipes and Reviews https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv
+
+Description: A group of datasets which contains recipes posted by users with their respective reviews and interactions done by other users. There is also a list of food with some info about calories.
+
+Volume: Around 1 GB. Specifically: 2225 food items; 180K+ recipes and 700K+ recipe reviews; over 500,000 recipes and 1,400,000 reviews.
+
+Variety: Calories.info and Food.com
+
+## Cleaning Process
+The cleaning process was done using Python and Jupyter Notebook. After having analyzed the datasets in detail we decided to drop the information that was not useful for our purposes.
+
+
+## Merging Process
+After having cleand the datasets we started to merge them in order to obtain the information needed for populating the databases.
+
+Here it is worth noticing that the data about the Users, because incomplete in the datasets we found (i.e. it was only provided the username of the users) was generated randomly using the Python library Faker. In this way the name and surname of the users are coherent with their username. The passwords are generated randomly too.
+
+
+
+
+*TO BE COMPLETED*
 
 Step #1:
 - Inside the the file called calories.csv we have the following structure:
@@ -189,60 +356,9 @@ Rieseguire il fuzzywuzzy script e vedere se ci sono duplicati su raw_ingr
 
 
 See Data...
-
-
-# UML Use Case Diagram
-
-
-# UML Class Diagram
-
-The UML Class Diagram is shown in the following figure:
-
-
-
-Details about the UML Class Diagram:
-
-Admin:
-- username: String
-- password: String (hashed)
-
-RegisteredUser:
-- username: String
-- password: String (hashed)
-- name: String
-- surname: String
-- posts: List<Post>
-
-Post:
-- description: String
-- timestamp: Date
-- comments: List<Comment>
-- starRankings: List<StarRanking>
-- recipe: Recipe
-
-Comment:
-- user: RegisteredUser
-- text: String
-- timestamp: Date
-
-StarRanking:
-- user: RegisteredUser
-- vote: Double
-
-Recipe:
-- name: String
-- image: String_URL
-- steps: List<String> (or String)
-- ingredients: Map<Ingredient, Double>
-
-Ingredient:
-- name: String
-- calories: Double
-
 (# Load Estimation)
 
 # DataBase
-
 
 ## Document DB
 
@@ -257,7 +373,6 @@ Collections:
 - User
 - Post
 
-
 ### Collections
 
 Structure of the collections:
@@ -271,7 +386,7 @@ User
     name: String, # Not applicable for Admin
     surname: String, # Not applicable for Admin
     posts: [{
-                _idPost: #,
+                idPost: #,
                 name: String, [R]
                 image: String_URL [R]
     }, ...]
@@ -280,7 +395,7 @@ User
 Post
 {
     _id: #,
-    _idUser: #,
+    idUser: #,
     username: String, [R]
     description: String,
     timestamp: Timestamp,
@@ -296,12 +411,12 @@ Post
     },
     avgStarRanking: Double, [R]
     starRankings: [{
-                        _idUser: #,
+                        idUser: #,
                         username: String, [R]
                         vote: Double
     }, ...],
     comments: [{
-                _idUser: #,
+                idUser: #,
                 username: String, [R]
                 text: String,
                 timestamp: Timestamp
@@ -454,6 +569,7 @@ CREATE (r:Recipe {
 - Create a new ingredient
 ```javascript
 CREATE (i:Ingredient {
+    _id: #,
     name: String
 })
 ```
@@ -499,6 +615,7 @@ Dobbiamo farlo in entrambi i versi!
 - Show comments of a Post
 - Show star ranking of a Post
 - Show ingredients
+- Find ingredient by name
 - Show friends
 - Show followers
 - Show followings
@@ -509,7 +626,6 @@ Dobbiamo farlo in entrambi i versi!
 - Show recipes filtering by the ingredients
 - Show recipes filtering by the calories (lower bound and upper bound) (if the totalCalories is the same, we show the ones with the highest star ranking)
 - Show the most/least recent posts (timestamp) 
-
 
 #### MongoDB
 
@@ -546,7 +662,14 @@ db.Post.find({
 db.Ingredient.find()
 ```
 
-- Show calories of an ingredient
+- Find ingredient by name
+```javascript
+db.Ingredient.find({
+    name: String,
+})
+```
+
+- Show calories of an ingredient (DA NON METTERE IN DB)
 ```javascript
 db.Ingredient.find({
     name: String,
@@ -617,6 +740,16 @@ db.Post.find().sort({
 })
 ```
 
+- Browse most recent top rated Posts
+```javascript
+db.Post.find({
+    timestamp: {
+        $gte: Timestamp
+    }
+}).sort({
+    avgStarRanking: -1
+}).limit(10)
+```
 
 
 #### Neo4j
@@ -723,7 +856,7 @@ db.Post.updateOne({
     _id: #,
     comments: {
         $elemMatch: {
-            _idUser: #,
+            idUser: #,
             timestamp: Timestamp,
         }
     }
@@ -799,11 +932,19 @@ db.User.updateOne({
 }, {
     $pull: {
         posts: {
-            _idPost: #,
+            idPost: #,
         }
     }
 })
 ```
+
+Delete Post
+```javascript
+db.Post.deleteOne({
+    _id: #,
+})
+```
+
 
 We need to delete all the relationships of the recipe contained in the post from Neo4j
 ```javascript
@@ -843,7 +984,7 @@ db.Post.updateOne({
 }, {
     $pull: {
         comments: {
-            _idUser: #,
+            idUser: #,
             timestamp: Timestamp,
         }
     }
@@ -857,7 +998,7 @@ db.Post.updateOne({
 }, {
     $pull: {
         starRankings: {
-            _idUser: #,
+            idUser: #,
         }
     }
 })
@@ -915,7 +1056,7 @@ db.Post.find({
 db.Post.aggregate([
     {
         $match: {
-            _idUser: #,
+            idUser: #,
         }
     },
     {
@@ -1275,34 +1416,64 @@ db.Post.aggregate([
 # Redundancies
 
 
-
-
-| Where                     | Reason              | Original/Raw Value                   |
-|---------------            |---------------------|------------------           |
-|`DocumentDB:User:posts:name` | To avoid joins      | `DocumentDB:Post:recipe:name` |
-|`DocumentDB:User:posts:image` | To avoid joins      | `DocumentDB:Post:recipe:image` |
-|`DocumentDB:Post:username` | To avoid joins      | `DocumentDB:User:username` |
-|`DocumentDB:Post:recipe:totalCalories` | To avoid joins and to avoid computing the total calories of a recipe every time a post is shown | It is possible to compute the total calories of a recipe by summing the calories of the ingredients contained in the recipe, in particular: $\sum_i \left( quantity_i\cdot\frac{calories100g_i}{100} \right)$ where $quantity_i$ is the quantity of the $i$th ingredient contained in the recipe, $calories100g_i$ is the number of calories of the $i$th ingredient per 100 grams that can be retrieved from the Ingredient collection |
-|`DocumentDB:Post:avgStarRanking` | To avoid computing the average star ranking of a post every time is shown | It is possible to compute the average star ranking of a post by averaging the values contained in `DocumentDB:Post:starRankings:vote` |
-|`DocumentDB:Post:starRankings:username` | To avoid joins | `DocumentDB:User:username` |
-|`DocumentDB:Post:comments:username` | To avoid joins | `DocumentDB:User:username` |
-|`GraphDB:(User):username` | To avoid joins with the DocumentDB | `DocumentDB:User:username` |
-|`GraphDB:(Recipe):name` | To avoid joins with the DocumentDB | `DocumentDB:Post:recipe:name` |
-|`GraphDB:(Ingredient):name` | To avoid joins with the DocumentDB | `DocumentDB:Ingredient:name` |
-|`GraphDB:(User)-[:USED]->(Ingredient):times` | To avoid computing the total number of times that a User used an Ingredient | It is possible to compute the total number of times that a User used an Ingredient by counting the number of times that a User used that Ingredient in his/her recipes (information that can be retrieved from the DocumentDB) |
-
-
----
-
-:USED_WITH:
-    - times
-
-Reason: to avoid computing the number of times that an ingredient is used with another ingredient every time that is needed.
-Original Value: it is possible to compute the number of times that an ingredient is used with another ingredient by counting the number of times that a user has used an ingredient with another ingredient in his/her recipes (retrieving the information from the DocumentDB).
+\begin{xltabular}{\textwidth}{X}
+    \caption{Redundancies introduced into the model.}
+    \label{tab:redundancies} \\
+    \toprule
+    \textbf{(1) \texttt{DocumentDB:User:posts:name}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:name} \\
+    \midrule
+    \textbf{(2) \texttt{DocumentDB:User:posts:image}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:image} \\
+    \midrule
+    \textbf{(3) \texttt{DocumentDB:Post:username}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
+    \midrule
+    \textbf{(4) \texttt{DocumentDB:Post:recipe:totalCalories}} \\
+    \textbf{Reason}: To avoid joins and to avoid computing the total calories of a recipe every time a post is shown. \\
+    \textbf{Original/Raw Value}: It is possible to compute the total calories of a recipe by summing the calories of the ingredients contained in the recipe In particular the precise formula is the following: $\sum_i \left( quantity_i\cdot\frac{calories100g_i}{100} \right)$ where $quantity_i$ is the quantity of the $i$-th ingredient contained in the recipe and $calories100g_i$ is the amount of calories contained in 100 grams of the $i$-th ingredient that can be retrieved from the \texttt{Ingredient} collection. \\
+    \midrule
+    \textbf{(5) \texttt{DocumentDB:Post:avgStarRanking}} \\
+    \textbf{Reason}: To avoid computing the average star ranking of a post every time is shown. \\
+    \textbf{Original/Raw Value}: It is possible to compute the average star ranking of a post by averaging the values contained in \texttt{DocumentDB:Post:starRankings:vote} \\
+    \midrule
+    \textbf{(6) \texttt{DocumentDB:Post:starRankings:username}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
+    \midrule
+    \textbf{(7) \texttt{DocumentDB:Post:comments:username}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
+    \midrule
+    \textbf{(8) \texttt{GraphDB:(User):username}} \\
+    \textbf{Reason}: To avoid joins with the DocumentDB. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
+    \midrule
+    \textbf{(9) \texttt{GraphDB:(Recipe):name}} \\
+    \textbf{Reason}: To avoid joins with the DocumentDB. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:name} \\
+    \midrule
+    \textbf{(10) \texttt{GraphDB:(Ingredient):name}} \\
+    \textbf{Reason}: To avoid joins with the DocumentDB. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Ingredient:name} \\
+    \midrule
+    \textbf{(11) \texttt{GraphDB:(User)-[:USED]->(Ingredient):times}} \\
+    \textbf{Reason}: To avoid computing the total number of times that a User used an Ingredient. \\
+    \textbf{Original/Raw Value}: It is possible to compute the total number of times that a User used an Ingredient by counting the number of times that the User used that Ingredient in his/her recipes (information that can be retrieved from the DocumentDB). \\
+    \midrule
+    \textbf{(12) \texttt{GraphDB:(Ingredient)-[:USED\_WITH]->(Ingredient):times}} \\
+    \textbf{Reason}: To avoid computing the number of times that an ingredient is used with another one. \\
+    \textbf{Original/Raw Value}: It is possible to compute the number of times that an ingredient is used with another one by counting the number of times that all the users used these two ingredients together in their recipes (information that can be retrieved from the DocumentDB). \\
+    \bottomrule
+\end{xltabular}
 
 
 
 # CONSISTENCY, AVAILABILITY AND PARTITION TOLERANCE [X]
+
 ## Distributed Database Design
 
 According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.

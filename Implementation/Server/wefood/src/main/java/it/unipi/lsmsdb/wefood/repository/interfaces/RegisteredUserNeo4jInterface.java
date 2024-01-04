@@ -15,6 +15,6 @@ public interface RegisteredUserNeo4jInterface {
     List<RegisteredUserDTO> findFollowers(RegisteredUser user);
     List<RegisteredUserDTO> findFollowed(RegisteredUser user);
 
-    List<RegisteredUserDTO> findUsersbyIngredientsUsed(List<IngredientDTO> ingredientDTOs)
+    List<RegisteredUserDTO> findUsersbyIngredientsUsed(List<IngredientDTO> ingredientDTOs);
 
 }

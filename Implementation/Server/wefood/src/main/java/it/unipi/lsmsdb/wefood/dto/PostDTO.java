@@ -1,6 +1,5 @@
 package it.unipi.lsmsdb.wefood.dto;
 
-import it.unipi.lsmsdb.wefood.model.Recipe;
 
 public class PostDTO {
     
@@ -9,10 +8,10 @@ public class PostDTO {
     private String recipeName;
 
     
-    public PostDTO(String _id, String image, Recipe recipe) {
+    public PostDTO(String _id, String image, String recipeName) {
         this._id = _id;
         this.image = image;
-        this.recipeName = recipe.getName();
+        this.recipeName = recipeName;
     }
 
     public void setId(String _id) {

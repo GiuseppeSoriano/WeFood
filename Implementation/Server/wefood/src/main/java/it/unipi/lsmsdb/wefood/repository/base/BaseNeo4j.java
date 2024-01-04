@@ -24,8 +24,7 @@ public abstract class BaseNeo4j {
 
     public static void openNeo4jDriver() {
         try {
-            driver = GraphDatabase.driver(URI, AuthTokens.basic(NEO4J_USERNAME, NEO4J_PASSWORD));
-           
+            driver = GraphDatabase.driver(URI, AuthTokens.basic(NEO4J_USERNAME, NEO4J_PASSWORD));           
         } 
         catch (Neo4jException e) {
             System.out.println("Failed to create the driver: " + e.getMessage());
@@ -39,18 +38,13 @@ public abstract class BaseNeo4j {
         }
     }
 
-    public static List<Record> executeQuery(String query) {
+    public static List<Record> executeQuery(String query) throws IllegalStateException, Neo4jException {
         if (driver == null) {
             throw new IllegalStateException("Driver not initialized!");
         }
-        try (Session session = driver.session()) {
-            Result result = session.run(query);
-            return result.list();
-        } 
-        catch (Neo4jException e) {
-            System.out.println("Query failed: " + e.getMessage());
-            return null;
-        }
+        Session session = driver.session();
+        Result result = session.run(query);
+        return result.list();
     }
 
 }

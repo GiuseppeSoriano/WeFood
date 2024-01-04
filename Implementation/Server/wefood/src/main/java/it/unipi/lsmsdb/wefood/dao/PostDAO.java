@@ -14,8 +14,8 @@ public class PostDAO {
         this.postMongoDB = new PostMongoDB();
     }
 
-    public boolean uploadPost(RegisteredUser user, Post post) {
-        return this.postMongoDB.uploadPost(user, post);
+    public boolean uploadPost(Post post, RegisteredUser user) {
+        return this.postMongoDB.uploadPost(post, user);
     }
     
     public boolean modifyPost(Post post) {

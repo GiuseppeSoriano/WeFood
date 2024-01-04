@@ -8,6 +8,8 @@ public interface IngredientNeo4jInterface {
 
     boolean createIngredient(IngredientDTO ingredientDTO);
 
+    // Suggest most popular combination of ingredients 
+    List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO, int limit);
     List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO);
     
 

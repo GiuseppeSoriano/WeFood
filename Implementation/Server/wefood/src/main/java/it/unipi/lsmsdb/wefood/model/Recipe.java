@@ -40,12 +40,40 @@ public class Recipe {
         return steps;
     }
 
+    public String getStepsString() {
+        String str = "[";
+        for(int i=0; i<steps.size(); i++){
+            str += "'" + steps.get(i) + "'";
+            if(i != steps.size()-1){
+                str += ", ";
+            }
+        }
+        str += "]";
+        return str;
+    }
+
     public void setSteps(List<String> steps) {
         this.steps = steps;
     }
 
     public Map<Ingredient, Double> getIngredients() {
         return ingredients;
+    }
+
+    public String getIngredientsString() {
+        String str = "[";
+        int i = 0;
+        for (Map.Entry<Ingredient, Double> entry : ingredients.entrySet()) {
+            Ingredient ingredient = entry.getKey();
+            Double quantity = entry.getValue();
+            str += "{name: '" + ingredient.getName() + "', quantity: " + quantity + "}";
+            if(i != ingredients.size()-1){
+                str += ", ";
+            }
+            i++;
+        }
+        str += "]";
+        return str;
     }
 
     public void setIngredients(Map<Ingredient, Double> ingredients) {

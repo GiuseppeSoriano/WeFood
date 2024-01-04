@@ -8,5 +8,4 @@ public interface IngredientMongoDBInterface {
     
     Ingredient findIngredientByName(String name);
 
-
 }
