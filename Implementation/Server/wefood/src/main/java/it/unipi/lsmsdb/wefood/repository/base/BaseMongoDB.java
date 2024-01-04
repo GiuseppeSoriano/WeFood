@@ -387,7 +387,23 @@ public abstract class BaseMongoDB {
         String operationWithDocument = new String(mongosh_string.split("\\.")[2]);
         
         String operation = new String(operationWithDocument.split("\\(")[0]);
-        String operationDoc = mongosh_string.substring(mongosh_string.indexOf("(")+1, mongosh_string.indexOf(")"));
+        
+        String operationDoc = mongosh_string.substring(mongosh_string.indexOf("(")+1);
+        for (int i = 0, counter = 0; i < operationDoc.length(); i++) {
+            if (operationDoc.charAt(i) == '(') {
+                counter++;
+            }
+            else if(operationDoc.charAt(i) == ')') {
+                if(counter == 0){
+                    operationDoc = operationDoc.substring(0, i);
+                    break;
+                }
+                counter--;
+            }
+        }
+
+        System.out.println("Operation: " + operation);
+        System.out.println("OperationDoc: " + operationDoc);
 
         switch (operation) {
             case "find": // find
@@ -434,17 +450,22 @@ public abstract class BaseMongoDB {
         try {
             openMongoClient(); // Ensure client is created
             String mongosh_string = QueryType.DELETE_ONE.getQuery();
+       
+            mongosh_string = "db.Post.find({\r\n" + //
+                       "    _id: ObjectId(\"658572b7d312a33aeb784cfc\")" + //
+                       "})";
 
             List<Document> result =executeQuery(mongosh_string);
 
+            
             System.out.println();
             System.out.println("Result: ");
             for(Document doc : result){
                 System.out.println(doc.toJson());
             }
-
+            
         } finally {
-            closeMongoClient(); // Ensure client is closed
+           closeMongoClient(); // Ensure client is closed
         }
     }
 
