@@ -192,6 +192,9 @@ public abstract class BaseMongoDB {
         return documents;
     }
 
+    //mongosh_string = "db.Post.aggregate([{$match: {$expr:{ $eq:[{$toString:\"$_id\"}, '658572b7d312a33aeb784cfc']}} }])";
+    // If you want to match by object id, you need to convert the object id to string following the above syntax
+    // in order to avoid errors in converting to json array
     private static List<Bson> translateAggregations(String queryString) throws IllegalArgumentException {
         JSONArray queryArray = new JSONArray(queryString);
         List<Bson> bsonList = new ArrayList<>();
@@ -451,13 +454,10 @@ public abstract class BaseMongoDB {
             openMongoClient(); // Ensure client is created
             String mongosh_string = QueryType.DELETE_ONE.getQuery();
        
-            mongosh_string = "db.Post.find({\r\n" + //
-                       "    _id: ObjectId(\"658572b7d312a33aeb784cfc\")" + //
-                       "})";
-
+            mongosh_string = "db.Post.aggregate([{$match: {$expr:{ $eq:[{$toString:\"$_id\"}, '658572b7d312a33aeb784cfc']}} }])";
+            
             List<Document> result =executeQuery(mongosh_string);
 
-            
             System.out.println();
             System.out.println("Result: ");
             for(Document doc : result){

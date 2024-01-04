@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.bson.Document;
 
+import com.fasterxml.jackson.databind.JsonSerializable.Base;
 import com.mongodb.MongoException;
 
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
@@ -134,18 +135,19 @@ public class PostMongoDB implements PostMongoDBInterface{
         // ingredients.put(new Ingredient("TOPOLINO!", 2231.0), 15.2);
 
         // System.out.println(getIngredientsString(ingredients)); 
-
-        String query = "db.Post.find({\r\n" + //
-                       "    _id: ObjectId(\"658572b7d312a33aeb784cfc\")" + //
-                       "})";
+        BaseMongoDB.openMongoClient();
+        String query = "db.Post.find({ username: \"virginia_long_73\"}).limit(1)";
         List<Document> result = BaseMongoDB.executeQuery(query);
 //        List<PostDTO> posts = new ArrayList<PostDTO>();
-        
+
         for(Document doc : result){
+            //System.out.println(doc.toJson());
             Document recipe = (Document) doc.get("recipe");
 //            PostDTO post = new PostDTO(doc.get("_id").toString(), recipe.get("image").toString(), recipe.get("name").toString());
-            System.out.println(doc.get("_id").toString());
-            System.out.println(recipe.get("image").toString());
+            System.out.println(recipe.toJson());
+
+            System.out.println(doc.get("_id"));
+            System.out.println(recipe.get("image"));
             System.out.println(recipe.get("name").toString());
 //            posts.add(post);
         }
