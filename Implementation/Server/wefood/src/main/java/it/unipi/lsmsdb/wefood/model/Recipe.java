@@ -8,11 +8,11 @@ public class Recipe {
     private String name;
     private String image;
     private List<String> steps;
-    private Map<Ingredient, Double> ingredients;
+    private Map<String, Double> ingredients;
 
     private Double totalCalories;
 
-    public Recipe(String name, String image, List<String> steps, Map<Ingredient, Double> ingredients, Double totalCalories) {
+    public Recipe(String name, String image, List<String> steps, Map<String, Double> ingredients, Double totalCalories) {
         this.name = name;
         this.image = image;
         this.steps = steps;
@@ -56,17 +56,17 @@ public class Recipe {
         this.steps = steps;
     }
 
-    public Map<Ingredient, Double> getIngredients() {
+    public Map<String, Double> getIngredients() {
         return ingredients;
     }
 
     public String getIngredientsString() {
         String str = "[";
         int i = 0;
-        for (Map.Entry<Ingredient, Double> entry : ingredients.entrySet()) {
-            Ingredient ingredient = entry.getKey();
+        for (Map.Entry<String, Double> entry : ingredients.entrySet()) {
+            String ingredient = entry.getKey();
             Double quantity = entry.getValue();
-            str += "{name: '" + ingredient.getName() + "', quantity: " + quantity + "}";
+            str += "{name: '" + ingredient + "', quantity: " + quantity + "}";
             if(i != ingredients.size()-1){
                 str += ", ";
             }
@@ -76,7 +76,7 @@ public class Recipe {
         return str;
     }
 
-    public void setIngredients(Map<Ingredient, Double> ingredients) {
+    public void setIngredients(Map<String, Double> ingredients) {
         this.ingredients = ingredients;
     }
 
@@ -87,6 +87,5 @@ public class Recipe {
     public void setTotalCalories(Double totalCalories) {
         this.totalCalories = totalCalories;
     }
-
 
 }

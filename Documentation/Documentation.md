@@ -165,6 +165,7 @@ The *UML Class Diagram* shown in Figure \ref{fig:class_diagram} represents the m
     \label{fig:class_diagram}
 \end{figure}
 
+DA METTERE IN IMPLEMENTAZIONE E RENDERE COERENTE CON MODELLO JAVA!
 More details on the classes and their attributes are as follows.
 
 **Admin**:
@@ -750,6 +751,43 @@ db.Post.find({
     avgStarRanking: -1
 }).limit(10)
 ```
+
+- Browse most recent top rated Posts by set of ingredients. It is necessary that the recipe contains all the ingredients of the set.
+```javascript
+db.Post.find({
+    timestamp: {
+        $gte: Timestamp
+    },
+    "recipe.ingredients.name": {
+        $all: [String, ...]
+    }
+}).sort({
+    avgStarRanking: -1
+}).limit(10)
+```
+
+- Browse most recent posts by minCalories and maxCalories
+```javascript
+db.Post.find({
+    timestamp: {
+        $gte: Timestamp
+    },
+    "recipe.totalCalories": {
+        $gte: minCalories,
+        $lte: maxCalories
+    }
+}).sort({
+    timestamp: -1
+}).limit(10)
+```
+
+- Find post by id
+```javascript
+db.Post.find({
+    _id: #,
+})
+```
+
 
 
 #### Neo4j

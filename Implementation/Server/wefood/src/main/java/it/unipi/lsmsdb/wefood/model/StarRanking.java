@@ -2,20 +2,20 @@ package it.unipi.lsmsdb.wefood.model;
 
 public class StarRanking {
     
-    private RegisteredUser user;
+    private String username;
     private Double vote;
 
-    public StarRanking(RegisteredUser user, Double vote) {
-        this.user = user;
+    public StarRanking(String username, Double vote) {
+        this.username = username;
         this.vote = vote;
     }
 
-    public RegisteredUser getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(RegisteredUser user) {
-        this.user = user;
+    public void setUser(String username) {
+        this.username = username;
     }
 
     public Double getVote() {

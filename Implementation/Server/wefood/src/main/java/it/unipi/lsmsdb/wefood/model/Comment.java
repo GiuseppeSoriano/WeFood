@@ -2,22 +2,22 @@ package it.unipi.lsmsdb.wefood.model;
 import java.util.Date;
 
 public class Comment {
-    private RegisteredUser user;
+    private String username;
     private String text;
     private Date timestamp;
 
-    public Comment(RegisteredUser user, String text, Date timestamp) {
-        this.user = user;
+    public Comment(String username, String text, Date timestamp) {
+        this.username = username;
         this.text = text;
         this.timestamp = timestamp;
     }
 
-    public RegisteredUser getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(RegisteredUser user) {
-        this.user = user;
+    public void setUser(String username) {
+        this.username = username;
     }
 
     public String getText() {

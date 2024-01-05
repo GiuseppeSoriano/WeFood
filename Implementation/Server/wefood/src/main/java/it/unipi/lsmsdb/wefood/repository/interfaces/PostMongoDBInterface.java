@@ -14,9 +14,12 @@ public interface PostMongoDBInterface {
     boolean deletePost(PostDTO postDTO);
 
     List<PostDTO> browseMostRecentTopRatedPosts(int hours, int limit);
-    List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs);
-    List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories);
+    List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, int hours, int limit);
+    List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, int hours, int limit);
     
     Post findPostByPostDTO(PostDTO postDTO);
+
+    // After having found the recipe on Neo4j, we need to find the post on MongoDB by _id
+    Post findPostById(String _id);
 
 }
