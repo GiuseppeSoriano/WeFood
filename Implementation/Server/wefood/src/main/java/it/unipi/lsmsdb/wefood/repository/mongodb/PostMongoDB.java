@@ -12,7 +12,6 @@ import com.mongodb.MongoException;
 
 import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
-import it.unipi.lsmsdb.wefood.model.Ingredient;
 import it.unipi.lsmsdb.wefood.model.Comment;
 import it.unipi.lsmsdb.wefood.model.StarRanking;
 import it.unipi.lsmsdb.wefood.model.Post;
@@ -74,7 +73,7 @@ public class PostMongoDB implements PostMongoDBInterface{
         return true;
     };
 
-    public List<PostDTO> browseMostRecentTopRatedPosts(int hours, int limit) {
+    public List<PostDTO> browseMostRecentTopRatedPosts(long hours, int limit) {
         long curr_timestamp = System.currentTimeMillis();
         long milliseconds = hours * 3600000;
         long timestamp = curr_timestamp - milliseconds; 
@@ -86,11 +85,13 @@ public class PostMongoDB implements PostMongoDBInterface{
                        "    avgStarRanking: -1\r\n" + //
                        "}).limit(" + limit + ")";
         List<Document> result = BaseMongoDB.executeQuery(query);
+        System.out.println(result.size());
         List<PostDTO> posts = new ArrayList<PostDTO>();
         
         for(Document doc : result){
             Document recipe = (Document) doc.get("recipe");
-            PostDTO post = new PostDTO(doc.get("_id").toString(), recipe.get("image").toString(), recipe.get("name").toString());
+            String image = (recipe.get("image") == null) ? "DEFAULT" : recipe.get("image").toString();
+            PostDTO post = new PostDTO(doc.get("_id").toString(), image, recipe.get("name").toString());
             posts.add(post);
         }  
 
@@ -109,7 +110,7 @@ public class PostMongoDB implements PostMongoDBInterface{
         return str;
     }
     
-    public List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, int hours, int limit) {
+    public List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, long hours, int limit) {
         long curr_timestamp = System.currentTimeMillis();
         long milliseconds = hours * 3600000;
         long timestamp = curr_timestamp - milliseconds; 
@@ -128,14 +129,15 @@ public class PostMongoDB implements PostMongoDBInterface{
         
         for(Document doc : result){
             Document recipe = (Document) doc.get("recipe");
-            PostDTO post = new PostDTO(doc.get("_id").toString(), recipe.get("image").toString(), recipe.get("name").toString());
+            String image = (recipe.get("image") == null) ? "DEFAULT" : recipe.get("image").toString();
+            PostDTO post = new PostDTO(doc.get("_id").toString(), image, recipe.get("name").toString());
             posts.add(post);
         }  
 
         return posts;
     };
     
-    public List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, int hours, int limit) {
+    public List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, long hours, int limit) {
         long curr_timestamp = System.currentTimeMillis();
         long milliseconds = hours * 3600000;
         long timestamp = curr_timestamp - milliseconds; 
@@ -150,14 +152,16 @@ public class PostMongoDB implements PostMongoDBInterface{
                        "    }\r\n" + //
                        "}).sort({\r\n" + //
                        "    timestamp: -1\r\n" + //
-                       "}).limit( " + limit + ")";
-        
+                       "}).limit(" + limit + ")";
+
         List<Document> result = BaseMongoDB.executeQuery(query);
+        System.out.println(result.size());
         List<PostDTO> posts = new ArrayList<PostDTO>();
         
         for(Document doc : result){
             Document recipe = (Document) doc.get("recipe");
-            PostDTO post = new PostDTO(doc.get("_id").toString(), recipe.get("image").toString(), recipe.get("name").toString());
+            String image = (recipe.get("image") == null) ? "DEFAULT" : recipe.get("image").toString();
+            PostDTO post = new PostDTO(doc.get("_id").toString(), image, recipe.get("name").toString());
             posts.add(post);
         }  
 
@@ -175,15 +179,20 @@ public class PostMongoDB implements PostMongoDBInterface{
         
         Map<String, Double> ingredients = new HashMap<String, Double>();
         for(Document ingredient_doc : (ArrayList<Document>) recipe_doc.get("ingredients")){
-            ingredients.put(ingredient_doc.get("name").toString(), (double) ingredient_doc.get("quantity"));
+            double quantity = Double.parseDouble(ingredient_doc.get("quantity").toString());
+            ingredients.put(ingredient_doc.get("name").toString(), quantity);
         }
 
         List<String> steps = new ArrayList<String>();
-        for(Document step : (ArrayList<Document>) recipe_doc.get("steps")){
-            steps.add(step.toString());
-        }
+        steps = recipe_doc.getList("steps", String.class);
+        System.out.println(steps.get(0));
+        System.out.println(steps.get(1));
+        //for(Document step : ){
+        //    steps.add(step.toString());
+        //}
 
-        Recipe recipe = new Recipe(recipe_doc.get("name").toString(), recipe_doc.get("image").toString(), steps, ingredients, (double) recipe_doc.get("totalCalories"));
+        String image = (recipe_doc.get("image") == null) ? "DEFAULT" : recipe_doc.get("image").toString();
+        Recipe recipe = new Recipe(recipe_doc.get("name").toString(), image, steps, ingredients, Double.parseDouble(recipe_doc.get("totalCalories").toString()));
         
         
         Post post = new Post(result.get("username").toString(), result.get("description").toString(), new Date(result.getLong("timestamp")), recipe);
@@ -197,7 +206,7 @@ public class PostMongoDB implements PostMongoDBInterface{
 
         for(Document starRanking_doc : (ArrayList<Document>) result.get("starRankings")){
             StarRanking starRanking = new StarRanking(starRanking_doc.get("username").toString(),
-                                                      starRanking_doc.getDouble("vote"));
+                                                      Double.parseDouble(starRanking_doc.get("vote").toString()));
             post.addStarRanking(starRanking);
         }
 
@@ -207,26 +216,5 @@ public class PostMongoDB implements PostMongoDBInterface{
     public Post findPostByPostDTO(PostDTO postDTO) {
         return findPostById(postDTO.getId());
     };
-
-    public static void main(String[] args) {
-
-        BaseMongoDB.openMongoClient();
-        String query = "db.Post.find({ username: \"virginia_long_73\"}).limit(1)";
-        List<Document> result = BaseMongoDB.executeQuery(query);
-//        List<PostDTO> posts = new ArrayList<PostDTO>();
-
-        for(Document doc : result){
-            //System.out.println(doc.toJson());
-            Document recipe = (Document) doc.get("recipe");
-//            PostDTO post = new PostDTO(doc.get("_id").toString(), recipe.get("image").toString(), recipe.get("name").toString());
-            System.out.println(recipe.toJson());
-
-            System.out.println(doc.get("_id"));
-            System.out.println(recipe.get("image"));
-            System.out.println(recipe.get("name").toString());
-//            posts.add(post);
-        }
-
-    }
 
 }

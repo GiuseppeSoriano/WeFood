@@ -11,17 +11,30 @@ import it.unipi.lsmsdb.wefood.repository.interfaces.RecipeNeo4jInterface;
 
 public class RecipeNeo4j implements RecipeNeo4jInterface {
 
-    public boolean createRecipe(Recipe recipe) {
-        String query = "";
+    public boolean createRecipe(RecipeDTO recipeDTO) {
+
+        String query = "CREATE (r: {\r\n" + //
+                       "    _id: " + ingredientDTO.getId() + ",\r\n" + //
+                       "    name: " + ingredientDTO.getName() + "\r\n" + //
+                       "})";
+
+        List<Record> results = BaseNeo4j.executeQuery(query);
+        System.out.println(results.get(0));
+        // If it does not throw an exception, it means that the query has been executed successfully
+        return true;
+
+        
+        String query = "CREATE (r:Recipe {name: " + recipeDTO.getName() + "})";
         List<Record> results = BaseNeo4j.executeQuery(query);
         if (results.isEmpty()) {
             return false;
         } else {
             return true;
         }
-    }; //da implementare
+    };
     
-    public boolean deleteRecipe(Recipe recipe) {
+    
+    public boolean deleteRecipe(RecipeDTO recipeDTO) {
         String query = "";
         List<Record> results = BaseNeo4j.executeQuery(query);
         if (results.isEmpty()) {

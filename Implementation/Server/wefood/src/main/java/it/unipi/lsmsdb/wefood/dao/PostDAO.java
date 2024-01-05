@@ -1,6 +1,8 @@
 package it.unipi.lsmsdb.wefood.dao;
 
 import it.unipi.lsmsdb.wefood.model.Post;
+import it.unipi.lsmsdb.wefood.dto.PostDTO;
+import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.model.Ingredient;
 import it.unipi.lsmsdb.wefood.repository.mongodb.PostMongoDB;
@@ -18,24 +20,24 @@ public class PostDAO {
         return this.postMongoDB.uploadPost(post, user);
     }
     
-    public boolean modifyPost(Post post) {
-        return this.postMongoDB.modifyPost(post);
+    public boolean modifyPost(Post post, PostDTO postDTO) {
+        return this.postMongoDB.modifyPost(post, postDTO);
     }
 
-    public boolean deletePost(RegisteredUser user, Post post) {
-        return this.postMongoDB.deletePost(user, post);
+    public boolean deletePost(PostDTO postDTO) {
+        return this.postMongoDB.deletePost(postDTO);
     }
 
-    public List<Post> browseMostRecentTopRatedPosts() {
-        return this.postMongoDB.browseMostRecentTopRatedPosts();
+    public List<PostDTO> browseMostRecentTopRatedPosts(long timestamp, int limit) {
+        return this.postMongoDB.browseMostRecentTopRatedPosts(timestamp, limit);
     }
 
-    public List<Post> browseMostRecentTopRatedPostsByIngredients(List<Ingredient> ingredients) {
-        return this.postMongoDB.browseMostRecentTopRatedPostsByIngredients(ingredients);
+    public List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredients, long timestamp, int limit) {
+        return this.postMongoDB.browseMostRecentTopRatedPostsByIngredients(ingredients, timestamp, limit);
     }
 
-    public List<Post> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories) {
-        return this.postMongoDB.browseMostRecentPostsByCalories(minCalories, maxCalories);
+    public List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, long timestamp, int limit) {
+        return this.postMongoDB.browseMostRecentPostsByCalories(minCalories, maxCalories, timestamp, limit);
     }
 
     public Post findPostById(String id) {

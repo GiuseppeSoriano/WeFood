@@ -563,6 +563,7 @@ CREATE (u:User {
 - Create a new recipe
 ```javascript
 CREATE (r:Recipe {
+    _id: #,
     name: String
 })
 ```

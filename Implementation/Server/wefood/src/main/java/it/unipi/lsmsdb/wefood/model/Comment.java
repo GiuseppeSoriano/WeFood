@@ -36,4 +36,9 @@ public class Comment {
         this.timestamp = timestamp;
     }
 
+    public String toString(){
+        return "Username: " + this.getUsername() + "\n" +
+                "Text: " + this.getText() + "\n" +
+                "Timestamp: " + this.getTimestamp() + "\n";
+    }
 }

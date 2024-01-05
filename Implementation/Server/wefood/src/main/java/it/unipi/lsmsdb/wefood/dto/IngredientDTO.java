@@ -6,7 +6,7 @@ public class IngredientDTO {
     private String name;
 
     public IngredientDTO(String _id, String name) {
-        this._id = _id;
+        this._id = "ObjectId('" + _id + "')";
         this.name = name;
     }
 

@@ -13,9 +13,9 @@ public interface PostMongoDBInterface {
     boolean modifyPost(Post post, PostDTO postDTO);
     boolean deletePost(PostDTO postDTO);
 
-    List<PostDTO> browseMostRecentTopRatedPosts(int hours, int limit);
-    List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, int hours, int limit);
-    List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, int hours, int limit);
+    List<PostDTO> browseMostRecentTopRatedPosts(long hours, int limit);
+    List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, long hours, int limit);
+    List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, long hours, int limit);
     
     Post findPostByPostDTO(PostDTO postDTO);
 

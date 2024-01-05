@@ -4,15 +4,13 @@ import java.util.List;
 
 import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
-import it.unipi.lsmsdb.wefood.model.Recipe;
 
 public interface RecipeNeo4jInterface {
 
-    boolean createRecipe(Recipe recipe);
+    boolean createRecipe(RecipeDTO recipeDTO);
 
-    boolean deleteRecipe(Recipe recipe);
+    boolean deleteRecipe(RecipeDTO recipeDTO);
 
     List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredientDTOs);
-
 
 }

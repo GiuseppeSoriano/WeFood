@@ -7,7 +7,7 @@ public class RegisteredUserDTO {
     private String username;
 
     public RegisteredUserDTO(String _id, String username) {
-        this._id = _id;
+        this._id = "ObjectId('" + _id + "')";
         this.username = username;
     }
 

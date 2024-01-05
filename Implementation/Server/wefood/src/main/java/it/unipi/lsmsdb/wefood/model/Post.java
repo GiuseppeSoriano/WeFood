@@ -70,4 +70,11 @@ public class Post {
         this.starRankings.add(starRanking);
     }
 
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public List<StarRanking> getStarRankings() {
+        return starRankings;
+    }
 }

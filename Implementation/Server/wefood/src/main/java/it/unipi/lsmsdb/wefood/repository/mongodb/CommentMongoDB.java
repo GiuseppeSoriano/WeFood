@@ -11,15 +11,15 @@ import com.mongodb.MongoException;
 
 public class CommentMongoDB implements CommentMongoDBInterface {
     
-    public boolean commentPost(Comment comment, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public boolean commentPost(RegisteredUser user, Comment comment, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
 
         String query = "db.Post.updateOne({\r\n" + //
                        "    _id: " + postDTO.getId() + ",\r\n" + //
                        "}, {\r\n" + //
                        "    $push: {\r\n" + //
                        "        comments: {\r\n" + //
-                       "            idUser: " + comment.getUser().getId() + ",\r\n" + //
-                       "            username: " + comment.getUser().getUsername() + ",\r\n" + //
+                       "            idUser: " + user.getId() + ",\r\n" + //
+                       "            username: " + user.getUsername() + ",\r\n" + //
                        "            text: " + comment.getText() + ",\r\n" + //
                        "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
                        "        }\r\n" + //
@@ -33,7 +33,7 @@ public class CommentMongoDB implements CommentMongoDBInterface {
 
     };
 
-    public boolean updateComment(Comment comment, PostDTO postDTO) {
+    public boolean updateComment(RegistereUser user, Comment comment, PostDTO postDTO) {
 
         String query = "db.Post.updateOne({\r\n" + //
                        "    _id: " + postDTO.getId() + ",\r\n" + //

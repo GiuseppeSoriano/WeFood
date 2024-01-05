@@ -9,7 +9,7 @@ public class RegisteredUserPageDTO {
     private List<PostDTO> posts;
 
     public RegisteredUserPageDTO(String _id, String username, List<PostDTO> posts) {
-        this._id = _id;
+        this._id = "ObjectId('" + _id + "')";
         this.username = username;
         this.posts = posts;
     }

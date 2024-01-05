@@ -25,4 +25,9 @@ public class StarRanking {
     public void setVote(Double vote) {
         this.vote = vote;
     }
+
+    public String toString(){
+        return "Username: " + this.getUsername() + "\n" +
+                "Vote: " + this.getVote() + "\n";
+    }
 }
