@@ -4,15 +4,16 @@ import java.util.List;
 
 import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
+import org.neo4j.driver.exceptions.Neo4jException;
 
 public interface RecipeNeo4jInterface {
 
-    boolean createRecipe(RecipeDTO recipeDTO);
+    boolean createRecipe(RecipeDTO recipeDTO) throws IllegalStateException, Neo4jException;
 
-    boolean deleteRecipe(RecipeDTO recipeDTO);
+    boolean deleteRecipe(RecipeDTO recipeDTO) throws IllegalStateException, Neo4jException;
 
-    List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredientDTOs);
+    List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException;
 
-    boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<IngredientDTO> ingredientDTOs);
+    boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException;
 
 }

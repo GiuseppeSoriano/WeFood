@@ -13,18 +13,6 @@ import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserNeo4jInterface
     //correggere le etichette con le nuove info
 public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
 
-    //aggiungere un metodo create user all'atto di login per la consistenza
-    public boolean createRegisteredUser(RegisteredUserDTO registeredUserDTO) throws IllegalStateException, Neo4jException {
-        String query = "CREATE (u:User {\r\n" + //
-                       "    _id: '" + registeredUserDTO.neo4JgetId() + "',\r\n" + //
-                       "    username: '" + registeredUserDTO.getUsername() + "'\r\n" + //
-                       "})";
-        List<Record> results = BaseNeo4j.executeQuery(query);
-        System.out.println(results.get(0));
-
-        return true;
-    }
-
     public boolean createUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
         for(IngredientDTO ingredient: ingredientDTOs){
             String query = "MATCH (u:User {username: '" + registeredUserDTO.getUsername() + "'}), (i:Ingredient {name: '" + ingredient.getName() + "'})\r\n" + //
@@ -65,7 +53,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         return true; 
     }
 
-    public List<RegisteredUserDTO> findFriends(RegisteredUserDTO user) {
+    public List<RegisteredUserDTO> findFriends(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
         String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u1)\r\n" + //
                        "RETURN u2";
         List<Record> results = BaseNeo4j.executeQuery(query);
@@ -79,7 +67,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         return friends;
     }
     
-    public List<RegisteredUserDTO> findFollowers(RegisteredUserDTO user) {
+    public List<RegisteredUserDTO> findFollowers(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
         String query = "MATCH (u1:User)-[:FOLLOWS]->(u2:User {username: '" + user.getUsername() + "'})\r\n" + //
                        "RETURN u1";
         List<Record> results = BaseNeo4j.executeQuery(query);
@@ -92,7 +80,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         return followers;
     }
     
-    public List<RegisteredUserDTO> findFollowed(RegisteredUserDTO user) {
+    public List<RegisteredUserDTO> findFollowed(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
         String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[:FOLLOWS]->(u2:User)\r\n" + //
                        "RETURN u2";
         List<Record> results = BaseNeo4j.executeQuery(query);
@@ -105,7 +93,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         return followedUsers;
     }
 
-    public List<RegisteredUserDTO> findUsersToFollowBasedOnUserFriends(RegisteredUserDTO user){
+    public List<RegisteredUserDTO> findUsersToFollowBasedOnUserFriends(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
         String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u3:User)\r\n" + //
                        "WHERE (u2)-[:FOLLOWS]->(u1)\r\n" + //
                        "AND NOT (u1)-[:FOLLOWS]->(u3)\r\n" + //
@@ -120,7 +108,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         return suggestedUsers;
     }
 
-    public List<RegisteredUserDTO> findMostFollowedUsers() {
+    public List<RegisteredUserDTO> findMostFollowedUsers() throws IllegalStateException, Neo4jException {
         String query = "MATCH (u1:User)-[:FOLLOWS]->(u2:User)\r\n" + //
                        "RETURN u2, COUNT(u1) AS followers\r\n" + //
                        "ORDER BY followers DESC\r\n" + //
@@ -135,7 +123,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         return suggestedUsers;
     }
 
-    public List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) {
+    public List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException {
         String query = "MATCH (u:User)-[r:USED]->(i:Ingredient {name: '" + ingredientDTO.getName() + "'})\r\n" + //
                        "RETURN u, i, r.times AS times\r\n" + //
                        "ORDER BY times DESC\r\n" + //

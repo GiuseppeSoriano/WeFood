@@ -488,7 +488,7 @@ db.User.insertOne({
     username: String,
     password: hashedString,
     name: String,
-    surname: String,
+    surname: String
 })
 ```
 

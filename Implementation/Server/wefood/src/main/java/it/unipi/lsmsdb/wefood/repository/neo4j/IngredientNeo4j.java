@@ -27,7 +27,7 @@ public class IngredientNeo4j implements IngredientNeo4jInterface {
         return true;
     }
 
-    public List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO, int limit) {
+    public List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO, int limit) throws IllegalStateException, Neo4jException {
         
         String query = "MATCH (i1:Ingredient{name:'" + ingredientDTO.getName() + "'})-[r:USED_WITH]->(i2:Ingredient)\r\n" + //
                        "RETURN i2, r.times AS times\r\n" + //
@@ -45,11 +45,11 @@ public class IngredientNeo4j implements IngredientNeo4jInterface {
         return resultSet; 
     }
 
-    public List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO){
+    public List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException {
         return findIngredientsUsedWithIngredient(ingredientDTO, 5);
     }  
 
-    public boolean createIngredientIngredientRelationship(List<IngredientDTO> ingredientDTOs) {
+    public boolean createIngredientIngredientRelationship(List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
         for(IngredientDTO ingredientDTO1: ingredientDTOs){
             for(IngredientDTO ingredientDTO2: ingredientDTOs){
                 if(ingredientDTO1.neo4JgetId().equals(ingredientDTO2.neo4JgetId()))
@@ -64,7 +64,7 @@ public class IngredientNeo4j implements IngredientNeo4jInterface {
         return true;      
     }
 
-    public List<IngredientDTO> mostPopularCombinationOfIngredients(IngredientDTO ingredientDTO) {
+    public List<IngredientDTO> mostPopularCombinationOfIngredients(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException {
         String query = "MATCH (i1:Ingredient{name: " + ingredientDTO.getName() + "})-[r:USED_WITH]->(i2:Ingredient)\r\n" + //
                        "RETURN i2, r.times AS times\r\n" + //
                        "ORDER BY times DESC\r\n" + //
@@ -79,7 +79,7 @@ public class IngredientNeo4j implements IngredientNeo4jInterface {
         return ingredients;
     }
 
-    public List<IngredientDTO> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user) {
+    public List<IngredientDTO> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
          String query = "MATCH (u1:User {username: " + user.getUsername() + "})-[:FOLLOWS]->(u2:User)-[r:USED]->(i:Ingredient)\r\n" + //
                         "WHERE (u2)-[:FOLLOWS]->(u1)\r\n" + //
                         "AND NOT (u1)-[:USED]->(i)\r\n" + //
@@ -96,7 +96,7 @@ public class IngredientNeo4j implements IngredientNeo4jInterface {
         return ingredients;
     } 
 
-    public List<IngredientDTO> findMostUsedIngredientsByUser(RegisteredUserDTO user) {
+    public List<IngredientDTO> findMostUsedIngredientsByUser(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
         String query = "MATCH (u:User {username: " + user.getUsername() + "})-[r:USED]->(i:Ingredient)\r\n" + //
                        "RETURN i, r.times AS times\r\n" + //
                        "ORDER BY times DESC\r\n" + //
@@ -112,7 +112,7 @@ public class IngredientNeo4j implements IngredientNeo4jInterface {
     }
 
     // If DESC is true, it returns the most used ingredients, otherwise the least used ingredients
-    public List<IngredientDTO> findMostLeastUsedIngredients(boolean DESC) {
+    public List<IngredientDTO> findMostLeastUsedIngredients(boolean DESC) throws IllegalStateException, Neo4jException {
         
         String order = (DESC) ? "DESC" : "ASC";
 

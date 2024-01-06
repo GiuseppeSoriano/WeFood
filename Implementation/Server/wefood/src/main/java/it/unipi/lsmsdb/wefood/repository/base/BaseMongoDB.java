@@ -9,7 +9,6 @@ import java.util.List;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
-import org.bson.BsonValue;
 import org.bson.Document;
 
 import org.bson.conversions.Bson;
@@ -255,8 +254,8 @@ public abstract class BaseMongoDB {
         InsertOneResult result = collection.insertOne(query_insert);
         
         // Ottieni l'ID del documento inserito
-        BsonValue insertedId = result.getInsertedId();
-
+//        BsonValue insertedId = result.getInsertedId();
+        String insertedId = result.getInsertedId().asObjectId().getValue().toString();      // DA PROVARE
         // Converti l'ID del documento in un oggetto Document
         documents.add(new Document("_id", insertedId));
             
