@@ -2,6 +2,7 @@ package it.unipi.lsmsdb.wefood.repository.mongodb;
 
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.model.Comment;
+import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.repository.base.BaseMongoDB;
 import it.unipi.lsmsdb.wefood.repository.interfaces.CommentMongoDBInterface;
 import java.util.List;
@@ -31,15 +32,15 @@ public class CommentMongoDB implements CommentMongoDBInterface {
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;
 
-    };
+    }
 
-    public boolean updateComment(RegistereUser user, Comment comment, PostDTO postDTO) {
+    public boolean updateComment(RegisteredUser user, Comment comment, PostDTO postDTO) {
 
         String query = "db.Post.updateOne({\r\n" + //
                        "    _id: " + postDTO.getId() + ",\r\n" + //
                        "    comments: {\r\n" + //
                        "        $elemMatch: {\r\n" + //
-                       "            idUser: " + comment.getUser().getId() + ",\r\n" + //
+                       "            idUser: " + user.getId() + ",\r\n" + //
                        "            timestamp: " + comment.getTimestamp().getTime() + ",\r\n" + //
                        "        }\r\n" + //
                        "    }\r\n" + //
@@ -53,16 +54,16 @@ public class CommentMongoDB implements CommentMongoDBInterface {
         System.out.println(result.get(0).toJson());
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;
-    };
+    }
 
-    public boolean deleteComment(Comment comment, PostDTO postDTO) {
+    public boolean deleteComment(RegisteredUser user, Comment comment, PostDTO postDTO) {
         
         String query = "db.Post.updateOne({\r\n" + //
                        "    _id: " + postDTO.getId() + ",\r\n" + //
                        "}, {\r\n" + //
                        "    $pull: {\r\n" + //
                        "        comments: {\r\n" + //
-                       "            idUser: " + comment.getUser().getId() + ",\r\n" + //
+                       "            idUser: " + user.getId() + ",\r\n" + //
                        "            timestamp: " + comment.getTimestamp().getTime() + ",\r\n" + //
                        "        }\r\n" + //
                        "    }\r\n" + //
@@ -72,6 +73,6 @@ public class CommentMongoDB implements CommentMongoDBInterface {
         System.out.println(result.get(0).toJson());
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;
-    };
+    }
     
 }

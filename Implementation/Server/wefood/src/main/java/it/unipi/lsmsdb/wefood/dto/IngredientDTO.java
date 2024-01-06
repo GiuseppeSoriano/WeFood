@@ -6,12 +6,16 @@ public class IngredientDTO {
     private String name;
 
     public IngredientDTO(String _id, String name) {
-        this._id = "ObjectId('" + _id + "')";
+        this._id = _id;
         this.name = name;
     }
 
-    public String getId() {
-        return this._id;
+    public String mongoDBgetId() {
+        return "ObjectId('" + this._id + "')";
+    }
+
+    public String neo4JgetId(){
+        return _id;
     }
 
     public String getName() {

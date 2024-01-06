@@ -21,7 +21,7 @@ public class RegisteredUser extends User {
     }
 
     public String getId() {
-        return _id;
+        return "ObjectId('" + this._id + "')";
     }
 
     public void setId(String id) {

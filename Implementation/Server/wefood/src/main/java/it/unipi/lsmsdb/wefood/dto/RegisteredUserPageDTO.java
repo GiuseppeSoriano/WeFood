@@ -9,12 +9,16 @@ public class RegisteredUserPageDTO {
     private List<PostDTO> posts;
 
     public RegisteredUserPageDTO(String _id, String username, List<PostDTO> posts) {
-        this._id = "ObjectId('" + _id + "')";
+        this._id = _id;
         this.username = username;
         this.posts = posts;
     }
 
-    public String get_id() {
+    public String mongoDBgetId() {
+        return "ObjectId('" + this._id + "')";
+    }
+
+    public String neo4JgetId(){
         return _id;
     }
 

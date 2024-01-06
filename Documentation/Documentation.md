@@ -537,7 +537,7 @@ db.Post.updateOne({
         starRankings: {
             idUser: #,
             username: String,
-            vote: Double,
+            vote: Double
         }
     }
 })
@@ -556,6 +556,7 @@ db.Ingredient.insertOne({
 - Create a new user 
 ```javascript
 CREATE (u:User {
+    _id: #,
     username: String
 })
 ```
@@ -584,7 +585,7 @@ CREATE (u1)-[:FOLLOWS]->(u2)
 
 - Create a new recipe-ingredient relationship
 ```javascript
-MATCH (r:Recipe {name: String}), (i:Ingredient {name: String})
+MATCH (r:Recipe {_id: #}), (i:Ingredient {name: String})
 CREATE (r)-[:CONTAINS]->(i)
 ```
 
@@ -793,7 +794,7 @@ db.Post.find({
 
 #### Neo4j
 
-- Show followings
+- Show followings / followed
 ```javascript
 MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)
 RETURN u2
@@ -876,6 +877,19 @@ db.User.updateOne({
 })
 ```
 
+- Update password, name, surname
+```javascript
+db.User.updateOne({
+    _id: #,
+}, {
+    $set: {
+        password: hashedString,
+        name: String,
+        surname: String
+    }
+})
+```
+
 - Update post 
 
 - description   
@@ -910,7 +924,9 @@ db.Post.updateOne({
 ### Delete
 
 - [Delete user] : we give the possibility to the user to delete his/her own profile.
-   
+
+When the user deletes his/her own profile, we have to delete all the posts of the user (calling the delete post operation) + we set "delete" = True
+
 - Delete post
 
 - Delete comment
@@ -987,8 +1003,8 @@ db.Post.deleteOne({
 
 We need to delete all the relationships of the recipe contained in the post from Neo4j
 ```javascript
-MATCH (r:Recipe {name: String})-[r:CONTAINS]->(i:Ingredient)
-DELETE r
+MATCH (r:Recipe {_id: #})
+DETACH DELETE r
 ```
 
 We need to update the times attribute of the relationships of the ingredients used together in the recipe contained in the post from Neo4j
@@ -1037,7 +1053,7 @@ db.Post.updateOne({
 }, {
     $pull: {
         starRankings: {
-            idUser: #,
+            idUser: #
         }
     }
 })
@@ -1113,7 +1129,7 @@ db.Post.aggregate([
 (Da implementare)
 
 
-- Find recipes filtering the name
+- Find Posts by recipes filtering the name
 ```javascript
 db.Post.find( { "recipe.name": { $regex: "pork", $options: "i" } } )
 ```
@@ -1152,6 +1168,7 @@ ORDER BY times DESC
 LIMIT 5
 ```
 
+(Not interesting)
 - Show least used ingredients by a user
 ```javascript
 MATCH (u:User {username: String})-[r:USED]->(i:Ingredient)
@@ -1167,6 +1184,7 @@ LIMIT 5
 - Suggest most popular combination of ingredients
 - Suggest new ingredients based on friends’ usage
 - Suggest most followed users
+- Suggest Users by Ingredient usage
 
 ##### Neo4j
 
@@ -1178,12 +1196,16 @@ AND NOT (u1)-[:FOLLOWS]->(u3)
 RETURN u3
 ```
 
-- Suggest users to follow (based on common ingredients)
+(NON SI implementa più)
+- Suggest users to follow (based on common ingredients). r1.times and r2.times must be both greater than threshold.
 ```javascript
 MATCH (u1:User {username: String})-[r1:USED]->(i:Ingredient)<-[r2:USED]-(u2:User)
 WHERE NOT (u1)-[:FOLLOWS]->(u2)
+AND r1.times > threshold
+AND r2.times > threshold
 RETURN u2
 ```
+
 
 - Suggest most popular combination of ingredients
 ```javascript
@@ -1210,6 +1232,15 @@ RETURN u2, COUNT(u1) AS followers
 ORDER BY followers DESC
 LIMIT 5
 ```
+
+- Suggest Users by Ingredient usage
+```javascript
+MATCH (u:User)-[r:USED]->(i:Ingredient {name: String})
+RETURN u, i, r.times AS times
+ORDER BY times DESC
+LIMIT 10
+```
+
 
 
 
@@ -1374,83 +1405,28 @@ We can use this to show when a post is shown, the average amount of calories of 
 
 Others...
 
-- Dato utente vediamo calorie medie per ricette pubblicate da lui
+- Given a user, show the average totalCalories of recipes publishished by him/her.
     
 ```javascript  
-db.Post.aggregate([ { $match: { username: "cody_cisneros_28" } }, { $project: { recipeCalories: "$recipe.totalCalories" } }, { $group: { _id: null, avgCalories: { $avg: "$recipeCalories" } } }] )
-```
-
-- Given a User, show among the posts he/she has done, the one with the highest avgStarRanking
-  
-```javascript
-db.Post.aggregate([
-    {
-        $match: {
-            username: #,
-        }
-    },
-    {
-        $sort: {
-            avgStarRanking: -1
-        }
-    },
-    {
-        $limit: 1
-    },
-    {
-        $project: {
-            _id: 0,
-            post: {
-                _id: "$_id",
-                description: "$description",
-                timestamp: "$timestamp",
-                recipe: "$recipe",
-                avgStarRanking: "$avgStarRanking",
-                starRankings: "$starRankings",
-                comments: "$comments"
-            }
-        }
+db.Post.aggregate([ 
+    { 
+        $match: { 
+            username: "cody_cisneros_28" 
+        } 
+    }, 
+    {   $project: { 
+            recipeCalories: "$recipe.totalCalories" 
+        } 
+    }, 
+    {   $group: { 
+            _id: null, 
+            avgCalories: { 
+                $avg: "$recipeCalories" 
+            } 
+        } 
     }
 ])
 ```
-
-- Average number of TotalCalories for recipes that contains a specific set of ingredients that have an average Star ranking greater than a given value
-
-```javascript
-db.Post.aggregate([
-    {
-        $match: {
-            recipe: {
-                ingredients: {
-                    $elemMatch: {
-                        name: {
-                            $in: [String, ...]   # List of ingredients
-                        }
-                    }
-                }
-            },
-            avgStarRanking: {
-                $gte: Double
-            }
-        }
-    },
-    {
-        $group: {
-            _id: null,
-            avgOfTotalCalories: {
-                $avg: "$recipe.totalCalories"
-            }
-        }
-    },
-    {
-        $project: {
-            _id: 0,
-            avgOfTotalCalories: 1
-        }
-    }
-])
-```
-
 
 # Redundancies
 

@@ -13,4 +13,6 @@ public interface RecipeNeo4jInterface {
 
     List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredientDTOs);
 
+    boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<IngredientDTO> ingredientDTOs);
+
 }

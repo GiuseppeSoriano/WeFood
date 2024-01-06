@@ -8,15 +8,16 @@ public interface RegisteredUserMongoDBInterface {
 
     RegisteredUser login(String username, String password);
 
-    RegisteredUser findRegisteredUserByUsername(String username);
-    
+    // RegisteredUser findRegisteredUserById(String _id);
+
     RegisteredUserPageDTO findRegisteredUserPageByUsername(String username);
 
     boolean modifyPersonalInformation(RegisteredUser user);
 
     boolean deleteUser(RegisteredUser user);
 
-    boolean banUser(RegisteredUser user);
-    boolean unbanUser(RegisteredUser user);
+    boolean banUser(String username);
+    boolean unbanUser(String username);
     
+
 }

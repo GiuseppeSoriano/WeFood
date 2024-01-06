@@ -7,12 +7,16 @@ public class RegisteredUserDTO {
     private String username;
 
     public RegisteredUserDTO(String _id, String username) {
-        this._id = "ObjectId('" + _id + "')";
+        this._id = _id;
         this.username = username;
     }
 
-    public String getId() {
-        return this._id;
+    public String mongoDBgetId() {
+        return "ObjectId('" + this._id + "')";
+    }
+
+    public String neo4JgetId(){
+        return _id;
     }
 
     public String getUsername() {

@@ -20,10 +20,6 @@ public class RegisteredUserDAO {
         return registeredUserMongoDB.login(username, password);
     };
 
-    public RegisteredUser findRegisteredUserByUsername(String username) {
-        return registeredUserMongoDB.findRegisteredUserByUsername(username);
-    };
-
     public boolean deleteUser(RegisteredUser user) {
         return registeredUserMongoDB.deleteUser(user);
     };

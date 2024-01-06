@@ -1,10 +1,11 @@
 package it.unipi.lsmsdb.wefood.repository.neo4j;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.driver.Record;
+import org.neo4j.driver.exceptions.Neo4jException;
 
-import it.unipi.lsmsdb.wefood.model.RegisteredUser;
+import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.repository.base.BaseNeo4j;
 import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserNeo4jInterface;
@@ -13,78 +14,141 @@ import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserNeo4jInterface
 public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
 
     //aggiungere un metodo create user all'atto di login per la consistenza
+    public boolean createRegisteredUser(RegisteredUserDTO registeredUserDTO) throws IllegalStateException, Neo4jException {
+        String query = "CREATE (u:User {\r\n" + //
+                       "    _id: '" + registeredUserDTO.neo4JgetId() + "',\r\n" + //
+                       "    username: '" + registeredUserDTO.getUsername() + "'\r\n" + //
+                       "})";
+        List<Record> results = BaseNeo4j.executeQuery(query);
+        System.out.println(results.get(0));
 
-    public boolean followUser(RegisteredUser user, RegisteredUser userToFollow) {
-        String query = "MATCH (u1:User {username: "+user.getUsername()+"}), (u2:User {username: "+userToFollow.getUsername()+"})" +
+        return true;
+    }
+
+    public boolean createUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
+        for(IngredientDTO ingredient: ingredientDTOs){
+            String query = "MATCH (u:User {username: '" + registeredUserDTO.getUsername() + "'}), (i:Ingredient {name: '" + ingredient.getName() + "'})\r\n" + //
+                           "MERGE (u)-[r:USED]->(i) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1";
+            List<Record> results = BaseNeo4j.executeQuery(query);
+            System.out.println(results.get(0));
+        }
+        return true;
+    }
+
+    public boolean deleteUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
+        for(IngredientDTO ingredient: ingredientDTOs){
+            String query = "MATCH (i1:Ingredient {name: '" + registeredUserDTO.getUsername() + "'})-[r:USED_WITH]->(i2:Ingredient {name: '" + ingredient.getName() + "'})\r\n" + //
+                           "SET r.times = r.times - 1\r\n" + //
+                           "IF r.times = 0 THEN\r\n" + //
+                           "    DELETE r\r\n" + //
+                           "END IF";
+            List<Record> results = BaseNeo4j.executeQuery(query);
+            System.out.println(results.get(0));
+        }
+        return true;
+    }
+
+    public boolean followUser(RegisteredUserDTO user, String usernameToFollow) throws IllegalStateException, Neo4jException {
+        String query = "MATCH (u1:User {username: '" + user.getUsername() + "'}), (u2:User {username: '" + usernameToFollow + "'})" +
                         "CREATE (u1)-[:FOLLOWS]->(u2)";
         List<Record> results = BaseNeo4j.executeQuery(query);
-        if (results.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
-    };
-    public boolean unfollowUser(RegisteredUser user, RegisteredUser userToUnfollow) {
-        String query = "MATCH (u1:User {username: "+user.getUsername()+"})-[r:FOLLOWS]->(u2:User {username: "+userToUnfollow.getUsername()+"})" +
+        System.out.println(results.get(0));
+        // If it does not throw an exception, it means that the query has been executed successfully
+        return true;       
+    }
+    public boolean unfollowUser(RegisteredUserDTO user, String usernameToUnfollow) throws IllegalStateException, Neo4jException {
+        String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[r:FOLLOWS]->(u2:User {username: '" + usernameToUnfollow + "'})" +
                         "DELETE r";
         List<Record> results = BaseNeo4j.executeQuery(query);
-        if (results.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
-    };
+        System.out.println(results.get(0));
+        // If it does not throw an exception, it means that the query has been executed successfully
+        return true; 
+    }
 
-    public List<RegisteredUserDTO> findFriends(RegisteredUser user) {
-        String query = "MATCH (u1:User {username: "+user.getUsername()+"})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u1)" +
-                        "RETURN u2";
+    public List<RegisteredUserDTO> findFriends(RegisteredUserDTO user) {
+        String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u1)\r\n" + //
+                       "RETURN u2";
         List<Record> results = BaseNeo4j.executeQuery(query);
-        LinkedList<Record> resultsList = new LinkedList<Record>(results);
-        List<RegisteredUser> friends = new LinkedList<RegisteredUser>();
-        while (resultsList.iterator().hasNext()) {
-            Record result = resultsList.iterator().next();
-            RegisteredUser friend = new RegisteredUser(result.get("username").asString());
+
+        List<RegisteredUserDTO> friends = new ArrayList<RegisteredUserDTO>();
+        for(Record result: results){
+            RegisteredUserDTO friend = new RegisteredUserDTO(result.get("u2").get("_id").asString(),
+                                                             result.get("u2").get("username").asString());
             friends.add(friend);
         }
         return friends;
-    };
-    public List<RegisteredUserDTO> findFollowers(RegisteredUser user) {
-        String query = "MATCH (u1:User)-[:FOLLOWS]->(u2:User {username: "+user.getUsername()+"})" +
-                        "RETURN u1";
+    }
+    
+    public List<RegisteredUserDTO> findFollowers(RegisteredUserDTO user) {
+        String query = "MATCH (u1:User)-[:FOLLOWS]->(u2:User {username: '" + user.getUsername() + "'})\r\n" + //
+                       "RETURN u1";
         List<Record> results = BaseNeo4j.executeQuery(query);
-        LinkedList<Record> resultsList = new LinkedList<Record>(results);
-        List<RegisteredUser> followers = new LinkedList<RegisteredUser>();
-        while (resultsList.iterator().hasNext()) {
-            Record result = resultsList.iterator().next();
-            RegisteredUser follower = new RegisteredUser(result.get("username").asString());
+        List<RegisteredUserDTO> followers = new ArrayList<RegisteredUserDTO>();
+        for(Record result: results){
+            RegisteredUserDTO follower = new RegisteredUserDTO(result.get("u1").get("_id").asString(),
+                                                               result.get("u1").get("username").asString());
             followers.add(follower);
         }
         return followers;
-    };
-    public List<RegisteredUserDTO> findFollowed(RegisteredUser user) {
-        String query = "MATCH (u1:User {username: "+user.getUsername()+"})-[:FOLLOWS]->(u2:User)" +
-                        "RERURN u2";
+    }
+    
+    public List<RegisteredUserDTO> findFollowed(RegisteredUserDTO user) {
+        String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[:FOLLOWS]->(u2:User)\r\n" + //
+                       "RETURN u2";
         List<Record> results = BaseNeo4j.executeQuery(query);
-        LinkedList<Record> resultsList = new LinkedList<Record>(results);
-        /*
-            Quello che viene dopo va corretto in tutti
-            rendendo coerente il tipo della lista e inserendo
-            nel costruttore le info corrette 
-        */
-        List<RegisteredUserDTO> followed = new LinkedList<RegisteredUserDTO>();
-        while (resultsList.iterator().hasNext()) {
-            Record result = resultsList.iterator().next();
-            /*
-                Qua bisogna mettere nel costruttore del DTO le info corrette
-                RegisteredUserDTO followedUser = new RegisteredUserDTO(result.get("username").asString()); 
-            */
-            followed.add(followedUser);
+        List<RegisteredUserDTO> followedUsers = new ArrayList<RegisteredUserDTO>();
+        for(Record result: results){
+            RegisteredUserDTO followedUser = new RegisteredUserDTO(result.get("u2").get("_id").asString(),
+                                                                   result.get("u2").get("username").asString());
+            followedUsers.add(followedUser);
         }
-        return followed;
-    };
+        return followedUsers;
+    }
 
-    public boolean modifyPersonalProfile(RegisteredUser user) { 
-        //come garantire la consistenza?                 
-        return false;                                   
-    };
+    public List<RegisteredUserDTO> findUsersToFollowBasedOnUserFriends(RegisteredUserDTO user){
+        String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u3:User)\r\n" + //
+                       "WHERE (u2)-[:FOLLOWS]->(u1)\r\n" + //
+                       "AND NOT (u1)-[:FOLLOWS]->(u3)\r\n" + //
+                       "RETURN u3";
+        List<Record> results = BaseNeo4j.executeQuery(query);
+        List<RegisteredUserDTO> suggestedUsers = new ArrayList<RegisteredUserDTO>();
+        for(Record result: results){
+            RegisteredUserDTO suggestedUser = new RegisteredUserDTO(result.get("u3").get("_id").asString(),
+                                                                   result.get("u3").get("username").asString());
+            suggestedUsers.add(suggestedUser);
+        }
+        return suggestedUsers;
+    }
+
+    public List<RegisteredUserDTO> findMostFollowedUsers() {
+        String query = "MATCH (u1:User)-[:FOLLOWS]->(u2:User)\r\n" + //
+                       "RETURN u2, COUNT(u1) AS followers\r\n" + //
+                       "ORDER BY followers DESC\r\n" + //
+                       "LIMIT 5";
+        List<Record> results = BaseNeo4j.executeQuery(query);
+        List<RegisteredUserDTO> suggestedUsers = new ArrayList<RegisteredUserDTO>();
+        for(Record result: results){
+            RegisteredUserDTO suggestedUser = new RegisteredUserDTO(result.get("u2").get("_id").asString(),
+                                                                   result.get("u2").get("username").asString());
+            suggestedUsers.add(suggestedUser);
+        }
+        return suggestedUsers;
+    }
+
+    public List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) {
+        String query = "MATCH (u:User)-[r:USED]->(i:Ingredient {name: '" + ingredientDTO.getName() + "'})\r\n" + //
+                       "RETURN u, i, r.times AS times\r\n" + //
+                       "ORDER BY times DESC\r\n" + //
+                       "LIMIT 20";
+        List<Record> results = BaseNeo4j.executeQuery(query);
+        List<RegisteredUserDTO> suggestedUsers = new ArrayList<RegisteredUserDTO>();
+        for(Record result: results){
+            RegisteredUserDTO suggestedUser = new RegisteredUserDTO(result.get("u2").get("_id").asString(),
+                                                                   result.get("u2").get("username").asString());
+            suggestedUsers.add(suggestedUser);
+        }
+        return suggestedUsers;
+    }
+
+
 }
