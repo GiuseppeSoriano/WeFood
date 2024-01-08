@@ -14,7 +14,7 @@ import java.util.Map;
 public class PostDAO {
     private final static PostMongoDBInterface postMongoDB = new PostMongoDB();
 
-    public static boolean uploadPost(Post post, RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public static String uploadPost(Post post, RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
         return postMongoDB.uploadPost(post, user);
     }
     

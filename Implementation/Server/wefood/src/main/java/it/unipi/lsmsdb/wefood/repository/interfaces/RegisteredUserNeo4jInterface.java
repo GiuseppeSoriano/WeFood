@@ -8,8 +8,8 @@ import org.neo4j.driver.exceptions.Neo4jException;
 
 public interface RegisteredUserNeo4jInterface {
 
-    boolean createUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException;
-    boolean deleteUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException;
+    boolean createUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException;
+    boolean deleteUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException;
 
     boolean followUser(RegisteredUserDTO user, String usernameToFollow) throws IllegalStateException, Neo4jException;
     boolean unfollowUser(RegisteredUserDTO user, String usernameToUnfollow) throws IllegalStateException, Neo4jException;

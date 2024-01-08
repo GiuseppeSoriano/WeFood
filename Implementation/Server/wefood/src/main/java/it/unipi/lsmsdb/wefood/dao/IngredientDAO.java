@@ -17,10 +17,17 @@ public class IngredientDAO {
     private final static IngredientNeo4jInterface ingredientNeo4jInterface = new IngredientNeo4j();
 
     // Bisogna gestire il caso in cui fallisce la creazione del nodo in neo4j
-    public static boolean createIngredient(Ingredient ingredient) throws MongoException, IllegalArgumentException, IllegalStateException{
-        String id = ingredientMongoDBInterface.createIngredient(ingredient);
+    public static String createIngredientMongoDB(Ingredient ingredient) throws MongoException, IllegalArgumentException, IllegalStateException{
+        return ingredientMongoDBInterface.createIngredient(ingredient);
         // eccezioni lanciate da neo4j vanno gestite con try catch per evitare che il nodo venga creato solo in mongo
-        return ingredientNeo4jInterface.createIngredient(new IngredientDTO(id, ingredient.getName()));
+    }
+
+    public static boolean deleteIngredientMongoDB(String _id) throws MongoException, IllegalArgumentException, IllegalStateException{
+        return ingredientMongoDBInterface.deleteIngredient(_id);
+    }
+
+    public static boolean createIngredientNeo4j(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException {
+        return ingredientNeo4jInterface.createIngredient(ingredientDTO);
     }
 
     public static Ingredient findIngredientByName(String name) throws MongoException, IllegalArgumentException, IllegalStateException {
@@ -38,8 +45,8 @@ public class IngredientDAO {
         return ingredientNeo4jInterface.findIngredientsUsedWithIngredient(ingredientDTO);
     }
 
-    public static boolean createIngredientIngredientRelationship(List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
-        return ingredientNeo4jInterface.createIngredientIngredientRelationship(ingredientDTOs);
+    public static boolean createIngredientIngredientRelationship(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
+        return ingredientNeo4jInterface.createIngredientIngredientRelationship(ingredientNames);
     }
 
     public static List<IngredientDTO> mostPopularCombinationOfIngredients(IngredientDTO ingredient) throws IllegalStateException, Neo4jException {

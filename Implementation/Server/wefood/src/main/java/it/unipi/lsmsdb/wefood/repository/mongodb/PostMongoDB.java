@@ -23,7 +23,7 @@ import it.unipi.lsmsdb.wefood.repository.interfaces.PostMongoDBInterface;
 
 public class PostMongoDB implements PostMongoDBInterface{
 
-    public boolean uploadPost(Post post, RegisteredUser user) throws MongoException, IllegalStateException, IllegalArgumentException {
+    public String uploadPost(Post post, RegisteredUser user) throws MongoException, IllegalStateException, IllegalArgumentException {
 
         String query = "db.Post.insertOne({\r\n" + //
                        "    idUser: " + user.getId() + ",\r\n" + //
@@ -42,7 +42,7 @@ public class PostMongoDB implements PostMongoDBInterface{
         List<Document> result = BaseMongoDB.executeQuery(query);
         System.out.println(result.get(0).toJson());
         // If it does not throw an exception, it means that the query has been executed successfully
-        return true;
+        return result.get(0).get("_id").toString();
     }
 
     public boolean modifyPost(Post post, PostDTO postDTO) {

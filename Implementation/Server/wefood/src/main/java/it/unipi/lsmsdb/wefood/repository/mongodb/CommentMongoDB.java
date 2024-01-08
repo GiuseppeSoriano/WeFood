@@ -34,7 +34,7 @@ public class CommentMongoDB implements CommentMongoDBInterface {
 
     }
 
-    public boolean updateComment(RegisteredUser user, Comment comment, PostDTO postDTO) {
+    public boolean updateComment(RegisteredUser user, Comment comment, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
 
         String query = "db.Post.updateOne({\r\n" + //
                        "    _id: " + postDTO.getId() + ",\r\n" + //
@@ -56,7 +56,7 @@ public class CommentMongoDB implements CommentMongoDBInterface {
         return true;
     }
 
-    public boolean deleteComment(RegisteredUser user, Comment comment, PostDTO postDTO) {
+    public boolean deleteComment(RegisteredUser user, Comment comment, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         
         String query = "db.Post.updateOne({\r\n" + //
                        "    _id: " + postDTO.getId() + ",\r\n" + //

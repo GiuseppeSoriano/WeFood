@@ -14,6 +14,6 @@ public interface RecipeNeo4jInterface {
 
     List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException;
 
-    boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException;
+    boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException;
 
 }

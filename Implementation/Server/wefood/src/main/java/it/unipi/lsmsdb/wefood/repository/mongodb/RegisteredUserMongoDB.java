@@ -6,6 +6,8 @@ import java.util.List;
 import org.bson.Document;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
+import com.mongodb.MongoException;
+
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
@@ -14,7 +16,7 @@ import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserMongoDBInterfa
 
 public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     
-    public RegisteredUser login(String username, String password) {
+    public RegisteredUser login(String username, String password) throws MongoException, IllegalArgumentException, IllegalStateException {
 
         String query = "db.User.find({username: \"" + username + "\"})";
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -66,7 +68,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     };
     */
 
-    public RegisteredUserPageDTO findRegisteredUserPageByUsername(String username) {
+    public RegisteredUserPageDTO findRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.find({username: \"" + username + "\"})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -95,7 +97,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         return user;
     }
 
-    public boolean modifyPersonalInformation(RegisteredUser user) {
+    public boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
         String  query = "db.User.updateOne({\r\n" + //
                         "    _id: " + user.getId() + ",\r\n" + //
                         "}, {\r\n" + //
@@ -112,7 +114,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         return true;
     };
 
-    public boolean deleteUser(RegisteredUser user) {
+    public boolean deleteUser(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
         // We heve to unset the following fields: password, name, surname and posts
         // and then we have to set the field deleted to true
 
@@ -143,7 +145,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     };
 
-    public boolean banUser(String username) {
+    public boolean banUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
                        "    username: " + username + ",\r\n" + //
                        "}, {\r\n" + //
@@ -157,7 +159,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         return true;
     };
 
-    public boolean unbanUser(String username) {
+    public boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
                        "    username: " + username + ",\r\n" + //
                        "}, {\r\n" + //
@@ -170,5 +172,51 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;
     };
+
+    public boolean cancelUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
+        String query = "db.User.deleteOne({\r\n" + //
+                       "    username: '" + username + "'\r\n" + //
+                       "})";
+        List<Document> result = BaseMongoDB.executeQuery(query);
+        System.out.println(result.get(0).toJson());
+        // If it does not throw an exception, it means that the query has been executed successfully
+        return true;
+    }
+
+    public boolean addPost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
+        String query = "db.User.updateOne({\r\n" + //
+                       "    _id: " + user.getId() + ",\r\n" + //
+                       "}, {\r\n" + //
+                       "    $push: {\r\n" + //
+                       "        posts: {\r\n" + //
+                       "            idPost: " + postDTO.getId() + ",\r\n" + //
+                       "            name: " + postDTO.getRecipeName() + ",\r\n" + //
+                       "            image: " + postDTO.getImage() + "\r\n" + //
+                       "        }\r\n" + //
+                       "    }\r\n" + //
+                       "})"; //
+
+        List<Document> result = BaseMongoDB.executeQuery(query);
+        System.out.println(result.get(0).toJson());
+        // If it does not throw an exception, it means that the query has been executed successfully
+        return true;
+    }
+
+    public boolean removePost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
+        String query = "db.User.updateOne({\r\n" + //
+                       "    _id: " + user.getId() + ",\r\n" + //
+                       "}, {\r\n" + //
+                       "    $pull: {\r\n" + //
+                       "        posts: {\r\n" + //
+                       "            idPost: " + postDTO.getId() + "\r\n" + //
+                       "        }\r\n" + //
+                       "    }\r\n" + //
+                       "})"; //
+
+        List<Document> result = BaseMongoDB.executeQuery(query);
+        System.out.println(result.get(0).toJson());
+        // If it does not throw an exception, it means that the query has been executed successfully
+        return true;
+    }
     
 }

@@ -23,8 +23,8 @@ public class RecipeDAO {
         return recipeNeo4j.findRecipeByIngredients(ingredientDTOs);
     }
 
-    public static boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
-        return recipeNeo4j.createRecipeIngredientsRelationship(recipeDTO, ingredientDTOs);
+    public static boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
+        return recipeNeo4j.createRecipeIngredientsRelationship(recipeDTO, ingredientNames);
     }
 
 }

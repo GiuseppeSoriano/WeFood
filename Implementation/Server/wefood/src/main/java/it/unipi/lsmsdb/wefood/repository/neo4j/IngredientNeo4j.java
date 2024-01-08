@@ -49,12 +49,13 @@ public class IngredientNeo4j implements IngredientNeo4jInterface {
         return findIngredientsUsedWithIngredient(ingredientDTO, 5);
     }  
 
-    public boolean createIngredientIngredientRelationship(List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
-        for(IngredientDTO ingredientDTO1: ingredientDTOs){
-            for(IngredientDTO ingredientDTO2: ingredientDTOs){
-                if(ingredientDTO1.neo4JgetId().equals(ingredientDTO2.neo4JgetId()))
+    public boolean createIngredientIngredientRelationship(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
+        
+        for(String ingredientName1: ingredientNames){
+            for(String ingredientName2: ingredientNames){
+                if(ingredientName1.equals(ingredientName2))
                     continue;
-                String query = "MATCH (i1:Ingredient {name: " + ingredientDTO1.getName() + "}), (i2:Ingredient {name: " + ingredientDTO2.getName() + "})\r\n" + //
+                String query = "MATCH (i1:Ingredient {name: " + ingredientName1 + "}), (i2:Ingredient {name: " + ingredientName2 + "})\r\n" + //
                                "MERGE (i1)-[r:USED_WITH]->(i2) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1";
                 List<Record> results = BaseNeo4j.executeQuery(query);
                 System.out.println(results.get(0));

@@ -11,7 +11,7 @@ import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 
 public interface PostMongoDBInterface {
 
-    boolean uploadPost(Post post, RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException;
+    String uploadPost(Post post, RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException;
     boolean modifyPost(Post post, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException;
     boolean deletePost(PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException;
 

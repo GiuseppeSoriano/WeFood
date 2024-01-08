@@ -457,7 +457,7 @@ User_A: {
 }
 ```
 
-## 5.2. Merging Process
+## 5.3. Merging Process
 After having cleaned the datasets, and having generated the missing information, it was possible to proceed with the merging process. This step was necessary to recreate the structure needed for the population of the databases. Also the merging process was performed using Python and Jupyter Notebook.
 
 Because the merging process aims to produce the final structure of the documents that will be stored in the document DB, the latter will follow a different partitioning compared to the one used in the cleaning process. Here the partitioning will be based on the collections of the document DB.
@@ -583,6 +583,173 @@ Being the main collection of *WeFood*, the `Post` collection was also the one th
         }
     ```
 
+3. Creation of the Posts involves relocating fields unrelated to the Recipes. Furthermore, the Posts themselves contain the Recipes.
+```javascript
+    Post_A: {
+        "id": 194491,
+        "idUser": 356062,
+        "description": "recipe for a basic pretzel crust i found in a magazine. i don't think i saw it posted here yet.",
+        "timestamp": "2006-11-07",
+        "recipe": {
+            "name": "pretzel crust",
+            "image": "https://img.sndimg.com/food/image/upload/ w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/ 19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg",
+            "steps": [
+                "preheat oven to 350",
+                "crush pretzels in a blender",
+                "add sugar and butter and mix well",
+                "press into a 9 inch pie plate",
+                "bake at 350 for 8 minutes and cool",
+                "add desired filling"
+            ],
+            "ingredients": [
+                {
+                    "foodItem": "Pretzel",
+                    "quantity": 176
+                },
+                {
+                    "foodItem": "Sugar",
+                    "quantity": 102
+                },
+                {
+                    "foodItem": "Butter",
+                    "quantity": 43
+                }
+            ],
+            "totalCalories": 1317.58
+        }
+    }
+```
+
+4. By considering `Comment_A` and `StarRanking_A`, it is possible to create the `comments` and `starRankings` arrays of the Posts. Specifically, each Comment or StarRanking is added to the corresponding post based on the `recipe_id` field.
+```javascript
+    Post_B: {
+        "id": 194491,
+        "idUser": 356062,
+        "description": "recipe for a basic pretzel crust i found in a magazine. i don't think i saw it posted here yet.",
+        "timestamp": "2006-11-07",
+        "recipe": {
+            "name": "pretzel crust",
+            "image": "https://img.sndimg.com/food/image/upload/ w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/ 19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg",
+            "steps": [
+                "preheat oven to 350",
+                "crush pretzels in a blender",
+                "add sugar and butter and mix well",
+                "press into a 9 inch pie plate",
+                "bake at 350 for 8 minutes and cool",
+                "add desired filling"
+            ],
+            "ingredients": [
+                {
+                    "foodItem": "Pretzel",
+                    "quantity": 176
+                },
+                {
+                    "foodItem": "Sugar",
+                    "quantity": 102
+                },
+                {
+                    "foodItem": "Butter",
+                    "quantity": 43
+                }
+            ],
+            "totalCalories": 1317.58
+        },
+        "comments": [
+            {
+                "user_id": 430471,
+                "timestamp": 1176076800000,
+                "text": "This tasted great, however, I couldn't get it to hold together good.  Either I didn't crush the pretzels small enough or I should have used a little more butter. But either way it was easy to make and tasted great.  I used it as a base for a cheesecake pudding with fresh strawberries on the top."
+            },
+            {
+                "user_id": 254614,
+                "timestamp": 1182902400000,
+                "text": "You have to crush the pretzels fine. There is a definite taste of salt, sugar and butter in the crust. It was great with a pudding pie filling but I would not make it with a fruit filling.You want the crust flavor to be a part of the dessert. Add waxed paper or non stick foil to press into pie pan, works very well. Thanks for posting."
+            }
+        ],
+        "starRankings": [
+            {
+                "user_id": 430471,
+                "vote": 3
+            },
+            {
+                "user_id": 254614,
+                "vote": 4
+            }
+        ]
+    }
+```
+
+---
+
+5. There isn't much left to do because the structure of the collection ii almost recreated. Indeed it is only necessary to convert the timestamp in long, add the avgStarRanking and add the username of Users everytime that apper a user id... using User_A
+```javascript
+    Post_C: {
+        "id": 194491,
+        "idUser": 356062,
+        "description": "recipe for a basic pretzel crust i found in a magazine. i don't think i saw it posted here yet.",
+        "timestamp": 1162857600000,
+        "recipe": {
+            "name": "pretzel crust",
+            "image": "https://img.sndimg.com/food/image/upload/w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg",
+            "steps": [
+                "preheat oven to 350",
+                "crush pretzels in a blender",
+                "add sugar and butter and mix well",
+                "press into a 9 inch pie plate",
+                "bake at 350 for 8 minutes and cool",
+                "add desired filling"
+            ],
+            "ingredients": [
+                {
+                    "quantity": 176,
+                    "name": "Pretzel"
+                },
+                {
+                    "quantity": 102,
+                    "name": "Sugar"
+                },
+                {
+                    "quantity": 43,
+                    "name": "Butter"
+                }
+            ],
+            "totalCalories": 1317.58
+        },
+        "comments": [
+            {
+                "timestamp": 1176076800000,
+                "text": "This tasted great, however, I couldn't get it to hold together good.  Either I didn't crush the pretzels small enough or I should have used a little more butter. But either way it was easy to make and tasted great.  I used it as a base for a cheesecake pudding with fresh strawberries on the top.",
+                "idUser": 430471,
+                "username": "bonnie_vincent_27"
+            },
+            {
+                "timestamp": 1182902400000,
+                "text": "You have to crush the pretzels fine. There is a definite taste of salt, sugar and butter in the crust. It was great with a pudding pie filling but I would not make it with a fruit filling.You want the crust flavor to be a part of the dessert. Add waxed paper or non stick foil to press into pie pan, works very well. Thanks for posting.",
+                "idUser": 254614,
+                "username": "christopher_bass_52"
+            }
+        ],
+        "starRankings": [
+            {
+                "vote": 3,
+                "idUser": 430471,
+                "username": "bonnie_vincent_27"
+            },
+            {
+                "vote": 4,
+                "idUser": 254614,
+                "username": "christopher_bass_52"
+            }
+        ],
+        "avgStarRanking": 3.5,
+        "username": "justin_alexander_34"
+    }
+```
+
+
+**User**:
+
+
 ---
 
 
@@ -621,36 +788,25 @@ Being the main collection of *WeFood*, the `Post` collection was also the one th
 ```
 
 
+dire anche il fatto dei caricamenti su mongoDb per ottenere gli  _id che ci dava lui e spiegare i collegamenti come si sono fatti lasciando tutte gli id...
+
+Dire anche il fatto dello script per neo4j che fa uso dei dati nel formato finale...
+
+
+//Aggiungere dimensione finale del dataset//? o no?
 
 
 
-//Aggiungere dimensione finale del dataset//
+5.1. Raw Dataset
+5.2. Data Cleaning
+5.3. Data Merging
 
 
-Recipes Merging:
-At this point, we merged the two files, to associate the images to the recipes. The file contains 231323 recipes. We then saved the ingredients not just as an array of string, but using the structure that we decided for our posts in the Post collection, generating for each of them the random quantity in the range we previously defined.
+---
 
-Ingredients Merging:
-We then removed duplicates from calories.csv, based on FoodItem field. At the end we merged ingredients.json with calories.csv using "replaced" and "FoodItem", to create a fixed structure of the possible ingredients that can be used in our social network. This association was made with a library called fuzzy wuzzy which merges string by likelyhood using Levenshtein Distance which is a metric used in information theory, linguistics, and computer science for measuring the difference between two sequences. 
-
-A questo punto, utilizzando il seguente script, abbiamo effettuato il matching per verosimiglianza, tra i file Ingredients.json e cleaned_calories.csv effettuando il matching tra le replaced (Ingredients.json) e FoodItem (cleaned_calories.csv).
-
-Mappatura dei valori 'replaced': Utilizza fuzzywuzzy per mappare ciascun valore di replaced nel DataFrame degli ingredienti al valore più simile nel DataFrame delle calorie.
-
-Comments Merging:
-We then eliminated all the comments of users that did not create a post (generated users which will be discussed later), to mantain a clean structure, ...  //Da rivedere//
-The final result was a file that contained:
-    user_id
-    recipe_id
-    timestamp
-    text
-
-
-
-## 5.4. Merging Process
-After having cleand the datasets we started to merge them in order to obtain the information needed for populating the databases.
-
-Here it is worth noticing that the data about the Users, because incomplete in the datasets we found (i.e. it was only provided the username of the users) was generated randomly using the Python library Faker. In this way the name and surname of the users are coherent with their username. The passwords are generated randomly too.
+Post collection around 700MB
+Ingredient 266KB
+User 69MB
 
 
 
@@ -1205,6 +1361,7 @@ MATCH (r:Recipe {_id: #})
 DETACH DELETE r
 ```
 
+(We do not decrement the times in this relationship for statistical purposes...)
 We need to update the times attribute of the relationships of the ingredients used together in the recipe contained in the post from Neo4j
 ```javascript
 MATCH (i1:Ingredient {name: String})-[r:USED_WITH]->(i2:Ingredient {name: String})

@@ -13,9 +13,9 @@ import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserNeo4jInterface
     //correggere le etichette con le nuove info
 public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
 
-    public boolean createUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
-        for(IngredientDTO ingredient: ingredientDTOs){
-            String query = "MATCH (u:User {username: '" + registeredUserDTO.getUsername() + "'}), (i:Ingredient {name: '" + ingredient.getName() + "'})\r\n" + //
+    public boolean createUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
+        for(String ingredientName: ingredientNames){
+            String query = "MATCH (u:User {username: '" + registeredUserDTO.getUsername() + "'}), (i:Ingredient {name: '" + ingredientName + "'})\r\n" + //
                            "MERGE (u)-[r:USED]->(i) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1";
             List<Record> results = BaseNeo4j.executeQuery(query);
             System.out.println(results.get(0));
@@ -23,9 +23,9 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         return true;
     }
 
-    public boolean deleteUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
-        for(IngredientDTO ingredient: ingredientDTOs){
-            String query = "MATCH (i1:Ingredient {name: '" + registeredUserDTO.getUsername() + "'})-[r:USED_WITH]->(i2:Ingredient {name: '" + ingredient.getName() + "'})\r\n" + //
+    public boolean deleteUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
+        for(String ingredientName: ingredientNames){
+            String query = "MATCH (i1:Ingredient {name: '" + registeredUserDTO.getUsername() + "'})-[r:USED_WITH]->(i2:Ingredient {name: '" + ingredientName + "'})\r\n" + //
                            "SET r.times = r.times - 1\r\n" + //
                            "IF r.times = 0 THEN\r\n" + //
                            "    DELETE r\r\n" + //

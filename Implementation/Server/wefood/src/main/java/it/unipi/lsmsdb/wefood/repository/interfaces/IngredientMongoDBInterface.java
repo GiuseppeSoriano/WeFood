@@ -13,4 +13,5 @@ public interface IngredientMongoDBInterface {
 
     List<Ingredient> getAllIngredients() throws MongoException, IllegalArgumentException, IllegalStateException;
 
+    boolean deleteIngredient(String _id) throws MongoException, IllegalArgumentException, IllegalStateException;
 }

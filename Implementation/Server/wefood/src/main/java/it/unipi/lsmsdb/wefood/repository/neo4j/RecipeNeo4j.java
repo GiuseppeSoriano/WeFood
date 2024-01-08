@@ -63,10 +63,10 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
         }
     }
 
-    public boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
+    public boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         
-        for(IngredientDTO ingredientDTO: ingredientDTOs){
-            String query = "MATCH (r:Recipe {_id: " + recipeDTO.getID() + "}), (i:Ingredient {name: '" + ingredientDTO.getName() + "'})\r\n" + //
+        for(String ingredientName: ingredientNames){
+            String query = "MATCH (r:Recipe {_id: " + recipeDTO.getID() + "}), (i:Ingredient {name: '" + ingredientName + "'})\r\n" + //
                            "CREATE (r)-[:CONTAINS]->(i)";
             List<Record> results = BaseNeo4j.executeQuery(query);
             System.out.println(results.get(0));
