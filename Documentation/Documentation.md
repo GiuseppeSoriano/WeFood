@@ -28,13 +28,13 @@ header-includes: |
 
 \pagenumbering{arabic}
 
-# Introduction
+# 1. Introduction
 *WeFood* is a Social Network where users can share their recipes and provide feedbacks about other users' recipes through comments and star rankings. It manages in a completely automatic way the calories of the recipes, so the users do not have to worry about that when they post a new recipe. Using the search engine, users can discover new top rated recipes to amaze their friends, filtering by ingredients or calories. Furthermore, users can follow other users and get suggestions about new users to follow.
 
-# Requirements
+# 2. Requirements
 Describing the requirements it is important to distinguish between functional and non-functional requirements.
 
-## Functional Requirements
+## 2.1. Functional Requirements
 The main functional requirements for *WeFood* can be organized by the actor that is involved in the use case.
 
 1. **Unregistered User**:
@@ -125,7 +125,7 @@ The main functional requirements for *WeFood* can be organized by the actor that
 
     3.10. Add a new Ingredient.
 
-## Non-Functional Requirements
+## 2.2. Non-Functional Requirements
 The non-functional requirements for *WeFood* are as follows.
 
 1. **Performance**: the overall system must be able to handle a request in less than `1.5` seconds, because the user experience would be negatively affected by a longer response time. Being a social network, it is necessary to have a good performance in order to provide a good user experience.
@@ -140,22 +140,25 @@ The non-functional requirements for *WeFood* are as follows.
 
 6. The **Back-End** must be written in Java.
 
-# Design
-After having defined the requirements, we can proceed with the design of the system. 
 
-## Use Case Diagram
+\newpage
+
+# 3. Design
+After having defined the requirements, it is possible to proceed with the design of the system. 
+
+## 3.1. Use Case Diagram
 Translating the requirements into a graphical representation we obtain the *UML Use Case Diagram* shown in Figure \ref{fig:use_case_diagram}.
 
 \begin{landscape}
 \begin{figure}
     \centering
-    \includegraphics[height=0.70\textheight]{Resources/"use_case_diagram.jpg"}
+    \includegraphics[height=0.71\textheight]{Resources/"use_case_diagram.jpg"}
     \caption{UML Use Case Diagram.}
     \label{fig:use_case_diagram}
 \end{figure}
 \end{landscape}
 
-## Class Diagram
+## 3.2. Class Diagram
 The *UML Class Diagram* shown in Figure \ref{fig:class_diagram} represents the main entities of the system and their relationships.
 
 \begin{figure}
@@ -165,310 +168,505 @@ The *UML Class Diagram* shown in Figure \ref{fig:class_diagram} represents the m
     \label{fig:class_diagram}
 \end{figure}
 
-DA METTERE IN IMPLEMENTAZIONE E RENDERE COERENTE CON MODELLO JAVA!
-More details on the classes and their attributes are as follows.
 
-**Admin**:
+\newpage
 
-- username: `String`
-- password: `String` (hashed)
+# 4. DataBases
+Before cleaning and preparing the dataset needed to populate the databases, it is necessary to define the structure of the latter. In particular, two different databases will be used: a document DB and a graph DB.
+
+## 4.1. Document DB
+The entities managed by the document DB are the following.
+
+- User (Unregistered User, Registered User, Admin);
+- Post;
+- Recipe;
+- Comment;
+- StarRanking;
+- Ingredient.
+
+### 4.1.1. Collections
+The collections designed for storing the information inside the document DB are three: User, Post and Ingredient.
+
+The structure of the User collection is as follows.
+
+```javascript
+[User]:
+{
+    _id: ObjectId('...'),
+    type: "Admin", # Applicable only for Admin
+    username: String, [UNIQUE]
+    password: String,
+    name: String, # Not Applicable for Admin
+    surname: String, # Not Applicable for Admin
+    posts: [{   
+                idPost: ObjectId('...'),
+                name: String, [REDUNDANCY]
+                image: String [REDUNDANCY]
+    }, ...] # Not Applicable for Admin 
+}
+```
+
+This collection is used both to store information about the Registered Users and the Admins. The field `type` is used to distinguish between the two types of Users, and it is set only for the Admins because they will be in minority compared to the Registered Users. The field `username` is required for the authentication of the Users and it is unique. So there cannot be two Users with the same username. The `password` is used for the authentication as well, and it contains the password provided by the User at the moment of the registration. For security reasons, the password is hashed before being stored in the database. The fields `name` and `surname` are used to store the name and the surname of the Registered Users and hence they are not applicable for the Admins for which it is not necessary to know their names and surnames. Lastly, the field `posts` is used to link (i.e. document linking) the Registered Users with their Posts. In particular, it contains a list of objects, each one containing the id of a Post and the `name` and the `image` of the Recipe of the Post. The fields `name` and `image` are redundant because they are already stored in the Post collection, but they are useful for the queries that involve the User collection because they avoid the need of joining the Post collection.
 
 
-**RegisteredUser**:
+The structure of the Post collection is a little bit more complex because it manages the information about the Posts, the Recipes, the Comments and the StarRankings. The decision of storing a Post in his own collection instead of embedding it in the document of the User that created it (i.e. document embedding) is due to several reasons:
 
-- username: `String`
-- password: `String` (hashed)
-- name: `String`
-- surname: `String`
+- a User can publish an unlimited number of Posts, and a Post can have an many Comments and StarRankings. So the size of the document of a User would have grown indefinitely and very quickly, and this would have lead to a degradation of the performance of the system;
+
+- the Posts are the main entities of the system and they are used in many queries. So having them in a separate collection ensures better performance by limiting the size of the individual document and taking advantage of tailored indexes.
+
+```javascript
+[Post]:
+{
+    _id: ObjectId('...'),
+    idUser: ObjectId('...'),
+    username: String, [REDUNDANCY]
+    description: String,
+    timestamp: Long,
+    recipe: {
+                name: String,
+                image: String,
+                steps: [String, ...],
+                totalCalories: Double, [REDUNDANCY]
+                ingredients: [{
+                                name: String,
+                                quantity: Double 
+                }, ...]
+    },
+    starRankings: [{
+                        idUser: ObjectId('...'),
+                        username: String, [REDUNDANCY]
+                        vote: Double
+    }, ...],
+    avgStarRanking: Double, [REDUNDANCY]
+    comments: [{
+                idUser: ObjectId('...'),
+                username: String, [REDUNDANCY]
+                text: String,
+                timestamp: Long
+    }, ...]
+}
+```
+
+Here the field `idUser` is used to link the Post with the Registered User that created it and `username` contains his/her username. The field `description` is used to store the description of the Post provided by the User. The field `timestamp` is used to store the timestamp of when the Post was uploaded. The field `recipe` is used to store the information about the Recipe contained in the Post. In particular, it contains the `name` and the `image` of the Recipe, the `steps` of the Recipe, the `totalCalories` of the Recipe and the list of `ingredients` of the Recipe together with the respective quantities in grams. It is important to notice that `image` does not contain the whole image, but just the URL of the image. The latter is stored or online or locally in the server. The field `starRankings` is used to store the information about the star rankings of the Post. In particular, it contains a list of objects, each one containing the id  and the `username` of the Registered User that provided the star ranking and the `vote`, that represents the vote expressed by the Registerd User. The field `avgStarRanking` is used to store the average of the star rankings of the Post. The field `comments` is used to store the information about the comments of the Post. It contains a list of objects, each one containing the id and the `username` of the RegisteUser that provided the comment, the `text` and the `timestamp` of the comment.
+
+The last collection is the Ingredient collection, that is used to store the information about the Ingredients. The structure of the Ingredient collection is very simple because it contains only the `name` and the `calories` per 100 grams of the Ingredient. The `name` is unique because does not make sense to have two Ingredients with the same name.
+
+```javascript
+[Ingredient]:
+{
+    _id: ObjectId('...'),
+    name: String, [UNIQUE]
+    calories: Double
+}
+```
+
+## 4.2. Graph DB
+The entities that are managed by the graph DB are just: User (Registered User), Recipe, Ingredient.
+
+### 4.2.1. Nodes
+The nodes designed for storing the information inside the graph DB are three, one for each entity.
+
+The User node is used to store the information about the Registered Users. Each node contains the `_id` of the Registered User that is stored in the User collection of the document DB and his/her `username`.
+
+```javascript
+(User):
+    - _id: String 
+    - username: String [REDUNDANCY]
+```
 
 
-**Post**:
+The Recipe node is used to store the information about the Recipes. Each node contains the `_id` of the Post that contains the Recipe, that is stored in the Post collection of the document DB and the `name` of the Recipe.
 
-- user: `RegisteredUser`
-- description: `String`
-- timestamp: `Date`
-- comments: `List<Comment>`
-- starRankings: `List<StarRanking>`
-- recipe: `Recipe`
+```javascript
+(Recipe):
+    - _id: String
+    - name: String [REDUNDANCY]
+```
+
+The Ingredient node is used to store the information about the Ingredients. Each node contains the `_id` of the Ingredient that is stored in the Ingredient collection of the document DB and the `name` of the Ingredient.
+
+```javascript
+(Ingredient):
+    - _id: String
+    - name: String [REDUNDANCY]
+```
+
+### 4.2.2. Relationships
+Between the described nodes are possible several relationships that are formally defined as follows.
 
 
-**Comment**:
+```javascript
+(User)-[:FOLLOWS]->(User)
+```
 
-- user: `RegisteredUser`
-- text: `String`
-- timestamp: `Date`
+This relationship allows Users to follow other Users. Two Users become friends when they follow each other.
 
 
-**StarRanking**:
+```javascript
+(User)-[:USED]->(Ingredient)
+       (times: int) [REDUNDANCY]
+```
 
-- user: `RegisteredUser`
-- vote: `Double`
+This relationship, instead, allows to quickly retrieve the Ingredients that have been used by the Users in their Recipes. The `times` attribute, in addition to being used for counting the number of times that an Ingredient has been used by a User, is used to keep track of the fact that the relationship with the Ingredient still can exist in other Recipes after the deletion of a Recipe by a User. Only when `times` becomes 0 the relationship can be deleted.
 
+
+```javascript
+(Ingredient)-[:USED_WITH]->(Ingredient)
+             (times: int) [REDUNDANCY]
+            [BIDIRECTIONAL]
+```
+
+This relationship allows to quickly retrieve the Ingredients that have been used together in the Users' Recipes. The `times` attribute is used in the same way as the previous relationship: it is used for counting the number of times that two Ingredients have been used together and to keep track of the fact that the relationship between two Ingredients still can exist in other Recipes after the deletion of a Recipe. Only when `times` becomes 0 the relationship can be deleted. This relationship is bidirectional because if an Ingredient `A` has been used with an Ingredient `B`, then also the Ingredient `B` has been used with the Ingredient `A`.
+
+
+```javascript
+(Recipe)-[:CONTAINS]->(Ingredient)
+```
+
+This last relationship allows to retrieve the Ingredients that are contained in a Recipe. 
+
+
+\newpage
+
+# 5. Dataset
+To populate the databases with a substantial volume of realistic data, datasets sourced from Kaggle were employed.
+
+## 5.1. Raw Dataset
+The intial raw datasets are related to the main functionalities of *WeFood*. In particular, datasets about recipes and ingredients were found.
+
+- Calories per 100 grams in Food Items [`[1]`](https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams)
+
+- Recipes and Interactions [`[2]`](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv)
+
+- Recipes and Reviews [`[3]`](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv)
+
+Contained in these datasets there are *almost* all the information needed to populate the databases. Indeed, in around 1 GB of raw data it is possible to find 2225 food items, over 500,000 recipes and 1,400,000 reviews. After a careful analysis, however, it was found that something was missing.
+
+1. Personal Information about the Users: only the username of the Users was available (`AuthorName ` in `recipes.csv` of [`[3]`](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv)).
+
+2. The quantity of each ingredient in the recipes: `RecipeIngredientQuantities` in `recipes.csv` of [`[3]`](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv) contains some numbers that could be useful for this purpose, but they are not clear and there is no documentation about them. Indeed there is no way to understand if they are the quantities of the ingredients in grams or in other units of measure (e.g. just to have an idea there numbers like the following: 1, 1/2, 3, 5, etc). Furthermore, there are a lot of `NA` values in this column.
+
+Everything else is in the datasets, and need only to be cleaned and appropriately merged to obtain the structure needed for the population of the databases.
+
+## 5.2. Cleaning Process
+There is the need to clean the datasets because in them there are plenty of information that are not useful for the purposes of *WeFood* and would result only in a waste of space. For achieving this goal, the datasets were analyzed in detail and the information that were not useful were discarded. The cleaning process was performed using Python and Jupyter Notebook.
+
+Below a separate description of the cleaning process for each entity identified in the design phase is provided.
+
+**Ingredient**:
+The starting point was: `ingr_map.pickle` of [`[2]`](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv). Here there are lots of fields useful for machine learning related tasks, but not for the purposes of *WeFood*. Only the fields strictly needed for the link with the recipes and with the dataset about the calories of the ingredients were kept. The final result is the following. To facilitate referencing in the subsequent merging process, each intermediate product generated during the cleaning process will be assigned a distinct name, starting with the following.
+
+```javascript
+Ingredient_A: {   
+    "raw_ingr":"pretzels", 
+    "replaced":"pretzel",
+    "id":5711
+}
+```
+
+The first field `raw_ingr` contains the original text of the ingredient, the one inserted by the user in the recipe. The second field `replaced` contains the unique representation of the ingredient and the last field `id` contains the unique identifier of the ingredient. 
+
+
+At this point, the file `calories.csv` of [`[1]`](https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams) was analyzed. In this file in addition to the calories per 100 grams of each ingredient there are also Food Categories associated to them. These categories were really useful because they allowed to devise a plan for dealing with the lack of the quantity of each ingredient in the recipes in a simple but effective way. The idea was the following:
+
+1. to associate to each `FoodCategory` two quantities, `quantity_min` and `quantity_max`, that are a realistic representation of the quantities used in real life for that specific `FoodCategory` (this labour intensive work was done with the support of an AI);
+
+2. to generate a random quantity for each ingredient in each recipe in the range `[quantity_min, quantity_max]`.
+
+This solution does not provide a precise quantity for each ingredient in each recipe, but it is a good approximation that won't produce unrealistic results. This means that there won't be a recipe where there are 500 grams of `salt`, because the maximum quantity of `salt` that can be used in a recipe is 10 grams (i.e. `Herbs&Spices`, the `FoodCategory` of `salt`, has `quantity_max` equal to 10 grams).
+
+After having removed some duplicates from `calories.csv`, based on the `FoodItem` field, the fields that were not useful were discarded. An example can be of help for understanding the final structure of the file.
+
+```javascript
+Ingredient_B: {   
+    "FoodCategory":"Pastries,Breads&Rolls",
+    "FoodItem":"Pretzel",
+    "Cals_per100grams":"338 cal",
+    "quantity_min":100,
+    "quantity_max":500
+}
+```
 
 **Recipe**:
+After the conversion of `RAW_recipes.csv` in `json` to have a more readable format, the file was analyzed in detail. Here there were lots of fields that could be discarded. The structure after the cleaning is, as before, better described by an example object.
 
-- name: `String`
-- image: `String`
-- steps: `List<String>`
-- ingredients: `Map<Ingredient, Double>`
+```javascript
+Recipe_A: {
+    "name":"pretzel crust",
+    "id":194491,
+    "contributor_id":356062,
+    "submitted":"2006-11-07",
+    "steps":"['preheat oven to 350', 'crush pretzels in a blender', 'add sugar and butter and mix well', 'press into a 9 inch pie plate', 'bake at 350 for 8 minutes and cool', 'add desired filling']",
+    "description":"recipe for a basic pretzel crust i found in a magazine. i don't think i saw it posted here yet.",
+    "ingredients":"['pretzels', 'sugar', 'butter']"
+}
+```
+
+Here the `name` is the name of the Recipe, `id` is the unique identifier of the Recipe and will be useful for linking the recipe with the interactions (i.e. comments and star rankings) of the dataset [`[2]`](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv). The `contributor_id` is the unique identifier of the User that created the Recipe. The `submitted` field is the timestamp of when the Recipe was uploaded. The `steps` field contains the steps of the Recipe, the `description` field contains the description that will be used for the Post that contains the Recipe and the `ingredients` field contains the list of the ingredients of the Recipe. Observing carefully the `steps` and the `ingredients` it is clear that they must be transformed into an array of strings because at the moment they are just strings. So the next step is the latter.
+
+From `recipes.csv` of [`[3]`](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv), instead, it is possible to retrieve the URLs of the images of the Recipes. Thus only the fields `RecipeId` and `Images` are retained. Note that not all the Recipes have an image, and some of them have more than one image. Where no image is available, a default image will be applied. Viceversa, if multiple images are present, only the first image will be utilized.
+
+```javascript
+Recipe_B: {
+    "RecipeId":194491,
+    "Image":"https:\/\/img.sndimg.com\/food\/image\/upload\/ w_555,h_416,c_fit,fl_progressive,q_95\/v1\/img\/recipes \/19\/44\/91\/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg"
+}
+```
+
+**Comment**:
+In `RAW_interactions.csv` of [`[2]`](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv) the reviews (i.e. comments of *WeFood*) and the ratings (i.e. star rankings of *WeFood*) are stored together, because to each review there is associated a rating. In *WeFood* it is not the same, because a Registered User can leave a comment without providing a star ranking and viceversa. So the first step was to separate the two types of interactions. 
+
+```javascript
+Comment_A: {
+    "user_id":430471,
+    "recipe_id":194491,
+    "timestamp":"2007-04-09"",
+    "text":"This tasted great, however, I couldn't get it to hold together good.  Either I didn't crush the pretzels small enough or I should have used a little more butter. But either way it was easy to make and tasted great.  I used it as a base for a cheesecake pudding with fresh strawberries on the top."
+}
+```
+
+**Star Ranking**:
+As previously mentioned, also the star rankings were stored in `RAW_interactions.csv` of [`[2]`](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv). For this reason the cleaning process was similar as the one used for the comments.
+
+```javascript
+StarRanking_A: {
+    "user_id":254614,
+    "recipe_id":194491,
+    "vote":4
+}
+```
+
+**Post**:
+Posts are an abstraction of the Recipes that was introduced in *WeFood*. In the datasets there is no information about them, so they will be created from scratch in the next merging process.
+
+**User**:
+As previously noted, another lack of the datasets was the absence of personal information about the Users. Indeed, only the username of the Users was available. For not having an inconsistent situation where the Users have a name and a surname that are not coherent with their username, the username was dropped as well. In this way, it was possible to generate all the information needed for the Users using the Python library `Faker`. In particular, the name and the surname of the Users were generated randomly, and the username was computed accordingly using the following structure: 
+
+    username = f"{name.lower()}_{surname.lower()}_{num}"
+    
+Where `num` is a random number in the range `[1, 99]`. All this is made paying attention to the fact that the username must be unique. By employing this approach, it was possible to create a User for each `contributor_id` of the Recipes (i.e. the Users who uploaded at least one Recipe). Users who did not upload any Recipe (i.e. who only appear in interactions) were excluded as a sufficient number of users was already available. The passwords (currently in plain) were generated randomly as well.
+
+```javascript
+User_A: {
+    "contributor_id":356062,
+    "name":"Justin",
+    "surname":"Alexander",
+    "username":"justin_alexander_34",
+    "password":"e6FMX30hGu"
+}
+```
+
+## 5.2. Merging Process
+After having cleaned the datasets, and having generated the missing information, it was possible to proceed with the merging process. This step was necessary to recreate the structure needed for the population of the databases. Also the merging process was performed using Python and Jupyter Notebook.
+
+Because the merging process aims to produce the final structure of the documents that will be stored in the document DB, the latter will follow a different partitioning compared to the one used in the cleaning process. Here the partitioning will be based on the collections of the document DB.
 
 
 **Ingredient**:
+Obtaining the final structure for the `Ingredient` collection is straightforward if `Ingredient_B` is considered. Indeed, it is sufficient to:
 
-- name: `String`
-- calories: `Double`
+- rename `FoodItem` to `name`;
+- rename `Cals_per100grams` to `calories`;
+- take the float value of `calories`;
+- discard `FoodCategory`, `quantity_min` and `quantity_max`.
 
+```javascript
+{
+    name: "Pretzel", 
+    calories: 338.0
+}
+```
 
-# Dataset
-For the population of the databases with a large amount of realistic data, we used datasets from Kaggle.
-
-## Raw Dataset
-The raw datasets from which we started are related to the main functionalities of *WeFood*. In particular we found datasets about recipes and ingredients.
-
-Source:
-Calories.info - Calories in Food Items (per 100 grams) https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams
-Food.com - Recipes and Interactions https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv
-Food.com - Recipes and Reviews https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv
-
-Description: A group of datasets which contains recipes posted by users with their respective reviews and interactions done by other users. There is also a list of food with some info about calories.
-
-Volume: Around 1 GB. Specifically: 2225 food items; 180K+ recipes and 700K+ recipe reviews; over 500,000 recipes and 1,400,000 reviews.
-
-Variety: Calories.info and Food.com
-
-## Cleaning Process
-The cleaning process was done using Python and Jupyter Notebook. After having analyzed the datasets in detail we decided to drop the information that was not useful for our purposes.
+The `_id` field will be automatically generated at the moment of the insertion in the database.
 
 
-## Merging Process
+**Post**:
+Being the main collection of *WeFood*, the `Post` collection was also the one that takes more time to be merged. For this reason it is necessary to describe a step at a time for not complicating too much the explanation.
+
+1. Merge of `Recipe_A` and `Recipe_B` on on `id` and `RecipeId` respectively for including the URLs of the images inside the Recipes. In this way `Recipe_AB` is obtained.
+
+2. The subsequent task involves converting the `ingredients` array of strings within `Recipe_A` into an array of objects. Each of these objects will include in the final structure the ingredient's `name` and its corresponding `quantity` expressed in grams. It is crucial to emphasize that the `name` of the ingredient must match an entry in the Ingredient collection. For achieving this:
+   
+   a. Firstly, `Ingredient_A` and `Ingredient_B` are matched on `replaced` and `FoodItem` respectively. For maximizing the number of matches, the matching was performed with the support of a Python Library called `fuzzywuzzy` which merges strings by likelyhood using *Levenshtein Distance*, which is a metric used in information theory, linguistics, and computer science for measuring the difference between two sequences. Thanks to this approach, no `Ingredient_A` was left unmatched with an `Ingredient_B`. An example of the matching is the following.
+   ```javascript
+        Ingredient_AB: {
+            "raw_ingr":"pretzels", 
+            "replaced":"pretzel",
+            "id":5711,
+            "FoodCategory":"Pastries,Breads&Rolls",
+            "FoodItem":"Pretzel",
+            "Cals_per100grams":"338 cal",
+            "quantity_min":100,
+            "quantity_max":500
+        }
+    ```
+    
+    b. By noticing that the `raw_ingr` field of `Ingredient_AB` contains the name of the ingredients as they are inserted by the users in the recipes, it possible to do a further match (this time using exact equality) between the latter and the strings contained in `ingredients` of `Recipe_AB`. 
+
+    c. At this point, `ingredients` will be an array of objects of the type of `Ingredient_AB`. For each of this object, it is possible to add a field `quantity` that is a random number in the range `[quantity_min, quantity_max]`. This is the quantity of the ingredient in grams that will be used in the recipe. After removing the no longer needed fields and making other minor modifications, here's the new structure.
+    ```javascript
+        Recipe_C: {
+            "name": "pretzel crust",
+            "id": 194491,
+            "contributor_id": 356062,
+            "submitted": "2006-11-07",
+            "steps": [
+                "preheat oven to 350",
+                "crush pretzels in a blender",
+                "add sugar and butter and mix well",
+                "press into a 9 inch pie plate",
+                "bake at 350 for 8 minutes and cool",
+                "add desired filling"
+            ],
+            "description": "recipe for a basic pretzel crust i found in a magazine. i don't think i saw it posted here yet.",
+            "ingredients": [
+                {
+                    "foodItem": "Pretzel",
+                    "Cals_per100grams": 338.0,
+                    "quantity": 176
+                },
+                {
+                    "foodItem": "Sugar",
+                    "Cals_per100grams": 405.0,
+                    "quantity": 102
+                },
+                {
+                    "foodItem": "Butter",
+                    "Cals_per100grams": 720.0,
+                    "quantity": 43
+                }
+            ],
+            "Image": "https://img.sndimg.com/food/image/upload/ w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/ 19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg"
+        }
+    ```
+
+    d. Now, exploiting the field `Cals_per100grams`, which has not been discarded yet, it is possible to compute the `totalCalories` of the recipe. This is done by executing the following operations for each recipe.
+    ```python
+        totalCalories = 0
+        for ingredient in ingredients:
+            totalCalories += ingredient["quantity"] * (ingredient["Cals_per100grams"]/100)
+    ```
+    
+    e. In the end, the desired structure for `ingredients` was obtained.
+    ```javascript
+        Recipe_D: {
+            "name": "pretzel crust",
+            "id": 194491,
+            "contributor_id": 356062,
+            "submitted": "2006-11-07",
+            "steps": [
+                "preheat oven to 350",
+                "crush pretzels in a blender",
+                "add sugar and butter and mix well",
+                "press into a 9 inch pie plate",
+                "bake at 350 for 8 minutes and cool",
+                "add desired filling"
+            ],
+            "description": "recipe for a basic pretzel crust i found in a magazine. i don't think i saw it posted here yet.",
+            "ingredients": [
+                {
+                    "foodItem": "Pretzel",
+                    "quantity": 176
+                },
+                {
+                    "foodItem": "Sugar",
+                    "quantity": 102
+                },
+                {
+                    "foodItem": "Butter",
+                    "quantity": 43
+                }
+            ],
+            "totalCalories": 1317.58,
+            "Image": "https://img.sndimg.com/food/image/upload/ w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/ 19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg"
+        }
+    ```
+
+---
+
+
+
+```javascript
+[Post]:
+{
+    _id: ObjectId('...'),
+    idUser: ObjectId('...'),
+    username: String, [REDUNDANCY]
+    description: String,
+    timestamp: Long,
+    recipe: {
+                name: String,
+                image: String,
+                steps: [String, ...],
+                totalCalories: Double, [REDUNDANCY]
+                ingredients: [{
+                                name: String,
+                                quantity: Double 
+                }, ...]
+    },
+    starRankings: [{
+                        idUser: ObjectId('...'),
+                        username: String, [REDUNDANCY]
+                        vote: Double
+    }, ...],
+    avgStarRanking: Double, [REDUNDANCY]
+    comments: [{
+                idUser: ObjectId('...'),
+                username: String, [REDUNDANCY]
+                text: String,
+                timestamp: Long
+    }, ...]
+}
+```
+
+
+
+
+
+//Aggiungere dimensione finale del dataset//
+
+
+Recipes Merging:
+At this point, we merged the two files, to associate the images to the recipes. The file contains 231323 recipes. We then saved the ingredients not just as an array of string, but using the structure that we decided for our posts in the Post collection, generating for each of them the random quantity in the range we previously defined.
+
+Ingredients Merging:
+We then removed duplicates from calories.csv, based on FoodItem field. At the end we merged ingredients.json with calories.csv using "replaced" and "FoodItem", to create a fixed structure of the possible ingredients that can be used in our social network. This association was made with a library called fuzzy wuzzy which merges string by likelyhood using Levenshtein Distance which is a metric used in information theory, linguistics, and computer science for measuring the difference between two sequences. 
+
+A questo punto, utilizzando il seguente script, abbiamo effettuato il matching per verosimiglianza, tra i file Ingredients.json e cleaned_calories.csv effettuando il matching tra le replaced (Ingredients.json) e FoodItem (cleaned_calories.csv).
+
+Mappatura dei valori 'replaced': Utilizza fuzzywuzzy per mappare ciascun valore di replaced nel DataFrame degli ingredienti al valore più simile nel DataFrame delle calorie.
+
+Comments Merging:
+We then eliminated all the comments of users that did not create a post (generated users which will be discussed later), to mantain a clean structure, ...  //Da rivedere//
+The final result was a file that contained:
+    user_id
+    recipe_id
+    timestamp
+    text
+
+
+
+## 5.4. Merging Process
 After having cleand the datasets we started to merge them in order to obtain the information needed for populating the databases.
 
 Here it is worth noticing that the data about the Users, because incomplete in the datasets we found (i.e. it was only provided the username of the users) was generated randomly using the Python library Faker. In this way the name and surname of the users are coherent with their username. The passwords are generated randomly too.
 
 
 
-
-*TO BE COMPLETED*
-
-Step #1:
-- Inside the the file called calories.csv we have the following structure:
-    FoodCategory,FoodItem,per100grams,Cals_per100grams,KJ_per100grams
-- Since quantities are missing in the file RAW_recipes.csv (we saw that in the second dataset, in the file recipes.csv there were numbers related to quantities but these one were really difficutl to understand, because there were no unit of measures and only little numebrs as 1, 2/3 etc. Furthermore no documentation was provided about the meaning of these numbers), we decided to generate meaningful ranges of values for each FoodCategory of the file calories.csv (with the support of ChatGPT). In this way we can associate to each ingriedient of a recipe a random number extracted from a uniform distribution in the range of values of the FoodCategory of that ingredient. In this way we can generate a recipe with random quantities of ingredients, that are meaningful and realistic (i.e. we can't have 500g of salt in a recipe).
-
-```
-Canned Fruit: 100-500
-Fruits: 50-300
-Tropical & Exotic Fruits: 50-300
-Potato Products: 100-500
-Vegetables: 50-400
-Fast Food: 50-500
-Pizza: 100-600
-Cheese: 50-200
-Cream Cheese: 50-200
-Milk & Dairy Products: 100-500
-Sliced Cheese: 50-200
-Yogurt: 100-250
-Beef & Veal: 100-500
-Cold Cuts & Lunch Meat: 50-200
-Meat: 100-500
-Offal & Giblets: 50-200
-Pork: 100-500
-Poultry & Fowl: 100-500
-Sausage: 100-300
-Venison & Game: 100-500
-Candy & Sweets: 30-100
-Ice Cream: 50-200
-(Fruit) Juices: 100-300
-Alcoholic Drinks & Beverages: 30-100
-Beer: 100-300
-Non-Alcoholic Drinks & Beverages: 100-300
-Soda & Soft Drinks: 100-300
-Wine: 50-200
-Cereal Products: 50-200
-Oatmeal, Muesli & Cereals: 50-200
-Pasta & Noodles: 100-400
-Dishes & Meals: 100-500
-Soups: 100-500
-Legumes: 50-300
-Nuts & Seeds: 30-100
-Oils & Fats: 10-100
-Vegetable Oils: 10-100
-Baking Ingredients: 5-200
-Fish & Seafood: 100-400
-Herbs & Spices: 1-10
-Pastries, Breads & Rolls: 100-500
-Sauces & Dressings: 10-100
-Spreads: 10-50
-```
-
-
-- Then we updated the file calories.csv by adding two new columns with the min and max values of the range of values for each FoodCategory. Here's the new structure of the file:
-    FoodCategory,FoodItem,per100grams,Cals_per100grams,KJ_per100grams,MinQuantity,MaxQuantity
-
-```python
-# First, let's read the contents of the 'quantities.txt' file to understand its structure
-file_path_quantities = 'quantities.txt'
-
-with open(file_path_quantities, 'r') as file:
-    quantities_content = file.read()
-
-# Parsing the quantities.txt content to create a dictionary mapping each food category to its quantity range
-quantities_dict = {}
-
-# Splitting the content into lines and then processing each line
-for line in quantities_content.split('\n'):
-    if line:
-        category, quantities = line.split(': ')
-        min_quantity, max_quantity = quantities.split('-')
-        quantities_dict[category] = (int(min_quantity), int(max_quantity))
-import pandas as pd
-
-# Next, let's read the contents of the 'calories.csv' file to understand its structure
-file_path_calories = 'calories.csv'
-
-# Reading the CSV file
-calories_df = pd.read_csv(file_path_calories)
-# Now, we will add the 'quantity_min' and 'quantity_max' columns to the calories dataframe based on the food category from the quantities dictionary
-# Function to extract quantity range from the dictionary
-def get_quantity_range(food_category, quantities_dict):
-    return quantities_dict.get(food_category, (None, None))
-
-# Applying the function to each row in the dataframe
-calories_df['quantity_min'], calories_df['quantity_max'] = zip(*calories_df['FoodCategory'].apply(lambda x: get_quantity_range(x, quantities_dict)))
-
-# The 'FoodCategory' values in the CSV file seem to have no spaces (e.g., 'CannedFruit' instead of 'Canned Fruit')
-# We need to adjust the key matching in the quantities dictionary accordingly
-# Adjusting the dictionary keys to match the format in the CSV
-adjusted_quantities_dict = {''.join(key.split()): value for key, value in quantities_dict.items()}
-
-# Reapplying the function with the adjusted dictionary
-calories_df['quantity_min'], calories_df['quantity_max'] = zip(*calories_df['FoodCategory'].apply(lambda x: get_quantity_range(x, adjusted_quantities_dict)))
-
-# Specifying the path for the new CSV file
-new_csv_file_path = 'updated_calories.csv'
-
-# Saving the dataframe to a CSV file
-calories_df.to_csv(new_csv_file_path, index=False)
-```
-
-
-Fare unique su updated_calories.csv su FoodItem (controlla esempio Bacon)
-Rieseguire il fuzzywuzzy script e vedere se ci sono duplicati su raw_ingr
-
-
 See Data...
 (# Load Estimation)
 
-# DataBase
-
-## Document DB
-
-Entities:
-- User
-- Post
-- Comment
-- StarRanking
-- Recipe
-
-Collections:
-- User
-- Post
-
-### Collections
-
-Structure of the collections:
-
-User
-{
-    _id: #,
-    type: "Admin", # Applicable only for Admin
-    username: String, [:unique]
-    password: String,
-    name: String, # Not applicable for Admin
-    surname: String, # Not applicable for Admin
-    posts: [{
-                idPost: #,
-                name: String, [R]
-                image: String_URL [R]
-    }, ...]
-}
-
-Post
-{
-    _id: #,
-    idUser: #,
-    username: String, [R]
-    description: String,
-    timestamp: Timestamp,
-    recipe: {
-                name: String,
-                image: String_URL,
-                steps: [String, ...],
-                totalCalories: Double, [R]
-                ingredients: [{
-                                name: String,
-                                quantity: Double 
-                }, ...]
-    },
-    avgStarRanking: Double, [R]
-    starRankings: [{
-                        idUser: #,
-                        username: String, [R]
-                        vote: Double
-    }, ...],
-    comments: [{
-                idUser: #,
-                username: String, [R]
-                text: String,
-                timestamp: Timestamp
-    }, ...]
-}
-
-Ingredient
-{
-    _id: #,
-    name: String, [:unique]
-    calories: Double
-}
 
 
-## Graph DB
 
-Entities:
-- User:
-    - _id (PK of User in Document DB)
-    - username [R]
-  
-- Recipe:
-    - _id (PK of Post in Document DB)
-    - name [R]
+\newpage
 
+# 6. Statistics and Queries
 
-- Ingredient:
-    - _id (PK of Ingredient in Document DB)
-    - name [R]
+## 6.1. CRUD operations
 
-
-Relationships:
-- User --> :FOLLOWS --> User
-
-- User --> :USED --> Ingredient
-           (times: int) [R]
-Here times keeps track of the fact that the relationship with the ingredient still exists in other recipes after the deletion of a recipe. If times = 0, even then the relationship can be deleted.
-
-- Ingredient --> :USED_WITH --> Ingredient  
-                 (times: int) [R]
-[This relationship is bidirectional]
-
-
-- Recipe --> :CONTAINS --> Ingredient
-
-
-# Statistics and Queries
-
-## CRUD operations
-
-### Create
+### 6.1.1. Create
 
 - Create a new user 
 - Create a new post / recipe
@@ -480,7 +678,7 @@ Here times keeps track of the fact that the relationship with the ingredient sti
 - Create a new user-ingredient relationship
 - Create a new ingredient-ingredient relationship
 
-#### MongoDB
+#### 6.1.1.1. MongoDB
 
 - Create a new user 
 ```javascript
@@ -551,7 +749,7 @@ db.Ingredient.insertOne({
 })
 ```
 
-#### Neo4j
+#### 6.1.1.2. Neo4j
 
 - Create a new user 
 ```javascript
@@ -611,7 +809,7 @@ Dobbiamo farlo in entrambi i versi!
 
 
 
-### Read
+### 6.1.2. Read
 
 - Show users
 - Shows posts
@@ -630,7 +828,7 @@ Dobbiamo farlo in entrambi i versi!
 - Show recipes filtering by the calories (lower bound and upper bound) (if the totalCalories is the same, we show the ones with the highest star ranking)
 - Show the most/least recent posts (timestamp) 
 
-#### MongoDB
+#### 6.1.2.1. MongoDB
 
 - Show users
 ```javascript
@@ -792,7 +990,7 @@ db.Post.find({
 
 
 
-#### Neo4j
+#### 6.1.2.2. Neo4j
 
 - Show followings / followed
 ```javascript
@@ -821,7 +1019,7 @@ RETURN r
 
 
 
-### Update
+### 6.1.3. Update
 
 - Update user's information
   - [username] : we have to mantain the consistency
@@ -841,7 +1039,7 @@ RETURN r
 - [Update ingredient-ingredient relationship] (it is done in the create operation)
 
 
-#### MongoDB
+#### 6.1.3.1. MongoDB
 
 - Update user's information
 
@@ -921,7 +1119,7 @@ db.Post.updateOne({
 ```
 
 
-### Delete
+### 6.1.4. Delete
 
 - [Delete user] : we give the possibility to the user to delete his/her own profile.
 
@@ -939,7 +1137,7 @@ When the user deletes his/her own profile, we have to delete all the posts of th
   
 - Delete ingredient-ingredient relationship (see delete a post)
 
-#### MongoDB
+#### 6.1.4.1. MongoDB
 
 - Delete user
 Before deleting a user we have to call delete post for each post of the user
@@ -1059,7 +1257,7 @@ db.Post.updateOne({
 })
 ```
 
-#### Neo4j
+#### 6.1.4.2. Neo4j
 
 - Delete following relationship
 ```javascript
@@ -1068,9 +1266,9 @@ DELETE r
 ```
 
 
-### Query
+### 6.1.5. Query
 
-#### Analytics
+#### 6.1.5.1. Analytics
 
 - Show most active users (da vedere) (DA ELIMINARE)
 - Show most followed users
@@ -1085,7 +1283,7 @@ DELETE r
 - To add others...
 
 
-##### MongoDB
+##### 6.1.5.1.1. MongoDB
 
 - Show posts with the highest star ranking (if the avgStarRanking is the same, we show the most recent one)
 ```javascript
@@ -1134,7 +1332,7 @@ db.Post.aggregate([
 db.Post.find( { "recipe.name": { $regex: "pork", $options: "i" } } )
 ```
 
-##### Neo4j
+##### 6.1.5.1.2. Neo4j
 
 - Show most followed users
 ```javascript
@@ -1177,7 +1375,7 @@ ORDER BY times ASC
 LIMIT 5
 ```
 
-#### Suggestions
+#### 6.1.5.2. Suggestions
 
 - Suggest users to follow (based on the user's friends)
 - Suggest users to follow (based on common ingredients)
@@ -1186,7 +1384,7 @@ LIMIT 5
 - Suggest most followed users
 - Suggest Users by Ingredient usage
 
-##### Neo4j
+##### 6.1.5.2.1. Neo4j
 
 - Suggest users to follow (based on the user's friends)
 ```javascript
@@ -1244,7 +1442,7 @@ LIMIT 10
 
 
 
-### Aggregations
+### 6.1.6. Aggregations
 
 - (#1)Show the ratio of interactions (number of comments / number of Posts  and  number of star rankings / number of Posts) and the average of avgStarRanking distinguishing among posts with and without images (i.e. no field image inside recipe)
 
@@ -1428,8 +1626,9 @@ db.Post.aggregate([
 ])
 ```
 
-# Redundancies
+# 7. Redundancies
 
+Ridondanze segnate come [REDUNDANCY] nella sezione database
 
 \begin{xltabular}{\textwidth}{X}
     \caption{Redundancies introduced into the model.}
@@ -1487,13 +1686,13 @@ db.Post.aggregate([
 
 
 
-# CONSISTENCY, AVAILABILITY AND PARTITION TOLERANCE [X]
+# 8. CONSISTENCY, AVAILABILITY AND PARTITION TOLERANCE [X]
 
-## Distributed Database Design
+## 8.1. Distributed Database Design
 
 According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.
 
-### Replicas
+### 8.1.1. Replicas
 We deployed mongoDB and neo4j with the following configuration:
 - MongoDB: 3 nodes (1 primary and 2 replicas DA VEDERE SE FARE 3 repliche con stessi poteri)
 - Neo4j: 1 node (1 primary) (we didn't implement the replicas because we would have needed the enterprise edition)
@@ -1505,12 +1704,12 @@ Write Operations:
 To ensure the low latency that we discussed before, write operations are considered successful 
 when just a replica node (da sistemare dopo che si è scelta configurazione) wrote the data. 
 
-### Handling inter database consistency
+### 8.1.2. Handling inter database consistency
 Using two different databases implemented redundancy of data, so for this reason any fail in insertion/up-date/deletion of data can cause inconsistencies between these to DBs, for this reason, in case of exceptions during write operations on one of the databases causes a rollback.
 If the operation succeeds on MongoDB, a success response is sent to the user, and the graph db becomes eventually consistent: if an exception occurs after this phase, a rollback operation starts bringing back the DBs in a state of consistency.
 Check write operations in the Replicas!
 
-## Sharding
+## 8.2. Sharding
 
 In our application as it is implemented it is not useful to design the sharding approach. The main reason behind this decision is that we give the users the possibility to find the posts using completely uncorrelated filters that are not linked by a particular relationship (i.e. such as a common field). Indeed if for example we decided to shard the post collection by the timestamp field, we would have latency issues when we have to find the posts using other filters (e.g. by totalCalories). Indeed we would have to query all the shards and then merge the results. This would be a very inefficient approach. For this reason we decided to not implement the sharding approach.
 
@@ -1518,7 +1717,7 @@ For example if WeFood were implemented by considering a category for each recipe
 
 We do not consider the sharding approach for the User collection because we do not expect the users to grow as much as the posts. Indeed we expect that the number of users will be much lower than the number of posts. For this reason we decided to not implement the sharding approach at all.
 
-## Configuration of MongoDB (ReplicaSet)
+## 8.3. Configuration of MongoDB (ReplicaSet)
 
 j = false (we do not handle sensitive data and there is no need to wait for the journal to be written to disk)
 w = 1 (write concern)
@@ -1545,9 +1744,9 @@ MongoCollection<Document> myColl = db.getCollection( s: "students")
 
 
 
-## Indexes and Constraints
+## 8.4. Indexes and Constraints
 
-### MongoDB
+### 8.4.1. MongoDB
 
 Possible Indexes:
 
@@ -1620,29 +1819,88 @@ try {
     }
 }
 
-## Indexes of Neo4j
+## 8.5. Indexes of Neo4j
 
 Da discutere dopo aver caricato tutti i dati ed eventualmente prevedere indice per ricette che sono davvero tante
 
 
-# System Architecture
+# 9. System Architecture
 
 MVC
 
 
-## Backend
+## 9.1. Backend
 
 
-## General description
+## 9.2. General description
 
-## Frameworks and components
+## 9.3. Frameworks and components
 
-# Implementation
-
-# PERFORMANCE TEST
+# 10. Implementation
 
 
-# USER MANUAL
 
-# BIBLIOGRAPHY
+More details on the classes and their attributes are as follows.
 
+**Admin**:
+
+- username: `String`
+- password: `String` (hashed)
+
+
+**RegisteredUser**:
+
+- username: `String`
+- password: `String` (hashed)
+- name: `String`
+- surname: `String`
+
+
+**Post**:
+
+- user: `RegisteredUser`
+- description: `String`
+- timestamp: `Date`
+- comments: `List<Comment>`
+- starRankings: `List<StarRanking>`
+- recipe: `Recipe`
+
+
+**Comment**:
+
+- user: `RegisteredUser`
+- text: `String`
+- timestamp: `Date`
+
+
+**StarRanking**:
+
+- user: `RegisteredUser`
+- vote: `Double`
+
+
+**Recipe**:
+
+- name: `String`
+- image: `String`
+- steps: `List<String>`
+- ingredients: `Map<Ingredient, Double>`
+
+
+**Ingredient**:
+
+- name: `String`
+- calories: `Double`
+
+# 11. PERFORMANCE TEST
+
+
+# 12. USER MANUAL
+
+# 13. References
+
+`[1]` Calories in Food Items (per 100 grams) - \url{https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams} - Accessed: December 2023.
+
+`[2]` Food.com Recipes and Interactions - \url{https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv} - Accessed: December 2023.
+
+`[3]` Food.com - Recipes and Reviews - \url{https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv} - Accessed: December 2023.
