@@ -45,25 +45,25 @@ public class StarRankingService {
         }
         catch(MongoException e){
             if(created)
-                System.err.println("Databases are not synchronized, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
+                System.err.println("MongoDB is not consistent, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
             System.out.println("MongoException in StarRanking.votePost: " + e.getMessage());
             return false;
         }
         catch(IllegalArgumentException e){
             if(created)
-                System.err.println("Databases are not synchronized, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
+                System.err.println("MongoDB is not consistent, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
             System.out.println("IllegalArgumentException in StarRanking.votePost: " + e.getMessage());
             return false;
         }
         catch(IllegalStateException e){
             if(created)
-                System.err.println("Databases are not synchronized, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
+                System.err.println("MongoDB is not consistent, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
             System.out.println("IllegalStateException in StarRanking.votePost: " + e.getMessage());
             return false;
         }
         catch(Exception e){
             if(created)
-                System.err.println("Databases are not synchronized, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
+                System.err.println("MongoDB is not consistent, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
             System.out.println("Exception in StarRanking.votePost: " + e.getMessage());
             return false;
         }
@@ -79,7 +79,7 @@ public class StarRankingService {
             }
             catch(MongoException e){
                 System.out.println("MongoException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.setAverage(user, postDTO);
+
                 return false;
             }
             catch(IllegalArgumentException e){

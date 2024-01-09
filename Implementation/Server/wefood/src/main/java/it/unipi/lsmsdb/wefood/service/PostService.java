@@ -155,6 +155,10 @@ public class PostService {
             catch(Neo4jException e){
                 System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
                 RecipeDAO.deleteRecipe(recipeDTO);
+                // deleteUserUsedIngredient does not have to be called because
+                // the method call createUserUsedIngredient is the last one to be
+                // executed and if it throws an exception, so it's not necessary 
+                // to execute the rollback                
                 return false;
             }
             catch(IllegalStateException e){
