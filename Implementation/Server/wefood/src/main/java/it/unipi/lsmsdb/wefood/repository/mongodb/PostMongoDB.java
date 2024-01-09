@@ -97,12 +97,12 @@ public class PostMongoDB implements PostMongoDBInterface{
 
         return posts;
     }
-    
-    private String ingredientDTOsToString(List<IngredientDTO> ingredientDTOs) {
+
+    private String ingredientNamesToString(List<String> ingredientNames) {
         String str = "[";
-        for(int i=0; i<ingredientDTOs.size(); i++){
-            str += "'" + ingredientDTOs.get(i).getName() + "'";
-            if(i != ingredientDTOs.size()-1){
+        for(int i=0; i<ingredientNames.size(); i++){
+            str += "'" + ingredientNames.get(i) + "'";
+            if(i != ingredientNames.size()-1){
                 str += ", ";
             }
         }
@@ -110,7 +110,7 @@ public class PostMongoDB implements PostMongoDBInterface{
         return str;
     }
     
-    public List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, long hours, int limit) {
+    public List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<String> ingredientNames, long hours, int limit) {
         long curr_timestamp = System.currentTimeMillis();
         long milliseconds = hours * 3600000;
         long timestamp = curr_timestamp - milliseconds; 
@@ -119,7 +119,7 @@ public class PostMongoDB implements PostMongoDBInterface{
                        "        $gte: " + timestamp + "\r\n" + //
                        "    },\r\n" + //
                        "    \"recipe.ingredients.name\": {\r\n" + //
-                       "        $all: " + ingredientDTOsToString(ingredientDTOs) + "\r\n" + //
+                       "        $all: " + ingredientNamesToString(ingredientNames) + "\r\n" + //
                        "    }\r\n" + //
                        "}).sort({\r\n" + //
                        "    avgStarRanking: -1\r\n" + //

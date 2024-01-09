@@ -123,8 +123,8 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         return suggestedUsers;
     }
 
-    public List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException {
-        String query = "MATCH (u:User)-[r:USED]->(i:Ingredient {name: '" + ingredientDTO.getName() + "'})\r\n" + //
+    public List<RegisteredUserDTO> findUsersByIngredientUsage(String ingredientName) throws IllegalStateException, Neo4jException {
+        String query = "MATCH (u:User)-[r:USED]->(i:Ingredient {name: '" + ingredientName + "'})\r\n" + //
                        "RETURN u, i, r.times AS times\r\n" + //
                        "ORDER BY times DESC\r\n" + //
                        "LIMIT 20";

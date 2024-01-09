@@ -307,9 +307,9 @@ public class PostService {
         }
     }
 
-    public List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, long hours, int limit) {
+    public List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<String> ingredientNames, long hours, int limit) {
         try{
-            return PostDAO.browseMostRecentTopRatedPostsByIngredients(ingredientDTOs, hours, limit);
+            return PostDAO.browseMostRecentTopRatedPostsByIngredients(ingredientNames, hours, limit);
         }
         catch(MongoException e){
             System.out.println("MongoException in browseMostRecentTopRatedPostsByIngredients: " + e.getMessage());
@@ -519,9 +519,9 @@ public class PostService {
         }
     }
 
-    public List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredientDTOs) {
+    public List<RecipeDTO> findRecipeByIngredients(List<String> ingredientNames) {
         try{
-            return RecipeDAO.findRecipeByIngredients(ingredientDTOs);
+            return RecipeDAO.findRecipeByIngredients(ingredientNames);
         }
         catch(Neo4jException e){
             System.out.println("Neo4jException in findRecipeByIngredients: " + e.getMessage());

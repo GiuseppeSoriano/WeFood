@@ -19,8 +19,8 @@ public class RecipeDAO {
         return recipeNeo4j.deleteRecipe(recipeDTO);
     }
 
-    public static List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException {
-        return recipeNeo4j.findRecipeByIngredients(ingredientDTOs);
+    public static List<RecipeDTO> findRecipeByIngredients(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
+        return recipeNeo4j.findRecipeByIngredients(ingredientNames);
     }
 
     public static boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {

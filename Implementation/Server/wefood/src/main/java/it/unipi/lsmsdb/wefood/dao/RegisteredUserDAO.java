@@ -92,8 +92,8 @@ public class RegisteredUserDAO {
         return registeredUserNeo4j.findMostFollowedUsers();
     } //valid also for showing them
 
-    public static List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException{
-        return registeredUserNeo4j.findUsersByIngredientUsage(ingredientDTO);
+    public static List<RegisteredUserDTO> findUsersByIngredientUsage(String ingredientName) throws IllegalStateException, Neo4jException{
+        return registeredUserNeo4j.findUsersByIngredientUsage(ingredientName);
     }
 
 }

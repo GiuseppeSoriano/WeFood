@@ -12,7 +12,7 @@ public interface RecipeNeo4jInterface {
 
     boolean deleteRecipe(RecipeDTO recipeDTO) throws IllegalStateException, Neo4jException;
 
-    List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredientDTOs) throws IllegalStateException, Neo4jException;
+    List<RecipeDTO> findRecipeByIngredients(List<String> ingredientNames) throws IllegalStateException, Neo4jException;
 
     boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException;
 

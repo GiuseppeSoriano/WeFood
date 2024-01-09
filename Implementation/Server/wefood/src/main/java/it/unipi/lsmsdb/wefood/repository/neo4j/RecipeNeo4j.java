@@ -35,11 +35,11 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
         return true;        
     }
 
-    private String ingredientDTOsToString(List<IngredientDTO> ingredientDTOs) {
+    private String ingredientNamesToString(List<String> ingredientNames) {
         String str = "[";
-        for(int i=0; i<ingredientDTOs.size(); i++){
-            str += "'" + ingredientDTOs.get(i).getName() + "'";
-            if(i != ingredientDTOs.size()-1){
+        for(int i=0; i<ingredientNames.size(); i++){
+            str += "'" + ingredientNames.get(i) + "'";
+            if(i != ingredientNames.size()-1){
                 str += ", ";
             }
         }
@@ -47,9 +47,9 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
         return str;
     }
 
-    public List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredients) throws IllegalStateException, Neo4jException {
+    public List<RecipeDTO> findRecipeByIngredients(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         String query = "MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)\r\n" + //
-                       "WHERE i.name IN " + ingredientDTOsToString(ingredients) + "\r\n" + //
+                       "WHERE i.name IN " + ingredientNamesToString(ingredientNames) + "\r\n" + //
                        "RETURN r";
         List<Record> results = BaseNeo4j.executeQuery(query);
         if (results.isEmpty()) {

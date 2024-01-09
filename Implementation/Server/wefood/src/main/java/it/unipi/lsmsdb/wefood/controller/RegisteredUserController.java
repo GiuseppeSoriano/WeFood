@@ -75,7 +75,7 @@ public class RegisteredUserController {
     }
 
     @PostMapping("/findUsersByIngredientUsage")
-    public ResponseEntity<List<RegisteredUserDTO>> findUsersByIngredientUsage(@RequestBody IngredientDTO request){
+    public ResponseEntity<List<RegisteredUserDTO>> findUsersByIngredientUsage(@RequestBody String request){
         return ResponseEntity.ok(registeredUserService.findUsersByIngredientUsage(request));
     }
 }

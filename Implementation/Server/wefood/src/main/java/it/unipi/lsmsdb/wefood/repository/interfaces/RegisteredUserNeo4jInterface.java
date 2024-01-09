@@ -21,5 +21,5 @@ public interface RegisteredUserNeo4jInterface {
     List<RegisteredUserDTO> findUsersToFollowBasedOnUserFriends(RegisteredUserDTO user) throws IllegalStateException, Neo4jException;
     List<RegisteredUserDTO> findMostFollowedUsers() throws IllegalStateException, Neo4jException; //valid also for showing them
 
-    List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException;
+    List<RegisteredUserDTO> findUsersByIngredientUsage(String ingredientName) throws IllegalStateException, Neo4jException;
 }

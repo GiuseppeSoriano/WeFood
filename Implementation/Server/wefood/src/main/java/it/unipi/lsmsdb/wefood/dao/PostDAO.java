@@ -30,8 +30,8 @@ public class PostDAO {
         return postMongoDB.browseMostRecentTopRatedPosts(hours, limit);
     }
 
-    public static List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, long hours, int limit) throws MongoException, IllegalArgumentException, IllegalStateException {
-        return postMongoDB.browseMostRecentTopRatedPostsByIngredients(ingredientDTOs, hours, limit);
+    public static List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<String> ingredientNames, long hours, int limit) throws MongoException, IllegalArgumentException, IllegalStateException {
+        return postMongoDB.browseMostRecentTopRatedPostsByIngredients(ingredientNames, hours, limit);
     }
 
     public static List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, long hours, int limit) throws MongoException, IllegalArgumentException, IllegalStateException {

@@ -16,7 +16,7 @@ public interface PostMongoDBInterface {
     boolean deletePost(PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException;
 
     List<PostDTO> browseMostRecentTopRatedPosts(long hours, int limit) throws MongoException, IllegalArgumentException, IllegalStateException;
-    List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, long hours, int limit) throws MongoException, IllegalArgumentException, IllegalStateException;
+    List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<String> ingredientNames, long hours, int limit) throws MongoException, IllegalArgumentException, IllegalStateException;
     List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, long hours, int limit) throws MongoException, IllegalArgumentException, IllegalStateException;
     
     Post findPostByPostDTO(PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException;

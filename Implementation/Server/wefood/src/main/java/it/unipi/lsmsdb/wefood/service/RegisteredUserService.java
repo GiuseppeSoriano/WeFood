@@ -275,9 +275,9 @@ public class RegisteredUserService {
         }
     }
 
-    public List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) {
+    public List<RegisteredUserDTO> findUsersByIngredientUsage(String ingredientName) {
         try{
-            return RegisteredUserDAO.findUsersByIngredientUsage(ingredientDTO);
+            return RegisteredUserDAO.findUsersByIngredientUsage(ingredientName);
         }
         catch(Neo4jException e){
             System.out.println("Neo4jException in RegisteredUserDAO.findUsersByIngredientUsage: " + e.getMessage());
