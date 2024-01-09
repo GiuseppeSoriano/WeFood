@@ -21,17 +21,17 @@ public class UnregisteredUserService {
                 return UnregisteredUserDAO.createRegisteredUser(new RegisteredUserDTO(registeredUser.getId(), username));
             }
             catch(Neo4jException e){
-                RegisteredUserDAO.cancelUser(registeredUser.getUsername());
+                RegisteredUserDAO.cancelUserMongoDB(registeredUser.getUsername());
                 System.out.println("Exception in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
                 return false;
             }
             catch(IllegalStateException e){
-                RegisteredUserDAO.cancelUser(registeredUser.getUsername());
+                RegisteredUserDAO.cancelUserMongoDB(registeredUser.getUsername());
                 System.out.println("Exception in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
                 return false;
             }
             catch(Exception e){
-                RegisteredUserDAO.cancelUser(registeredUser.getUsername());
+                RegisteredUserDAO.cancelUserMongoDB(registeredUser.getUsername());
                 System.out.println("Exception in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
                 return false;
             }

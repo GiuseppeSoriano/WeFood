@@ -173,9 +173,9 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         return true;
     };
 
-    public boolean cancelUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public boolean cancelUserMongoDB(String registeredUsername) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.deleteOne({\r\n" + //
-                       "    username: '" + username + "'\r\n" + //
+                       "    username: '" + registeredUsername + "'\r\n" + //
                        "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
         System.out.println(result.get(0).toJson());
@@ -218,5 +218,4 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;
     }
-    
 }

@@ -41,10 +41,7 @@ public class RegisteredUserDAO {
     public static boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         return registeredUserMongoDB.unbanUser(username);
     }
-    public static boolean cancelUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
-        return registeredUserMongoDB.cancelUser(username);
-    }
-
+        
     public static boolean addPost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         return registeredUserMongoDB.addPost(user, postDTO);
     }
@@ -52,6 +49,11 @@ public class RegisteredUserDAO {
     public static boolean removePost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         return registeredUserMongoDB.removePost(user, postDTO);
     }
+
+    public static boolean cancelUserMongoDB(String registeredUsername) throws MongoException, IllegalArgumentException, IllegalStateException {
+        return registeredUserMongoDB.cancelUserMongoDB(registeredUsername);
+    }
+
 
     // Neo4j
     public static boolean createUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
@@ -93,9 +95,5 @@ public class RegisteredUserDAO {
     public static List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException{
         return registeredUserNeo4j.findUsersByIngredientUsage(ingredientDTO);
     }
-
-    public static void cancelUser(RegisteredUser registeredUser) {
-    }
-
 
 }

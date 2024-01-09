@@ -466,4 +466,22 @@ public class PostService {
         }
     }
 
+    public List<RecipeDTO> findRecipeByIngredients(List<IngredientDTO> ingredientDTOs) {
+        try{
+            return RecipeDAO.findRecipeByIngredients(ingredientDTOs);
+        }
+        catch(Neo4jException e){
+            System.out.println("Neo4jException in findRecipeByIngredients: " + e.getMessage());
+            return null;
+        }
+        catch(IllegalStateException e){
+            System.out.println("IllegalStateException in findRecipeByIngredients: " + e.getMessage());
+            return null;
+        }
+        catch(Exception e){
+            System.out.println("Exception in findRecipeByIngredients: " + e.getMessage());
+            return null;
+        }
+    }
+
 }

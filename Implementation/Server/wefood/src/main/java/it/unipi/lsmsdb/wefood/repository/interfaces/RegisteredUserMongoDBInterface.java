@@ -24,5 +24,6 @@ public interface RegisteredUserMongoDBInterface {
 
     boolean banUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException;
     boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException;
-    boolean cancelUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException;
+    
+    boolean cancelUserMongoDB(String registeredUsername) throws MongoException, IllegalArgumentException, IllegalStateException;
 }
