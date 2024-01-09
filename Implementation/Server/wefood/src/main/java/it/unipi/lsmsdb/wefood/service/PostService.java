@@ -204,13 +204,12 @@ public class PostService {
                 // Databases are consistent again
             }
             else 
-                // MongoDB is inconsistent, Post has not been removed from User posts
                 System.err.println("Databases are not synchronized, Post " + id + " has not been added only in MongoDB");
             return false;
         }
     }
 
-    public static boolean modifyPost(Post post, PostDTO postDTO) {
+    public boolean modifyPost(Post post, PostDTO postDTO) {
         try{
             return PostDAO.modifyPost(post, postDTO);
         }
@@ -232,11 +231,61 @@ public class PostService {
         }
     }
 
-    public static boolean deletePost(PostDTO postDTO) {
+    private boolean deletePostNeo4j(RegisteredUser user, PostDTO postDTO, Post post){
+        RecipeDTO recipeDTO = new RecipeDTO(postDTO.getRecipeName(), postDTO.getImage());
+        List<String> ingredients = new ArrayList<String>();
+        for (Map.Entry<String, Double> entry : post.getRecipe().getIngredients().entrySet()) {
+            ingredients.add(entry.getKey());
+        }
+        
+        try{
+            RecipeDAO.deleteRecipe(recipeDTO);
+            try{
+                RegisteredUserDAO.deleteUserUsedIngredient(new RegisteredUserDTO(user.getId(), user.getUsername()), ingredients);
+                return true;
+            }
+            catch(Neo4jException e){
+                System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
+                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + recipeDTO.getName() + " have not been deleted");
+                return false;
+            }
+            catch(IllegalStateException e){
+                System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
+                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + recipeDTO.getName() + " have not been deleted");
+                return false;
+            }
+            catch(Exception e){
+                System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
+                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + recipeDTO.getName() + " have not been deleted");
+                return false;
+            }
+        }
+        catch(Neo4jException e){
+            System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
+            return false;
+        }
+        catch(IllegalStateException e){
+            System.out.println("IllegalStateException in uploadPostNeo4j: " + e.getMessage());
+            return false;
+        }
+        catch(Exception e){
+            System.out.println("Exception in uploadPostNeo4j: " + e.getMessage());
+            return false;
+        }
     }
 
+    public boolean deletePost(Post post, PostDTO postDTO, RegisteredUser user) {
+        if(!deletePostMongoDB(postDTO, user))
+            return false;
+        if(deletePostNeo4j(user, postDTO, post))
+            return true;
+        else{
+            System.err.println("Databases are not synchronized, Recipe " + postDTO.getId() + " has not been deleted in Neo4j");
+            return false;
+        }
+    }
 
-    public static List<PostDTO> browseMostRecentTopRatedPosts(long hours, int limit) {
+    public List<PostDTO> browseMostRecentTopRatedPosts(long hours, int limit) {
         try{
             return PostDAO.browseMostRecentTopRatedPosts(hours, limit);
         }
@@ -258,7 +307,7 @@ public class PostService {
         }
     }
 
-    public static List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, long hours, int limit) {
+    public List<PostDTO> browseMostRecentTopRatedPostsByIngredients(List<IngredientDTO> ingredientDTOs, long hours, int limit) {
         try{
             return PostDAO.browseMostRecentTopRatedPostsByIngredients(ingredientDTOs, hours, limit);
         }
@@ -280,7 +329,7 @@ public class PostService {
         }        
     }
 
-    public static List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, long hours, int limit) {
+    public List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, long hours, int limit) {
         try{
             return PostDAO.browseMostRecentPostsByCalories(minCalories, maxCalories, hours, limit);
         }
@@ -302,7 +351,7 @@ public class PostService {
         } 
     }
 
-    public static Post findPostByPostDTO(PostDTO postDTO) {
+    public Post findPostByPostDTO(PostDTO postDTO) {
         try{
             return PostDAO.findPostByPostDTO(postDTO);
         }
@@ -324,7 +373,7 @@ public class PostService {
         }
     }
 
-    public static Post findPostById(String _id) {
+    public Post findPostById(String _id) {
         try{
             return PostDAO.findPostById(_id);
         }
@@ -346,7 +395,7 @@ public class PostService {
         }    
     }
 
-    public static List<PostDTO> findPostsByRecipeName(String recipeName) {
+    public List<PostDTO> findPostsByRecipeName(String recipeName) {
         try{
             return PostDAO.findPostsByRecipeName(recipeName);
         }
@@ -373,7 +422,7 @@ public class PostService {
     // and  number of star rankings / number of Posts) and the average of 
     // avgStarRanking distinguishing among posts with and without images 
     // (i.e. no field image inside recipe) (Admin)
-    public static Map<String, Double> interactionsAnalysis() {
+    public Map<String, Double> interactionsAnalysis() {
         try{
             return PostDAO.interactionsAnalysis();
         }
@@ -399,7 +448,7 @@ public class PostService {
     // Given a User, show the number of comments he/she has done, 
     // the number of star rankings he/she has done and the average 
     // of this star rankings (Admin and RegisteredUser)
-    public static Map<String, Double> userInteractionsAnalysis(String username) {
+    public Map<String, Double> userInteractionsAnalysis(String username) {
         try{
             return PostDAO.userInteractionsAnalysis(username);
         }
@@ -425,7 +474,7 @@ public class PostService {
     // After filtering recipes by name, retrieve the average 
     // amount of calories of first 10 recipes ordered by 
     // descending avgStarRanking (Admin and RegisteredUser)
-    public static Double caloriesAnalysis(String recipeName) {
+    public Double caloriesAnalysis(String recipeName) {
         try{
             return PostDAO.caloriesAnalysis(recipeName);
         }
@@ -448,7 +497,7 @@ public class PostService {
     }
 
     // Given a user, show the average totalCalories of recipes publishished by him/her.
-    public static Double averageTotalCaloriesByUser(String username) {
+    public Double averageTotalCaloriesByUser(String username) {
         try{
             return PostDAO.averageTotalCaloriesByUser(username);
         }

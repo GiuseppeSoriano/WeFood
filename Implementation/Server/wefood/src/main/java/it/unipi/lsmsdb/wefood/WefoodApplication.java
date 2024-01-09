@@ -12,13 +12,13 @@ import it.unipi.lsmsdb.wefood.repository.base.BaseNeo4j;
 public class WefoodApplication {
 
 	public static void main(String[] args) {
-		BaseMongoDB.openMongoClient(); //?
-		BaseNeo4j.openNeo4jDriver();
+		// BaseMongoDB.openMongoClient();
+		// BaseNeo4j.openNeo4jDriver();
 
 		SpringApplication.run(WefoodApplication.class, args); //MAIN APPLICATION
 		
-		BaseMongoDB.closeMongoClient();
-		BaseNeo4j.closeNeo4jDriver();
+		// BaseMongoDB.closeMongoClient();
+		// BaseNeo4j.closeNeo4jDriver();
 	}
 
 }

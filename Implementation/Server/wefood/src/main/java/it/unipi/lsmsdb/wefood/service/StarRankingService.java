@@ -1,5 +1,6 @@
 package it.unipi.lsmsdb.wefood.service;
 
+import it.unipi.lsmsdb.wefood.dao.PostDAO;
 import it.unipi.lsmsdb.wefood.dao.StarRankingDAO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 
@@ -8,38 +9,45 @@ import org.springframework.stereotype.Service;
 import com.mongodb.MongoException;
 
 import it.unipi.lsmsdb.wefood.model.StarRanking;
+import it.unipi.lsmsdb.wefood.model.Post;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 
 @Service
 public class StarRankingService {
     
-    //aggiungere la consistenza dell'average star ranking
     public boolean votePost(RegisteredUser user, StarRanking starRanking, PostDTO postDTO) {
         boolean created = false;
         try{
+            Post post = PostDAO.findPostByPostDTO(postDTO); // to update redundancies
             created = StarRankingDAO.votePost(user, starRanking, postDTO);
-            // Compute the new average star ranking
             try{
-                StarRankingDAO.computeAverageStarRanking(postDTO);
+                // Computing the new average star ranking
+                Double oldAvgStarRanking = post.getAvgStarRanking();
+                Double oldNumStarRanking = (double) post.getStarRankings().size();
+                Double newAvgStarRanking = starRanking.getVote();
+                if(oldNumStarRanking > 0.0)
+                    newAvgStarRanking = (oldAvgStarRanking * oldNumStarRanking + starRanking.getVote()) / (oldNumStarRanking + 1);
+                StarRankingDAO.updateAvgStarRanking(postDTO, newAvgStarRanking);
+                return true;
             }
             catch(MongoException e){
                 System.out.println("MongoException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.deleteVote(user, postDTO);
+                StarRankingDAO.deleteVote(starRanking, postDTO);
                 return false;
             }
             catch(IllegalArgumentException e){
                 System.out.println("IllegalArgumentException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.deleteVote(user, postDTO);
+                StarRankingDAO.deleteVote(starRanking, postDTO);
                 return false;
             }
             catch(IllegalStateException e){
                 System.out.println("IllegalStateException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.deleteVote(user, postDTO);
+                StarRankingDAO.deleteVote(starRanking, postDTO);
                 return false;
             }
             catch(Exception e){
                 System.out.println("Exception in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.deleteVote(user, postDTO);
+                StarRankingDAO.deleteVote(starRanking, postDTO);
                 return false;
             }
         }
@@ -69,32 +77,41 @@ public class StarRankingService {
         }
     }
 
-    public boolean deleteVote(RegisteredUser user, PostDTO postDTO) {
+    public boolean deleteVote(RegisteredUser user, StarRanking starRanking, PostDTO postDTO) {
         boolean deleted = false;
         try{
-            deleted = StarRankingDAO.deleteVote(user, postDTO);
+            Post post = PostDAO.findPostByPostDTO(postDTO); // to update redundancies
+            deleted = StarRankingDAO.deleteVote(starRanking, postDTO);
             // Compute the new average star ranking
             try{
-                StarRankingDAO.computeAverageStarRanking(postDTO);      // A Solution may be to return with this method the new average star ranking, in order to allow the rollback of the vote in case of failure
+                Double oldAvgStarRanking = post.getAvgStarRanking();
+                Double oldNumStarRanking = (double) post.getStarRankings().size();
+                if(oldNumStarRanking == 1.0)
+                    StarRankingDAO.unsetStarRankings(postDTO);    
+                else{
+                    Double newAvgStarRanking = (oldAvgStarRanking * oldNumStarRanking - starRanking.getVote()) / (oldNumStarRanking - 1);
+                    StarRankingDAO.updateAvgStarRanking(postDTO, newAvgStarRanking);
+                }           
+                return true;         
             }
             catch(MongoException e){
                 System.out.println("MongoException in StarRanking.votePost: " + e.getMessage());
-
+                StarRankingDAO.votePost(user, starRanking, postDTO);
                 return false;
             }
             catch(IllegalArgumentException e){
                 System.out.println("IllegalArgumentException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.setAverage(user, postDTO);
+                StarRankingDAO.votePost(user, starRanking, postDTO);
                 return false;
             }
             catch(IllegalStateException e){
                 System.out.println("IllegalStateException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.setAverage(user, postDTO);
+                StarRankingDAO.votePost(user, starRanking, postDTO);
                 return false;
             }
             catch(Exception e){
                 System.out.println("Exception in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.setAverage(user, postDTO);
+                StarRankingDAO.votePost(user, starRanking, postDTO);
                 return false;
             }
         }

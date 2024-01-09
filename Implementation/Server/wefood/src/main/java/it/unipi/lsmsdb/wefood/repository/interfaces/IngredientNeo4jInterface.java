@@ -11,15 +11,15 @@ public interface IngredientNeo4jInterface {
     boolean createIngredient(IngredientDTO ingredientDTO);
 
     // Suggest most popular combination of ingredients 
-    List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO, int limit) throws IllegalStateException, Neo4jException;
-    List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException;
+    List<String> findIngredientsUsedWithIngredient(String ingredientName, int limit) throws IllegalStateException, Neo4jException;
+    List<String> findIngredientsUsedWithIngredient(String ingredientName) throws IllegalStateException, Neo4jException;
     
     boolean createIngredientIngredientRelationship(List<String> ingredientNames) throws IllegalStateException, Neo4jException;
 
-    List<IngredientDTO> mostPopularCombinationOfIngredients(IngredientDTO ingredient) throws IllegalStateException, Neo4jException;
+    List<String> mostPopularCombinationOfIngredients(String ingredientName) throws IllegalStateException, Neo4jException;
     
-    List<IngredientDTO> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user) throws IllegalStateException, Neo4jException;
+    List<String> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user) throws IllegalStateException, Neo4jException;
 
-    List<IngredientDTO> findMostUsedIngredientsByUser(RegisteredUserDTO user) throws IllegalStateException, Neo4jException;
-    List<IngredientDTO> findMostLeastUsedIngredients(boolean DESC) throws IllegalStateException, Neo4jException;
+    List<String> findMostUsedIngredientsByUser(RegisteredUserDTO user) throws IllegalStateException, Neo4jException;
+    List<String> findMostLeastUsedIngredients(boolean DESC) throws IllegalStateException, Neo4jException;
 }

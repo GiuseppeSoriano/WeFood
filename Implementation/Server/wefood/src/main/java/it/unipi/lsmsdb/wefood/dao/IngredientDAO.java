@@ -38,29 +38,29 @@ public class IngredientDAO {
         return ingredientMongoDBInterface.getAllIngredients();
     }
 
-    public static List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO, int limit) throws IllegalStateException, Neo4jException  {
-        return ingredientNeo4jInterface.findIngredientsUsedWithIngredient(ingredientDTO, limit);
+    public static List<String> findIngredientsUsedWithIngredient(String ingredientName, int limit) throws IllegalStateException, Neo4jException  {
+        return ingredientNeo4jInterface.findIngredientsUsedWithIngredient(ingredientName, limit);
     }
-    public static List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException {
-        return ingredientNeo4jInterface.findIngredientsUsedWithIngredient(ingredientDTO);
+    public static List<String> findIngredientsUsedWithIngredient(String ingredientName) throws IllegalStateException, Neo4jException {
+        return ingredientNeo4jInterface.findIngredientsUsedWithIngredient(ingredientName);
     }
 
     public static boolean createIngredientIngredientRelationship(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         return ingredientNeo4jInterface.createIngredientIngredientRelationship(ingredientNames);
     }
 
-    public static List<IngredientDTO> mostPopularCombinationOfIngredients(IngredientDTO ingredient) throws IllegalStateException, Neo4jException {
+    public static List<String> mostPopularCombinationOfIngredients(String ingredient) throws IllegalStateException, Neo4jException {
         return ingredientNeo4jInterface.mostPopularCombinationOfIngredients(ingredient);
     }
 
-    public static List<IngredientDTO> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
+    public static List<String> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
         return ingredientNeo4jInterface.findNewIngredientsBasedOnFriendsUsage(user);
     }
 
-    public static List<IngredientDTO> findMostUsedIngredientsByUser(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
+    public static List<String> findMostUsedIngredientsByUser(RegisteredUserDTO user) throws IllegalStateException, Neo4jException {
         return ingredientNeo4jInterface.findMostUsedIngredientsByUser(user);
     }
-    public static List<IngredientDTO> findMostLeastUsedIngredients(boolean DESC) throws IllegalStateException, Neo4jException {
+    public static List<String> findMostLeastUsedIngredients(boolean DESC) throws IllegalStateException, Neo4jException {
         return ingredientNeo4jInterface.findMostLeastUsedIngredients(DESC);
     }
 }

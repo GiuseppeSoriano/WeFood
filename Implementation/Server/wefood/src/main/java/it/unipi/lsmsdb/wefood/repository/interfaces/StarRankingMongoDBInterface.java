@@ -11,6 +11,11 @@ public interface StarRankingMongoDBInterface {
 
     boolean votePost(RegisteredUser user, StarRanking starRanking, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException;
 
-    boolean deleteVote(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException;
+    boolean deleteVote(StarRanking starRanking, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException;
+
+    boolean updateAvgStarRanking(PostDTO postDTO, Double newAvgStarRanking) throws MongoException, IllegalArgumentException, IllegalStateException;
+
+    boolean unsetStarRankings(PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException;
 
 }
+

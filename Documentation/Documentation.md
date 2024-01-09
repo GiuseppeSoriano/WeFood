@@ -620,7 +620,7 @@ Being the main collection of *WeFood*, the `Post` collection was also the one th
     }
 ```
 
-4. By considering `Comment_A` and `StarRanking_A`, it is possible to create the `comments` and `starRankings` arrays of the Posts. Specifically, each Comment or StarRanking is added to the corresponding post based on the `recipe_id` field.
+4. By considering `Comment_A` and `StarRanking_A`, it is possible to create the `comments` and `starRankings` arrays of the Posts. Specifically, each Comment or StarRanking is added to the corresponding Post based on the `recipe_id` field.
 ```javascript
     Post_B: {
         "id": 194491,
@@ -679,13 +679,12 @@ Being the main collection of *WeFood*, the `Post` collection was also the one th
     }
 ```
 
----
-
-5. There isn't much left to do because the structure of the collection ii almost recreated. Indeed it is only necessary to convert the timestamp in long, add the avgStarRanking and add the username of Users everytime that apper a user id... using User_A
+5. To reconstruct the collection's structure there isn't much left to do. Indeed, it is only necessary to convert the `timestamp` of creation of the Post in `Long`, to add the `avgStarRanking` field and to include the `username` of the Users, available in `User_A`, whenever their `id` appears.
 ```javascript
     Post_C: {
         "id": 194491,
         "idUser": 356062,
+        "username": "justin_alexander_34",
         "description": "recipe for a basic pretzel crust i found in a magazine. i don't think i saw it posted here yet.",
         "timestamp": 1162857600000,
         "recipe": {
@@ -729,6 +728,7 @@ Being the main collection of *WeFood*, the `Post` collection was also the one th
                 "username": "christopher_bass_52"
             }
         ],
+        "avgStarRanking": 3.5,
         "starRankings": [
             {
                 "vote": 3,
@@ -740,52 +740,58 @@ Being the main collection of *WeFood*, the `Post` collection was also the one th
                 "idUser": 254614,
                 "username": "christopher_bass_52"
             }
-        ],
-        "avgStarRanking": 3.5,
-        "username": "justin_alexander_34"
+        ]
     }
 ```
 
-
 **User**:
+In `User_A`, the only thing missing for having the User collection is the array field `posts` which contains a simplified representation of the Posts uploaded by the User. By employing the `idUser` in `Post_C`, all the user's posts can be retrieved, and the necessary fields can be selected.
+```javascript
+User_B: {
+    "contributor_id": 356062,
+    "name": "Justin",
+    "surname": "Alexander",
+    "username": "justin_alexander_34",
+    "password": "e6FMX30hGu",
+    "posts": [
+        {
+            "idPost": 234229,
+            "name": "layered ice cream candy cake",
+            "image": "https://img.sndimg.com/food/image/upload/ w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/ 23/42/29/picztrpPR.jpg"
+        },
+        {
+            "idPost": 194491,
+            "name": "pretzel crust",
+            "image": "https://img.sndimg.com/food/image/upload/ w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/ 19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg"
+        },
+        {
+            "idPost": 226341,
+            "name": "quesadilla combos",
+            "image": "https://img.sndimg.com/food/image/upload/ w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/ 22/63/41/Xc9MqI3jSBmO7sx9cUFN_quesadilla-combos_0511.jpg"
+        },
+        {
+            "idPost": 282971,
+            "name": "raspberry lime rugalach",
+            "image": "https://img.sndimg.com/food/image/upload/ w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/ 28/29/71/picYumCGj.jpg"
+        },
+        ...
+    ]
+}
+```
+
+
+Now, all the necessary files for populating the documentDB have been generated. However, there are some points that may need further clarifications. 
+
+- Firstly, in cases where a field is null or empty (e.g. a Post with no associated image, comment, or star ranking), within the context of a NoSQL database, there is no necessity for these fields to be assigned the null value to reduce unnecessary memory usage. Consequently, if there is missing information in a field, that field will simply be absent from the structure.
+
+- Secondly, the `_id` fields are not yet incorporated into the aforementioned structures, while conversely, the old `id`s from the datasets still persist. This is due to the intention to utilize the _id values provided by MongoDB (i.e. the documentDB employed in the implementation). To preserve the connection between documents and facilitate the substitution, a straightforward yet effective procedure was implemented. Documents were imported into their respective MongoDB collections, and subsequently, a JSON export was performed, leading to the insertion of MongoDB's _id within all the documents. Utilizing the old ids, the linkage between entities was established, and a substitution was executed by assigning the new MongoDB _id whenever the old id was encountered. Subsequently, all collections were re-imported. In this way, the linkage was now based on the MongoDB _id, and no problems were encountered at all.
 
 
 ---
 
 
 
-```javascript
-[Post]:
-{
-    _id: ObjectId('...'),
-    idUser: ObjectId('...'),
-    username: String, [REDUNDANCY]
-    description: String,
-    timestamp: Long,
-    recipe: {
-                name: String,
-                image: String,
-                steps: [String, ...],
-                totalCalories: Double, [REDUNDANCY]
-                ingredients: [{
-                                name: String,
-                                quantity: Double 
-                }, ...]
-    },
-    starRankings: [{
-                        idUser: ObjectId('...'),
-                        username: String, [REDUNDANCY]
-                        vote: Double
-    }, ...],
-    avgStarRanking: Double, [REDUNDANCY]
-    comments: [{
-                idUser: ObjectId('...'),
-                username: String, [REDUNDANCY]
-                text: String,
-                timestamp: Long
-    }, ...]
-}
-```
+Say if few words that when a field is null it is not present in the document...
 
 
 dire anche il fatto dei caricamenti su mongoDb per ottenere gli  _id che ci dava lui e spiegare i collegamenti come si sono fatti lasciando tutte gli id...

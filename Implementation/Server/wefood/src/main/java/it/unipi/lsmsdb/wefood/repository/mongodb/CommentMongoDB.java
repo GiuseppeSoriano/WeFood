@@ -20,8 +20,8 @@ public class CommentMongoDB implements CommentMongoDBInterface {
                        "    $push: {\r\n" + //
                        "        comments: {\r\n" + //
                        "            idUser: " + user.getId() + ",\r\n" + //
-                       "            username: " + user.getUsername() + ",\r\n" + //
-                       "            text: " + comment.getText() + ",\r\n" + //
+                       "            username: \"" + user.getUsername() + "\",\r\n" + //
+                       "            text: \"" + comment.getText() + "\",\r\n" + //
                        "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
                        "        }\r\n" + //
                        "    }\r\n" + //
@@ -46,7 +46,7 @@ public class CommentMongoDB implements CommentMongoDBInterface {
                        "    }\r\n" + //
                        "}, {\r\n" + //
                        "    $set: {\r\n" + //
-                       "        \"comments.$.text\": " + comment.getText() + ",\r\n" + //
+                       "        \"comments.$.text\": \"" + comment.getText() + "\",\r\n" + //
                        "    }\r\n" + //
                        "})";
 

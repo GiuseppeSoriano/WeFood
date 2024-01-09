@@ -27,12 +27,12 @@ public class PostMongoDB implements PostMongoDBInterface{
 
         String query = "db.Post.insertOne({\r\n" + //
                        "    idUser: " + user.getId() + ",\r\n" + //
-                       "    username: " + user.getUsername() + ",\r\n" + //
-                       "    description: " + post.getDescription() + ",\r\n" + //
+                       "    username: \"" + user.getUsername() + "\",\r\n" + //
+                       "    description: \"" + post.getDescription() + "\",\r\n" + //
                        "    timestamp: " + post.getTimestamp().getTime() + ",\r\n" + //
                        "    recipe: {\r\n" + //
-                       "                name: " + post.getRecipe().getName() + ",\r\n" + //
-                       "                image: " + post.getRecipe().getImage() +",\r\n" + //
+                       "                name: \"" + post.getRecipe().getName() + "\",\r\n" + //
+                       "                image: \"" + post.getRecipe().getImage() +"\",\r\n" + //
                        "                steps: " + post.getRecipe().getStepsString() + ",\r\n" + //
                        "                totalCalories: " + post.getRecipe().getTotalCalories() + ",\r\n" + //
                        "                ingredients: " + post.getRecipe().getIngredientsString() + "\r\n" + //
@@ -197,18 +197,25 @@ public class PostMongoDB implements PostMongoDBInterface{
         
         Post post = new Post(result.get("username").toString(), result.get("description").toString(), new Date(result.getLong("timestamp")), recipe);
 
-        for(Document comment_doc : (ArrayList<Document>) result.get("comments")){
-            Comment comment = new Comment(comment_doc.get("username").toString(),
-                                          comment_doc.get("text").toString(),
-                                          new Date(comment_doc.getLong("timestamp")));
-            post.addComment(comment);
-        }
+        if(result.containsKey("comments"))
+            for(Document comment_doc : (ArrayList<Document>) result.get("comments")){
+                Comment comment = new Comment(comment_doc.get("username").toString(),
+                                            comment_doc.get("text").toString(),
+                                            new Date(comment_doc.getLong("timestamp")));
+                post.addComment(comment);
+            }
 
-        for(Document starRanking_doc : (ArrayList<Document>) result.get("starRankings")){
-            StarRanking starRanking = new StarRanking(starRanking_doc.get("username").toString(),
-                                                      Double.parseDouble(starRanking_doc.get("vote").toString()));
-            post.addStarRanking(starRanking);
-        }
+        if(result.containsKey("starRankings"))
+            for(Document starRanking_doc : (ArrayList<Document>) result.get("starRankings")){
+                StarRanking starRanking = new StarRanking(starRanking_doc.get("username").toString(),
+                                                        Double.parseDouble(starRanking_doc.get("vote").toString()));
+                post.addStarRanking(starRanking);
+            }
+
+        if(result.containsKey("avgStarRanking"))
+            post.setAvgStarRanking(Double.parseDouble(result.get("avgStarRanking").toString()));
+        else
+            post.setAvgStarRanking(-1.0);
 
         return post;
     } 

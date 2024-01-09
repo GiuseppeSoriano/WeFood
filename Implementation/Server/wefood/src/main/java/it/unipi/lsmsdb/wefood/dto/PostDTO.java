@@ -9,7 +9,7 @@ public class PostDTO {
 
     
     public PostDTO(String _id, String image, String recipeName) {
-        this._id = "ObjectId('" + _id + "')";
+        this._id = _id;
         this.image = image;
         this.recipeName = recipeName;
     }
@@ -27,7 +27,7 @@ public class PostDTO {
     }
 
     public String getId() {
-        return this._id;
+        return "ObjectId('" + this._id + "')";
     }
     
     public String getImage() {

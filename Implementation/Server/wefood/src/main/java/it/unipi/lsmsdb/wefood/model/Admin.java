@@ -2,8 +2,8 @@ package it.unipi.lsmsdb.wefood.model;
 
 public class Admin extends User {
 
-    String username;
-    String password;
+    private String username;
+    private String password;
 
     public Admin(String username, String password){
         this.username = username;

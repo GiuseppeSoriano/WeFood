@@ -47,27 +47,6 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     };
 
-    /*
-    public RegisteredUser findRegisteredUserById(String _id) {
-        String query = "db.User.find({_id: \"" + _id + "\"})";
-
-        List<Document> registeredUserDocument = BaseMongoDB.executeQuery(query);
-        if(registeredUserDocument.isEmpty()) {
-            return null;
-        } else {
-            RegisteredUser registeredUser = new RegisteredUser(
-                registeredUserDocument.get(0).getString("_id"),
-                registeredUserDocument.get(0).getString("username"),
-                registeredUserDocument.get(0).getString("password"),
-                registeredUserDocument.get(0).getString("name"),
-                registeredUserDocument.get(0).getString("surname")
-            );
-
-            return registeredUser;
-        }
-    };
-    */
-
     public RegisteredUserPageDTO findRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.find({username: \"" + username + "\"})";
 
@@ -102,9 +81,9 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
                         "    _id: " + user.getId() + ",\r\n" + //
                         "}, {\r\n" + //
                         "    $set: {\r\n" + //
-                        "        password: " + user.getPassword() + ",\r\n" + //
-                        "        name: " + user.getName() + ",\r\n" + //
-                        "        surname: " + user.getSurname() + "\r\n" + //
+                        "        password: \"" + user.getPassword() + "\",\r\n" + //
+                        "        name: \"" + user.getName() + "\",\r\n" + //
+                        "        surname: \"" + user.getSurname() + "\"\r\n" + //
                         "    }\r\n" + //
                         "})";
 
@@ -147,7 +126,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean banUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
-                       "    username: " + username + ",\r\n" + //
+                       "    username: \"" + username + "\",\r\n" + //
                        "}, {\r\n" + //
                        "    $set: {\r\n" + //
                        "        deleted: true\r\n" + //
@@ -161,7 +140,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
-                       "    username: " + username + ",\r\n" + //
+                       "    username: \"" + username + "\",\r\n" + //
                        "}, {\r\n" + //
                        "    $unset: {\r\n" + //
                        "        deleted: \"\"\r\n" + //
@@ -175,7 +154,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean cancelUserMongoDB(String registeredUsername) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.deleteOne({\r\n" + //
-                       "    username: '" + registeredUsername + "'\r\n" + //
+                       "    username: \"" + registeredUsername + "\"\r\n" + //
                        "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
         System.out.println(result.get(0).toJson());
@@ -190,8 +169,8 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
                        "    $push: {\r\n" + //
                        "        posts: {\r\n" + //
                        "            idPost: " + postDTO.getId() + ",\r\n" + //
-                       "            name: " + postDTO.getRecipeName() + ",\r\n" + //
-                       "            image: " + postDTO.getImage() + "\r\n" + //
+                       "            name: \"" + postDTO.getRecipeName() + "\",\r\n" + //
+                       "            image: \"" + postDTO.getImage() + "\"\r\n" + //
                        "        }\r\n" + //
                        "    }\r\n" + //
                        "})"; //

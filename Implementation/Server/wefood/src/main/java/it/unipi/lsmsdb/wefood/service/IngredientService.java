@@ -109,9 +109,9 @@ public class IngredientService {
         }
     }
 
-    public List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO, int limit){
+    public List<String> findIngredientsUsedWithIngredient(String ingredientName, int limit){
         try{
-            return IngredientDAO.findIngredientsUsedWithIngredient(ingredientDTO, limit);
+            return IngredientDAO.findIngredientsUsedWithIngredient(ingredientName, limit);
         }
         catch(Neo4jException e){
             System.out.println("Neo4JException in IngredientService.findIngredientsUsedWithIngredient: " + e.getMessage());
@@ -127,9 +127,9 @@ public class IngredientService {
         }
     }
 
-    public List<IngredientDTO> findIngredientsUsedWithIngredient(IngredientDTO ingredientDTO){
+    public List<String> findIngredientsUsedWithIngredient(String ingredientName){
         try{
-            return IngredientDAO.findIngredientsUsedWithIngredient(ingredientDTO);
+            return IngredientDAO.findIngredientsUsedWithIngredient(ingredientName);
         }
         catch(Neo4jException e){
             System.out.println("Neo4JException in IngredientService.findIngredientsUsedWithIngredient: " + e.getMessage());
@@ -145,9 +145,9 @@ public class IngredientService {
         }
     }
 
-    public boolean createIngredientIngredientRelationship(List<IngredientDTO> ingredientDTOs){
+    public boolean createIngredientIngredientRelationship(List<String> ingredientNames){
         try{
-            return IngredientDAO.createIngredientIngredientRelationship(ingredientDTOs);
+            return IngredientDAO.createIngredientIngredientRelationship(ingredientNames);
         }
         catch(Neo4jException e){
             System.out.println("Neo4JException in IngredientService.createIngredientIngredientRelationship: " + e.getMessage());
@@ -163,9 +163,9 @@ public class IngredientService {
         }
     }
 
-    public List<IngredientDTO> mostPopularCombinationOfIngredients(IngredientDTO ingredient){
+    public List<String> mostPopularCombinationOfIngredients(String ingredientName){
         try{
-            return IngredientDAO.mostPopularCombinationOfIngredients(ingredient);
+            return IngredientDAO.mostPopularCombinationOfIngredients(ingredientName);
         }
         catch(Neo4jException e){
             System.out.println("Neo4JException in IngredientService.mostPopularCombinationOfIngredients: " + e.getMessage());
@@ -181,7 +181,7 @@ public class IngredientService {
         }
     }
 
-    public static List<IngredientDTO> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user){
+    public static List<String> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user){
         try{
             return IngredientDAO.findNewIngredientsBasedOnFriendsUsage(user);
         }
@@ -199,7 +199,7 @@ public class IngredientService {
         }
     }
 
-    public static List<IngredientDTO> findMostUsedIngredientsByUser(RegisteredUserDTO user){
+    public static List<String> findMostUsedIngredientsByUser(RegisteredUserDTO user){
         try{
             return IngredientDAO.findMostUsedIngredientsByUser(user);
         }
@@ -217,7 +217,7 @@ public class IngredientService {
         }
     }
 
-    public static List<IngredientDTO> findMostLeastUsedIngredients(boolean DESC){
+    public static List<String> findMostLeastUsedIngredients(boolean DESC){
         try{
             return IngredientDAO.findMostLeastUsedIngredients(DESC);
         }

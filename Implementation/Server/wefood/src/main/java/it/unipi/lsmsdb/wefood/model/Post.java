@@ -13,6 +13,9 @@ public class Post {
     private List<StarRanking> starRankings;
     private Recipe recipe;
 
+    private Double avgStarRanking;
+
+
     public Post(String username, String description, Date timestamp, Recipe recipe) {
         this.username = username;
         this.description = description;
@@ -20,6 +23,7 @@ public class Post {
         this.comments = new ArrayList<Comment>();
         this.starRankings = new ArrayList<StarRanking>();
         this.recipe = recipe;
+        this.avgStarRanking = -1.0;
     }
 
     public String getUsername() {
@@ -77,4 +81,13 @@ public class Post {
     public List<StarRanking> getStarRankings() {
         return starRankings;
     }
+
+    public Double getAvgStarRanking() {
+        return avgStarRanking;
+    }
+
+    public void setAvgStarRanking(Double avgStarRanking) {
+        this.avgStarRanking = avgStarRanking;
+    }
+    
 }
