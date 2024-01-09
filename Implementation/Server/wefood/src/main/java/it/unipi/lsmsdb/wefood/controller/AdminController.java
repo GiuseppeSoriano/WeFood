@@ -1,7 +1,12 @@
 package it.unipi.lsmsdb.wefood.controller;
 
+import java.util.List;
 import java.util.Map;
 
+import it.unipi.lsmsdb.wefood.apidto.LoginRequestDTO;
+import it.unipi.lsmsdb.wefood.model.Ingredient;
+import it.unipi.lsmsdb.wefood.service.IngredientService;
+import it.unipi.lsmsdb.wefood.service.RegisteredUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,29 +24,36 @@ import it.unipi.lsmsdb.wefood.model.Admin;
 public class AdminController {
     
     private final AdminService adminService;
+    private final IngredientService ingredientService;
+    private RegisteredUserService registeredUserService;
 
     public AdminController() {
         this.adminService = new AdminService();
+        this.ingredientService = new IngredientService();
+        this.registeredUserService = new RegisteredUserService();
     }
 
-    @PostMapping("/prova")
-    public void loginAdmin(@RequestBody Map<String, String> admin) {
-        // Admin currentAdmin = adminService.loginAdmin(username, password);
-        System.out.println(admin);
-        // return currentAdmin != null ? ResponseEntity.ok(currentAdmin) : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    @PostMapping("/login")
+    public ResponseEntity<Admin> loginAdmin(@RequestBody LoginRequestDTO credentials) {
+        System.out.println(credentials.getUsername() + " " + credentials.getPassword());
+        Admin admin = adminService.loginAdmin(credentials.getUsername(), credentials.getPassword());
+        return admin != null ? ResponseEntity.ok(admin) : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @GetMapping("/login")
-    public ResponseEntity<Admin> loginAdmin(@RequestBody Admin admin) {
-        // Admin currentAdmin = adminService.loginAdmin(username, password);
-        System.out.println(admin.getUsername() + " " + admin.getPassword());
-        return null;
-        // return currentAdmin != null ? ResponseEntity.ok(currentAdmin) : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    @PostMapping("/createIngredient")
+    public ResponseEntity<Boolean> createIngredient(@RequestBody Ingredient request) {
+        return ResponseEntity.ok(ingredientService.createIngredient(request));
     }
 
-    /*
-        RequestMapping -> path base (localhost:8080/admin) delle API che sono gestite da AdminController
-        PostMapping -> login is a Post Request
-        PathVariable -> 
-    */
+    @PostMapping("/banUser")
+    public ResponseEntity<Boolean> banUser(@RequestBody String request){
+        return ResponseEntity.ok(registeredUserService.banUser(request));
+    }
+    @PostMapping("/unbanUser")
+    public ResponseEntity<Boolean> unbanUser(@RequestBody String request){
+        return ResponseEntity.ok(registeredUserService.unbanUser(request));
+    }
+
+
+
 }

@@ -12,8 +12,8 @@ import it.unipi.lsmsdb.wefood.repository.base.BaseNeo4j;
 public class WefoodApplication {
 
 	public static void main(String[] args) {
-		// BaseMongoDB.openMongoClient();
-		// BaseNeo4j.openNeo4jDriver();
+		BaseMongoDB.openMongoClient();
+		BaseNeo4j.openNeo4jDriver();
 
 		SpringApplication.run(WefoodApplication.class, args); //MAIN APPLICATION
 		

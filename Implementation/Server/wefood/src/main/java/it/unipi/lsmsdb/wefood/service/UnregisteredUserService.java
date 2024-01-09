@@ -13,52 +13,53 @@ import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 @Service
 public class UnregisteredUserService {
 
-    public boolean createRegisteredUser(String username, String password, String name, String surname){
+    public RegisteredUser createRegisteredUser(String username, String password, String name, String surname){
         RegisteredUser registeredUser = null;
         try{
             registeredUser = UnregisteredUserDAO.register(username, password, name, surname);
             try{
-                return UnregisteredUserDAO.createRegisteredUser(new RegisteredUserDTO(registeredUser.getId(), username));
+                UnregisteredUserDAO.createRegisteredUser(new RegisteredUserDTO(registeredUser.getId(), username));
+                return registeredUser;
             }
             catch(Neo4jException e){
                 RegisteredUserDAO.cancelUserMongoDB(registeredUser.getUsername());
                 System.out.println("Exception in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
-                return false;
+                return null;
             }
             catch(IllegalStateException e){
                 RegisteredUserDAO.cancelUserMongoDB(registeredUser.getUsername());
                 System.out.println("Exception in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
-                return false;
+                return null;
             }
             catch(Exception e){
                 RegisteredUserDAO.cancelUserMongoDB(registeredUser.getUsername());
                 System.out.println("Exception in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
-                return false;
+                return null;
             }
         }
         catch(MongoException e){
             if(registeredUser != null)
                 System.err.println("Databases are not synchronized, user " + registeredUser.getId() + " has been created in MongoDB but not in Neo4j");
             System.out.println("MongoException in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
-            return false;
+            return null;
         }
         catch(IllegalArgumentException e){
             if(registeredUser != null)
                 System.err.println("Databases are not synchronized, user " + registeredUser.getId() + " has been created in MongoDB but not in Neo4j");
             System.out.println("IllegalArgumentException in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
-            return false;
+            return null;
         }
         catch(IllegalStateException e){
             if(registeredUser != null)
                 System.err.println("Databases are not synchronized, user " + registeredUser.getId() + " has been created in MongoDB but not in Neo4j");
             System.out.println("IllegalStateException in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
-            return false;
+            return null;
         }
         catch(Exception e){
             if(registeredUser != null)
                 System.err.println("Databases are not synchronized, user " + registeredUser.getId() + " has been created in MongoDB but not in Neo4j");
             System.out.println("Exception in UnregisteredUserService.createRegisteredUser: " + e.getMessage());
-            return false;
+            return null;
         }
     }
 

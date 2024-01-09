@@ -87,7 +87,7 @@ public class IngredientService {
         }
     }
 
-    public List<Ingredient> getAllIngredients(String id){
+    public List<Ingredient> getAllIngredients(){
         try{
             return IngredientDAO.getAllIngredients();
         }
@@ -181,7 +181,7 @@ public class IngredientService {
         }
     }
 
-    public static List<String> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user){
+    public List<String> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO user){
         try{
             return IngredientDAO.findNewIngredientsBasedOnFriendsUsage(user);
         }
@@ -199,7 +199,7 @@ public class IngredientService {
         }
     }
 
-    public static List<String> findMostUsedIngredientsByUser(RegisteredUserDTO user){
+    public List<String> findMostUsedIngredientsByUser(RegisteredUserDTO user){
         try{
             return IngredientDAO.findMostUsedIngredientsByUser(user);
         }
@@ -217,7 +217,7 @@ public class IngredientService {
         }
     }
 
-    public static List<String> findMostLeastUsedIngredients(boolean DESC){
+    public List<String> findMostLeastUsedIngredients(boolean DESC){
         try{
             return IngredientDAO.findMostLeastUsedIngredients(DESC);
         }

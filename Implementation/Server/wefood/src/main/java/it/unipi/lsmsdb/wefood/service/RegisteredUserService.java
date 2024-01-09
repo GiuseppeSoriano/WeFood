@@ -38,7 +38,7 @@ public class RegisteredUserService {
         }
     }
 
-    public RegisteredUserPageDTO findRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public RegisteredUserPageDTO findRegisteredUserPageByUsername(String username) {
         try{
             return RegisteredUserDAO.findRegisteredUserPageByUsername(username);
         }
@@ -60,8 +60,7 @@ public class RegisteredUserService {
         }
     }
 
-
-    public boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public boolean modifyPersonalInformation(RegisteredUser user) {
         try{
             return RegisteredUserDAO.modifyPersonalInformation(user);
         }
@@ -83,8 +82,7 @@ public class RegisteredUserService {
         }
     }
 
-
-    public boolean deleteUser(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public boolean deleteUser(RegisteredUser user) {
         try{
             return RegisteredUserDAO.deleteUser(user);
         }
@@ -106,7 +104,7 @@ public class RegisteredUserService {
         }
     }
 
-    public boolean banUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public boolean banUser(String username) {
         try{
             return RegisteredUserDAO.banUser(username);
         }
@@ -128,7 +126,7 @@ public class RegisteredUserService {
         }
     }
 
-    public boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public boolean unbanUser(String username) {
         try{
             return RegisteredUserDAO.unbanUser(username);
         }
@@ -151,7 +149,7 @@ public class RegisteredUserService {
     }
 
     // Neo4j
-    public boolean followUser(RegisteredUserDTO user, String usernameToFollow) throws IllegalStateException, Neo4jException{
+    public boolean followUser(RegisteredUserDTO user, String usernameToFollow) {
         try{
             return RegisteredUserDAO.followUser(user, usernameToFollow);
         }
@@ -169,7 +167,7 @@ public class RegisteredUserService {
         }
     }
 
-    public boolean unfollowUser(RegisteredUserDTO user, String usernameToUnfollow) throws IllegalStateException, Neo4jException{
+    public boolean unfollowUser(RegisteredUserDTO user, String usernameToUnfollow) {
         try{
             return RegisteredUserDAO.unfollowUser(user, usernameToUnfollow);
         }
@@ -187,7 +185,7 @@ public class RegisteredUserService {
         }
     }
 
-    public List<RegisteredUserDTO> findFriends(RegisteredUserDTO user) throws IllegalStateException, Neo4jException{
+    public List<RegisteredUserDTO> findFriends(RegisteredUserDTO user) {
         try{
             return RegisteredUserDAO.findFriends(user);
         }
@@ -205,7 +203,7 @@ public class RegisteredUserService {
         }
     }
 
-    public List<RegisteredUserDTO> findFollowers(RegisteredUserDTO user) throws IllegalStateException, Neo4jException{
+    public List<RegisteredUserDTO> findFollowers(RegisteredUserDTO user) {
         try{
             return RegisteredUserDAO.findFollowers(user);
         }
@@ -223,7 +221,7 @@ public class RegisteredUserService {
         }
     }
 
-    public List<RegisteredUserDTO> findFollowed(RegisteredUserDTO user) throws IllegalStateException, Neo4jException{
+    public List<RegisteredUserDTO> findFollowed(RegisteredUserDTO user) {
         try{
             return RegisteredUserDAO.findFollowed(user);
         }
@@ -241,7 +239,7 @@ public class RegisteredUserService {
         }
     }
 
-    public List<RegisteredUserDTO> findUsersToFollowBasedOnUserFriends(RegisteredUserDTO user) throws IllegalStateException, Neo4jException{
+    public List<RegisteredUserDTO> findUsersToFollowBasedOnUserFriends(RegisteredUserDTO user) {
         try{
             return RegisteredUserDAO.findUsersToFollowBasedOnUserFriends(user);
         }
@@ -259,7 +257,7 @@ public class RegisteredUserService {
         }
     }
 
-    public List<RegisteredUserDTO> findMostFollowedUsers() throws IllegalStateException, Neo4jException{
+    public List<RegisteredUserDTO> findMostFollowedUsers() {
         try{
             return RegisteredUserDAO.findMostFollowedUsers();
         }
@@ -277,7 +275,7 @@ public class RegisteredUserService {
         }
     }
 
-    public List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException{
+    public List<RegisteredUserDTO> findUsersByIngredientUsage(IngredientDTO ingredientDTO) {
         try{
             return RegisteredUserDAO.findUsersByIngredientUsage(ingredientDTO);
         }
