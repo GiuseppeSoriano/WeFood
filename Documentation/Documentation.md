@@ -689,7 +689,7 @@ Being the main collection of *WeFood*, the `Post` collection was also the one th
         "timestamp": 1162857600000,
         "recipe": {
             "name": "pretzel crust",
-            "image": "https://img.sndimg.com/food/image/upload/w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg",
+            "image": "https://img.sndimg.com/food/image/upload/ w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/ 19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg",
             "steps": [
                 "preheat oven to 350",
                 "crush pretzels in a blender",

@@ -35,6 +35,7 @@ public class PostController {
     public ResponseEntity<Boolean> uploadPost(@RequestBody PostRequestDTO request){
         // IMAGE
         Post post = request.getPost();
+        // GESTIRE IMMAGINE NULL SE USER NON LA CARICA NEL POST!
         post.getRecipe().setImage(recipeImageService.storePostImage(post));
         return ResponseEntity.ok(postService.uploadPost(post, request.getUser()));
     }
