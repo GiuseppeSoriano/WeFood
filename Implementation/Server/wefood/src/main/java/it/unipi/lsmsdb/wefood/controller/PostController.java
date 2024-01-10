@@ -34,6 +34,7 @@ public class PostController {
 
     public PostController(){
         postService = new PostService();
+        recipeImageService = new RecipeImageService();
     }
 
 
@@ -76,6 +77,7 @@ public class PostController {
     @PostMapping("/findPostByPostDTO")
     public ResponseEntity<Post> findPostByPostDTO(@RequestBody PostDTO request){
         // IMAGE
+        Post post = recipeImageService.postDTOconverter(postService.findPostByPostDTO(request));
         return ResponseEntity.ok(postService.findPostByPostDTO(request));
     }
 
