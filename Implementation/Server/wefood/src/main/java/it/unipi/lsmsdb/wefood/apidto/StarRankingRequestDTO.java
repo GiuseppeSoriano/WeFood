@@ -1,7 +1,6 @@
 package it.unipi.lsmsdb.wefood.apidto;
 
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
-import it.unipi.lsmsdb.wefood.model.Comment;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.model.StarRanking;
 

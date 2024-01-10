@@ -1,6 +1,5 @@
 package it.unipi.lsmsdb.wefood.dao;
 
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
 import it.unipi.lsmsdb.wefood.repository.interfaces.RecipeNeo4jInterface;
 import it.unipi.lsmsdb.wefood.repository.neo4j.RecipeNeo4j;

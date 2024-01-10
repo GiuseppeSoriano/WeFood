@@ -3,7 +3,6 @@ package it.unipi.lsmsdb.wefood.controller;
 import it.unipi.lsmsdb.wefood.apidto.CommentRequestDTO;
 import it.unipi.lsmsdb.wefood.service.CommentService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

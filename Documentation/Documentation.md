@@ -779,216 +779,192 @@ User_B: {
 }
 ```
 
+## 5.4. Population
+After completing the preceding steps, the datasets have been appropriately cleansed, merged, and are now prepared for being imported into the databases. The file dimensions are as follows:
 
-Now, all the necessary files for populating the documentDB have been generated. However, there are some points that may need further clarifications. 
+- Post collection: approximately 700MB;
+- User: 69MB;
+- Ingredient: 266KB.
+
+However, specific procedures are needed to populate the two types of databases.
+
+### 5.4.1. DocumentDB
+It's true that all the necessary files for populating the documentDB have been generated, but there are some points that may need further clarifications. 
 
 - Firstly, in cases where a field is null or empty (e.g. a Post with no associated image, comment, or star ranking), within the context of a NoSQL database, there is no necessity for these fields to be assigned the null value to reduce unnecessary memory usage. Consequently, if there is missing information in a field, that field will simply be absent from the structure.
 
-- Secondly, the `_id` fields are not yet incorporated into the aforementioned structures, while conversely, the old `id`s from the datasets still persist. This is due to the intention to utilize the _id values provided by MongoDB (i.e. the documentDB employed in the implementation). To preserve the connection between documents and facilitate the substitution, a straightforward yet effective procedure was implemented. Documents were imported into their respective MongoDB collections, and subsequently, a JSON export was performed, leading to the insertion of MongoDB's _id within all the documents. Utilizing the old ids, the linkage between entities was established, and a substitution was executed by assigning the new MongoDB _id whenever the old id was encountered. Subsequently, all collections were re-imported. In this way, the linkage was now based on the MongoDB _id, and no problems were encountered at all.
+- Secondly, the `_id` fields are not yet incorporated into the aforementioned structures, while conversely, the old *ids* from the datasets still persist. This is due to the intention to utilize the `_id` values provided by MongoDB (i.e. the documentDB employed in the implementation). To preserve the connection between documents and facilitate the substitution, a straightforward yet effective procedure was implemented. Documents were imported into their respective MongoDB collections, and subsequently, a *JSON export* was performed, leading to the insertion of MongoDB's `_id` within all the documents. Utilizing the old *ids*, the linkage between documents was established, and a substitution was executed by assigning the new MongoDB `_id` whenever the old *id* was encountered. Subsequently, all collections were re-imported. In this way, the linkage was now based on the MongoDB `_id`, and no problems were encountered at all.
 
-
----
-
-
-
-Say if few words that when a field is null it is not present in the document...
-
-
-dire anche il fatto dei caricamenti su mongoDb per ottenere gli  _id che ci dava lui e spiegare i collegamenti come si sono fatti lasciando tutte gli id...
-
-Dire anche il fatto dello script per neo4j che fa uso dei dati nel formato finale...
-
-
-//Aggiungere dimensione finale del dataset//? o no?
-
-
-
-5.1. Raw Dataset
-5.2. Data Cleaning
-5.3. Data Merging
-
-
----
-
-Post collection around 700MB
-Ingredient 266KB
-User 69MB
-
-
-
-See Data...
-(# Load Estimation)
-
-
+### 5.4.2. GraphDB
+Populating Neo4j (i.e. the adopted graphDB) proved to be a bit more challenging. Unlike MongoDB, the import process from JSON is not as straightforward. Moreover, the structure defined earlier was specific to the MongoDB collections. To address this, Python scripts were developed. 
+After establishing a connection with the Neo4j DBMS using the Neo4j driver for Python, these scripts initiate the creation of all the nodes before establishing the relationships between them. This process relies on both *Cypher* queries and the information found in the JSON documents to construct the entire graph database from scratch.
 
 
 \newpage
 
-# 6. Statistics and Queries
+# 6. Queries
+Here are all the queries required to access the databases and implement the functionalities of *WeFood*. They are grouped into basic CRUD operations and more intricate aggregations or query suggestions. 
 
 ## 6.1. CRUD operations
+The set of fundamental operations includes creating, reading, updating, and deleting data within the databases. 
 
 ### 6.1.1. Create
+Creation operations are:
 
-- Create a new user 
-- Create a new post / recipe
-- Create a new comment
-- Create a new star ranking
-- Create a new ingredient
-- Create a new following relationship
-- Create a new recipe-ingredient relationship
-- Create a new user-ingredient relationship
-- Create a new ingredient-ingredient relationship
+1. `Create a new User`: a new User signs up to *WeFood*;
+2. `Create a new Post / Recipe`: a User uploads a new Recipe;
+3. `Create a new Comment`: a User comments a Post;
+4. `Create a new StarRanking`: a User rates a Post;
+5. `Create a new Ingredient`: an Admin adds a new ingredient;
+6. `Create a new following relationship`: a User follows another User;
+7. `Create a new Recipe-Ingredient relationship`: a new recipe is created and contains an ingredient;
+8. `Create a new User-Ingredient relationship`: a User uses an ingredient;
+9. `Create a new Ingredient-Ingredient relationship`: an ingredient is used with another ingredient.
 
-#### 6.1.1.1. MongoDB
 
-- Create a new user 
+**MongoDB**
+
+1. `Create a new user`:
 ```javascript
-db.User.insertOne({
-    username: String,
-    password: hashedString,
-    name: String,
-    surname: String
-})
+    db.User.insertOne({
+        username: String,
+        password: [HASHEDSTRING],
+        name: String,
+        surname: String
+    })
 ```
 
-- Create a new post
+2. `Create a new Post`:
 ```javascript
-db.Post.insertOne({
-    idUser: #,
-    username: String,
-    description: String,
-    timestamp: Timestamp,
-    recipe: {
+    db.Post.insertOne({
+        idUser: ObjectId("..."),
+        username: String,
+        description: String,
+        timestamp: Long,
+        recipe: {
+            name: String,
+            image: String,
+            steps: [String, ...],
+            totalCalories: Double,
+            ingredients: [{
                 name: String,
-                image: String_URL,
-                steps: [String, ...],
-                totalCalories: Double,
-                ingredients: [{
-                                name: String,
-                                quantity: Double, 
-                }, ...]
-    }
-})
+                quantity: Double,
+            }, ...]
+        }
+    })
 ```
 
-- Create a new comment
+3. `Create a new Comment`:
 ```javascript   
-db.Post.updateOne({
-    _id: #,
-}, {
-    $push: {
-        comments: {
-            idUser: #,
-            username: String,
-            text: String,
-            timestamp: Timestamp
+    db.Post.updateOne({
+        _id: ObjectId("...")
+    }, {
+        $push: {
+            comments: {
+                idUser: ObjectId("..."),
+                username: String,
+                text: String,
+                timestamp: Long
+            }
         }
-    }
-})
+    })
 ```
 
-- Create a new star ranking
+4. `Create a new StarRanking`:
 ```javascript
-db.Post.updateOne({
-    _id: #,
-}, {
-    $push: {
-        starRankings: {
-            idUser: #,
-            username: String,
-            vote: Double
+    db.Post.updateOne({
+        _id: ObjectId("...")
+    }, {
+        $push: {
+            starRankings: {
+                idUser: ObjectId("..."),
+                username: String,
+                vote: Double
+            }
         }
-    }
-})
+    })
 ```
 
-- Create a new ingredient
+5. `Create a new Ingredient`:
 ```javascript
-db.Ingredient.insertOne({
-    name: String,
-    calories: Double,
-})
+    db.Ingredient.insertOne({
+        name: String,
+        calories: Double
+    })
 ```
 
-#### 6.1.1.2. Neo4j
 
-- Create a new user 
+**Neo4j**
+
+1. `Create a new User`:
 ```javascript
-CREATE (u:User {
-    _id: #,
-    username: String
-})
+    CREATE (u:User {
+        _id: String,
+        username: String
+    })
 ```
 
-- Create a new recipe
+2. `Create a new Recipe`:
 ```javascript
-CREATE (r:Recipe {
-    _id: #,
-    name: String
-})
+    CREATE (r:Recipe {
+        _id: String,
+        name: String
+    })
 ```
 
-- Create a new ingredient
+5. `Create a new Ingredient`:
 ```javascript
-CREATE (i:Ingredient {
-    _id: #,
-    name: String
-})
+    CREATE (i:Ingredient {
+        _id: String,
+        name: String
+    })
 ```
 
-- Create a new following relationship
+6. `Create a new following relationship`:
 ```javascript
-MATCH (u1:User {username: String}), (u2:User {username: String})
-CREATE (u1)-[:FOLLOWS]->(u2)
+    MATCH (u1:User {username: String}), (u2:User {username: String})
+    CREATE (u1)-[:FOLLOWS]->(u2)
 ```
 
-- Create a new recipe-ingredient relationship
+7. `Create a new Recipe-Ingredient relationship`:
 ```javascript
-MATCH (r:Recipe {_id: #}), (i:Ingredient {name: String})
-CREATE (r)-[:CONTAINS]->(i)
+    MATCH (r:Recipe {_id: String}), (i:Ingredient {name: String})
+    CREATE (r)-[:CONTAINS]->(i)
 ```
 
-- Create a new user-ingredient relationship
-  - Check if the relationship already exists
-  - If it exists, increment the times attribute
-  - If it doesn't exist, create the relationship
+8. `Create a new User-Ingredient relationship`:
 ```javascript
-MATCH (u:User {username: String}), (i:Ingredient {name: String})
-MERGE (u)-[r:USED]->(i) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1
+    MATCH (u:User {username: String}), (i:Ingredient {name: String})
+    MERGE (u)-[r:USED]->(i) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1
 ```
 
-(Done after the creation of a Recipe)
-- Create a new ingredient-ingredient relationship
-  - Check if the relationship already exists
-  - If it exists, increment the times attribute
-  - If it doesn't exist, create the relationship
+9. `Create a new Ingredient-Ingredient relationship`:
 ```javascript
-MATCH (i1:Ingredient {name: String}), (i2:Ingredient {name: String})
-MERGE (i1)-[r:USED_WITH]->(i2) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1
+    MATCH (i1:Ingredient {name: String}), (i2:Ingredient {name: String})
+    MERGE (i1)-[r:USED_WITH]->(i2) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1
 ```
-Dobbiamo farlo in entrambi i versi!
-
-
 
 ### 6.1.2. Read
+Reading operations are:
 
-- Show users
-- Shows posts
-- Show comments of a Post
-- Show star ranking of a Post
-- Show ingredients
-- Find ingredient by name
-- Show friends
-- Show followers
-- Show followings
-- Show calories of an ingredient
-- Show steps of a Recipe 
-- Show recipe of a Post
-- Show ingredients of a Recipe
-- Show recipes filtering by the ingredients
-- Show recipes filtering by the calories (lower bound and upper bound) (if the totalCalories is the same, we show the ones with the highest star ranking)
-- Show the most/least recent posts (timestamp) 
+Sistemare qui
+
+1. Show users:
+2. Shows posts:
+3. Show comments of a Post:
+4. Show star ranking of a Post:
+5. Show ingredients
+6. Find ingredient by name
+7. Show friends
+8. Show followers
+9. Show followings
+10. Show calories of an ingredient
+11. Show steps of a Recipe 
+12. Show recipe of a Post
+13. Show ingredients of a Recipe
+14. Show recipes filtering by the ingredients
+15. Show recipes filtering by the calories (lower bound and upper bound) (if the totalCalories is the same, we show the ones with the highest star ranking)
+16. Show the most/least recent posts (timestamp) 
 
 #### 6.1.2.1. MongoDB
 
@@ -1151,7 +1127,6 @@ db.Post.find({
 ```
 
 
-
 #### 6.1.2.2. Neo4j
 
 - Show followings / followed
@@ -1182,36 +1157,37 @@ RETURN r
 
 
 ### 6.1.3. Update
+Update operations are:
 
-- Update user's information
-  - [username] : we have to mantain the consistency
-  - password
-  - name
-  - surname
-
-- Update post 
-  - description   
- 
-- [Update recipe] : we have to mantain the consistency
-
-- Update comment
-
-- [Update user-ingredient relationship] (it is done in the create operation)
-
-- [Update ingredient-ingredient relationship] (it is done in the create operation)
+1. `Update User's information`: A User can update his/her password, name or surname;
+2. `Update Post`: A User can update the description of a Post;
+3. `Update Comment`: A User can update the text of a Comment;
 
 
-#### 6.1.3.1. MongoDB
+**MongoDB**
+
+1. `Update User's information`:
 
 - Update user's information
 
-- Update password
+"db.User.updateOne({\r\n" + //
+                        "    _id: " + user.getId() + ",\r\n" + //
+                        "}, {\r\n" + //
+                        "    $set: {\r\n" + //
+                        "        password: \"" + user.getPassword() + "\",\r\n" + //
+                        "        name: \"" + user.getName() + "\",\r\n" + //
+                        "        surname: \"" + user.getSurname() + "\"\r\n" + //
+                        "    }\r\n" + //
+                        "})";
+
 ```javascript
 db.User.updateOne({
-    _id: #,
+    _id: ObjectId("...")
 }, {
     $set: {
-        password: hashedString,
+        password: [HASHEDSTRING],
+        name: String,
+        surname: String
     }
 })
 ```
@@ -1905,6 +1881,7 @@ MongoDatabase db = mongoClient.getDatabase( s: "LSMDB")
 MongoCollection<Document> myColl = db.getCollection( s: "students")
 .withReadPreference(ReadPreference. secondary ());
 
+(# Load Estimation)
 
 
 ## 8.4. Indexes and Constraints
@@ -2002,6 +1979,11 @@ MVC
 # 10. Implementation
 
 
+I have a login api in java spring and i want that other apis are accessible only after the login is performed
+DIRE in breve come si doveva fare per rendere API non pubbliche
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+e poi dire come si è fatto e perchè, per semplificare l'implementazione....
+
 
 More details on the classes and their attributes are as follows.
 
@@ -2059,6 +2041,9 @@ More details on the classes and their attributes are as follows.
 
 
 # 12. USER MANUAL
+
+Da fare più mettere screen
+
 
 # 13. References
 

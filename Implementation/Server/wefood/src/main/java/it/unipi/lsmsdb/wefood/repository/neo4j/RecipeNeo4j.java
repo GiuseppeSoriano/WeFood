@@ -1,7 +1,6 @@
 package it.unipi.lsmsdb.wefood.repository.neo4j;
 
 import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.exceptions.Neo4jException;
 

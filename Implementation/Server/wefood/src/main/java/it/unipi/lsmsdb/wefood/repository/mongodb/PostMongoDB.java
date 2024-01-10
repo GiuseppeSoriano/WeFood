@@ -10,7 +10,6 @@ import org.bson.Document;
 
 import com.mongodb.MongoException;
 
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.model.Comment;
 import it.unipi.lsmsdb.wefood.model.StarRanking;

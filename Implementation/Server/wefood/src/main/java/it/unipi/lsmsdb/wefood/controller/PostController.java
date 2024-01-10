@@ -1,29 +1,21 @@
 package it.unipi.lsmsdb.wefood.controller;
 
-import com.mongodb.MongoException;
 import it.unipi.lsmsdb.wefood.apidto.PostByCaloriesRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.PostByIngredientsRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.PostRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.PostTopRatedRequestDTO;
-import it.unipi.lsmsdb.wefood.dao.PostDAO;
-import it.unipi.lsmsdb.wefood.dao.RecipeDAO;
-import it.unipi.lsmsdb.wefood.dao.RegisteredUserDAO;
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
-import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.model.Post;
-import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.service.PostService;
-import org.neo4j.driver.exceptions.Neo4jException;
+import it.unipi.lsmsdb.wefood.service.RecipeImageService;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +23,7 @@ import java.util.Map;
 @RequestMapping("/post")
 public class PostController {
     private final PostService postService;
+    private final RecipeImageService recipeImageService;
 
     public PostController(){
         postService = new PostService();
@@ -41,56 +34,62 @@ public class PostController {
     @PostMapping("/uploadPost")
     public ResponseEntity<Boolean> uploadPost(@RequestBody PostRequestDTO request){
         // IMAGE
-        // Post post, RegisteredUser user
-        return ResponseEntity.ok(postService.uploadPost(request.getPost(), request.getUser()));
+        Post post = request.getPost();
+        post.getRecipe().setImage(recipeImageService.storePostImage(post));
+        return ResponseEntity.ok(postService.uploadPost(post, request.getUser()));
     }
 
     @PostMapping("/modifyPost")
     public ResponseEntity<Boolean> modifyPost(@RequestBody PostRequestDTO request){
         // Post post, PostDTO postDTO
-        return ResponseEntity.ok(postService.modifyPost(request.getPost(), request.getPostDTO()));
+        Post post = recipeImageService.postConverter(request.getPost());
+        PostDTO postDTO = request.getPostDTO();
+        postDTO.setImage(post.getRecipe().getImage());
+        return ResponseEntity.ok(postService.modifyPost(post, postDTO));
     }
 
     @PostMapping("/deletePost")
     public ResponseEntity<Boolean> deletePost(@RequestBody PostRequestDTO request){
-        return ResponseEntity.ok(postService.deletePost(request.getPost(), request.getPostDTO(), request.getUser()));
+        Post post = recipeImageService.postConverter(request.getPost());
+        PostDTO postDTO = request.getPostDTO();
+        postDTO.setImage(post.getRecipe().getImage());
+        return ResponseEntity.ok(postService.deletePost(post, postDTO, request.getUser()));
     }
 
     @PostMapping("/browseMostRecentTopRatedPosts")
     public ResponseEntity<List<PostDTO>> browseMostRecentTopRatedPosts(@RequestBody PostTopRatedRequestDTO request){
-        // IMAGE
-        return ResponseEntity.ok(postService.browseMostRecentTopRatedPosts(request.getHours(), request.getLimit()));
+        List<PostDTO> postDTOList = recipeImageService.postDTOconverter(postService.browseMostRecentTopRatedPosts(request.getHours(), request.getLimit()));
+        return ResponseEntity.ok(postDTOList);
     }
 
     @PostMapping("/browseMostRecentTopRatedPostsByIngredients")
     public ResponseEntity<List<PostDTO>> browseMostRecentTopRatedPostsByIngredients(@RequestBody PostByIngredientsRequestDTO request){
-        // IMAGE
-        return ResponseEntity.ok(postService.browseMostRecentTopRatedPostsByIngredients(request.getIngredientNames(), request.getHours(), request.getLimit()));
+        List<PostDTO> postDTOList = recipeImageService.postDTOconverter(postService.browseMostRecentTopRatedPostsByIngredients(request.getIngredientNames(), request.getHours(), request.getLimit()));
+        return ResponseEntity.ok(postDTOList);
     }
 
     @PostMapping("/browseMostRecentPostsByCalories")
     public ResponseEntity<List<PostDTO>> browseMostRecentPostsByCalories(@RequestBody PostByCaloriesRequestDTO request){
-        // IMAGE
-        return ResponseEntity.ok(postService.browseMostRecentPostsByCalories(request.getMinCalories(), request.getMaxCalories(), request.getHours(), request.getLimit()));
+        List<PostDTO> postDTOList = recipeImageService.postDTOconverter(postService.browseMostRecentPostsByCalories(request.getMinCalories(), request.getMaxCalories(), request.getHours(), request.getLimit()));
+        return ResponseEntity.ok(postDTOList);
     }
 
     @PostMapping("/findPostByPostDTO")
     public ResponseEntity<Post> findPostByPostDTO(@RequestBody PostDTO request){
-        // IMAGE
-        Post post = recipeImageService.postDTOconverter(postService.findPostByPostDTO(request));
-        return ResponseEntity.ok(postService.findPostByPostDTO(request));
+        Post post = recipeImageService.postConverter(postService.findPostByPostDTO(request));
+        return ResponseEntity.ok(post);
     }
 
     @PostMapping("/findPostById")
     public ResponseEntity<Post> findPostById(@RequestBody String request){
-        // IMAGE
-        return ResponseEntity.ok(postService.findPostById(request));
+        Post post = recipeImageService.postConverter(postService.findPostById(request));
+        return ResponseEntity.ok(post);
     }
 
     @PostMapping("/findPostsByRecipeName")
     public ResponseEntity<List<PostDTO>> findPostsByRecipeName(@RequestBody String request){
-        // IMAGE
-        return ResponseEntity.ok(postService.findPostsByRecipeName(request));
+        List<PostDTO> postDTOList = recipeImageService.postDTOconverter(postService.findPostsByRecipeName(request));
+        return ResponseEntity.ok(postDTOList);
     }
 
     @PostMapping("/interactionsAnalysis")

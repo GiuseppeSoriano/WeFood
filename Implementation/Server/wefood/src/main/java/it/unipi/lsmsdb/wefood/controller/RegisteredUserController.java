@@ -1,14 +1,10 @@
 package it.unipi.lsmsdb.wefood.controller;
 
-import com.mongodb.MongoException;
 import it.unipi.lsmsdb.wefood.apidto.LoginRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.RegisteredUserRequestDTO;
-import it.unipi.lsmsdb.wefood.dao.RegisteredUserDAO;
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.service.RegisteredUserService;
-import org.neo4j.driver.exceptions.Neo4jException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

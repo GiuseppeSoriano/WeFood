@@ -3,7 +3,6 @@ package it.unipi.lsmsdb.wefood.dao;
 import java.util.List;
 
 import com.mongodb.MongoException;
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;

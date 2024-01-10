@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.mongodb.MongoException;
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.model.Post;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;

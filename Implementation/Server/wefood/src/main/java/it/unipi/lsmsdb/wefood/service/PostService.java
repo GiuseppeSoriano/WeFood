@@ -12,7 +12,6 @@ import it.unipi.lsmsdb.wefood.dao.IngredientDAO;
 import it.unipi.lsmsdb.wefood.dao.PostDAO;
 import it.unipi.lsmsdb.wefood.dao.RecipeDAO;
 import it.unipi.lsmsdb.wefood.dao.RegisteredUserDAO;
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;

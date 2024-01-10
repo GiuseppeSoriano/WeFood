@@ -3,7 +3,6 @@ package it.unipi.lsmsdb.wefood.dao;
 import com.mongodb.MongoException;
 import it.unipi.lsmsdb.wefood.model.Post;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.repository.interfaces.PostMongoDBInterface;
 import it.unipi.lsmsdb.wefood.repository.mongodb.PostMongoDB;

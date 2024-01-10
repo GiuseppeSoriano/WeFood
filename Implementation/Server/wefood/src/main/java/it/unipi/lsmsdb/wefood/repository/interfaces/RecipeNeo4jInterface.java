@@ -2,7 +2,6 @@ package it.unipi.lsmsdb.wefood.repository.interfaces;
 
 import java.util.List;
 
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
 import org.neo4j.driver.exceptions.Neo4jException;
 

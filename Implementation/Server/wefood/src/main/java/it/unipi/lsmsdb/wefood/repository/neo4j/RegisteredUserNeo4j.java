@@ -5,7 +5,6 @@ import java.util.List;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.exceptions.Neo4jException;
 
-import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.repository.base.BaseNeo4j;
 import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserNeo4jInterface;
