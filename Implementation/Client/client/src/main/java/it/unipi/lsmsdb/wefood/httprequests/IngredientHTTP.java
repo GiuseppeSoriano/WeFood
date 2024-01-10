@@ -78,23 +78,6 @@ public class IngredientHTTP{
             return null;
         }
     }
-
-    
-    public Boolean createIngredientIngredientRelationship(List<String> request) {
-        try{
-            String requestBody = objectMapper.writeValueAsString(request);
-            HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/createIngredientIngredientRelationship", requestBody);
-            if(result.statusCode() == 200)
-                // HTTP 200 OK
-                return objectMapper.readValue(result.body(), Boolean.class);
-            // errors
-            return null;
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            return null;
-        }
-    }
     
     public List<String> mostPopularCombinationOfIngredients(String request){
         try{
@@ -110,7 +93,6 @@ public class IngredientHTTP{
             return null;
         }
     }
-
     
     public List<String> findNewIngredientsBasedOnFriendsUsage(RegisteredUserDTO request){
         try{
