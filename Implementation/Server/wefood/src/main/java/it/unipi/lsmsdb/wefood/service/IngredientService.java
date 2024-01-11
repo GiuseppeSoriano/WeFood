@@ -145,24 +145,6 @@ public class IngredientService {
         }
     }
 
-    public boolean createIngredientIngredientRelationship(List<String> ingredientNames){
-        try{
-            return IngredientDAO.createIngredientIngredientRelationship(ingredientNames);
-        }
-        catch(Neo4jException e){
-            System.out.println("Neo4JException in IngredientService.createIngredientIngredientRelationship: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in IngredientService.createIngredientIngredientRelationship: " + e.getMessage());
-            return false;
-        }
-        catch(Exception e){
-            System.out.println("Exception in IngredientService.createIngredientIngredientRelationship: " + e.getMessage());
-            return false;
-        }
-    }
-
     public List<String> mostPopularCombinationOfIngredients(String ingredientName){
         try{
             return IngredientDAO.mostPopularCombinationOfIngredients(ingredientName);

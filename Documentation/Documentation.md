@@ -18,6 +18,46 @@ header-includes: |
 ---
 
 
+\title{Large-Scale and Multi-Structured DataBases}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[keepaspectratio=true,scale=0.4]{Resources/"cherub.eps"}
+\end{figure}
+
+\begin{center}
+    \LARGE{UNIVERSITY OF PISA}
+    \vspace{5mm}
+    \\ \large{COMPUTER ENGINEERING MASTER DEGREE}\vspace{3mm}
+    \\ \large{Large-Scale and Multi-Structured DataBases}
+    \vspace{10mm}
+    \\ \huge\textbf{WeFood}
+\end{center}
+
+\vspace{20mm}
+
+\begin{minipage}[t]{0.47\textwidth}
+	{\large{Professors:}{\normalsize\vspace{3mm} \bf\\ \large{Pietro Ducange}\vspace{3mm}
+ \\ \large{Alessio Schiavo}}}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.47\textwidth}\raggedleft
+ {\large{Group Members:}\raggedleft
+ {\normalsize\vspace{3mm}
+	\bf\\ \large{Giovanni Ligato}\raggedleft
+     \normalsize\vspace{3mm}
+    	\bf\\ \large{Cleto Pellegrino}\raggedleft
+     \normalsize\vspace{3mm}
+    	\bf\\ \large{Giuseppe Soriano}\raggedleft}}
+\end{minipage}
+
+\vspace{40mm}
+\hrulefill
+
+\begin{center}
+\normalsize{ACADEMIC YEAR 2023/2024}
+\end{center}
+
 \pagenumbering{gobble}
 
 \renewcommand*\contentsname{Index}
@@ -170,7 +210,6 @@ The *UML Class Diagram* shown in Figure \ref{fig:class_diagram} represents the m
 
 
 \newpage
-
 # 4. DataBases
 Before cleaning and preparing the dataset needed to populate the databases, it is necessary to define the structure of the latter. In particular, two different databases will be used: a document DB and a graph DB.
 
@@ -327,8 +366,66 @@ This relationship allows to quickly retrieve the Ingredients that have been used
 This last relationship allows to retrieve the Ingredients that are contained in a Recipe. 
 
 
-\newpage
+## 4.3. Redundancies
+The proposed database models have redundancies, denoted as `[REDUNDANCY]`. This means that the information they contain can be obtained through alternative means, often involving more intricate operations than a straightforward retrieval of the redundant value. These redundancies were cautiously introduced to enhance the system's reading performance and subsequently reduce response times. However, to maintain *data consistency*, writing operations are necessary to keep the redundancies updated. 
+While reading operations are more frequent for the redundancies, the writing operations are generally less frequent. This approach is deemed more convenient for optimizing overall system performance. Redundancies also allow to avoid the need for joins, particularly when dealing with inter-database connections. A detailed explanation of the reasons justifying the introduction of the redundancies is provided in Table \ref{tab:redundancies}.
 
+\begin{xltabular}{\textwidth}{X}
+    \caption{Redundancies introduced into the database models.}
+    \label{tab:redundancies} \\
+    \toprule
+    \textbf{(1) \texttt{DocumentDB:User:posts:name}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:name} \\
+    \midrule
+    \textbf{(2) \texttt{DocumentDB:User:posts:image}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:image} \\
+    \midrule
+    \textbf{(3) \texttt{DocumentDB:Post:username}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
+    \midrule
+    \textbf{(4) \texttt{DocumentDB:Post:recipe:totalCalories}} \\
+    \textbf{Reason}: To avoid joins and to avoid computing the total calories of a Recipe every time a Post is shown. \\
+    \textbf{Original/Raw Value}: It is possible to compute the total calories of a Recipe by summing the calories of the Ingredients contained in the Recipe In particular the precise formula is the following: $\sum_i \left( quantity_i\cdot\frac{calories100g_i}{100} \right)$ where $quantity_i$ is the quantity of the $i$-th Ingredient contained in the Recipe and $calories100g_i$ is the amount of calories contained in 100 grams of the $i$-th Ingredient that can be retrieved from the \texttt{Ingredient} collection. \\
+    \midrule
+    \textbf{(5) \texttt{DocumentDB:Post:avgStarRanking}} \\
+    \textbf{Reason}: To avoid computing the average star ranking of a Post every time is shown. \\
+    \textbf{Original/Raw Value}: It is possible to compute the average star ranking of a Post by averaging the values contained in \texttt{DocumentDB:Post:starRankings:vote} \\
+    \midrule
+    \textbf{(6) \texttt{DocumentDB:Post:starRankings:username}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
+    \midrule
+    \textbf{(7) \texttt{DocumentDB:Post:comments:username}} \\
+    \textbf{Reason}: To avoid joins. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
+    \midrule
+    \textbf{(8) \texttt{GraphDB:(User):username}} \\
+    \textbf{Reason}: To avoid joins with the DocumentDB. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
+    \midrule
+    \textbf{(9) \texttt{GraphDB:(Recipe):name}} \\
+    \textbf{Reason}: To avoid joins with the DocumentDB. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:name} \\
+    \midrule
+    \textbf{(10) \texttt{GraphDB:(Ingredient):name}} \\
+    \textbf{Reason}: To avoid joins with the DocumentDB. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Ingredient:name} \\
+    \midrule
+    \textbf{(11) \texttt{GraphDB:(User)-[:USED]->(Ingredient):times}} \\
+    \textbf{Reason}: To avoid computing the total number of times that a User used an Ingredient. \\
+    \textbf{Original/Raw Value}: It is possible to compute the total number of times that a User used an Ingredient by counting the number of times that the User used that Ingredient in his/her Recipes (information that can be retrieved from the DocumentDB). \\
+    \midrule
+    \textbf{(12) \texttt{GraphDB:(Ingredient)-[:USED\_WITH]->(Ingredient):times}} \\
+    \textbf{Reason}: To avoid computing the number of times that an Ingredient is used with another one. \\
+    \textbf{Original/Raw Value}: It is possible to compute the number of times that an Ingredient is used with another one by counting the number of times that all the Users used these two Ingredients together in their Recipes (information that can be retrieved from the DocumentDB). \\
+    \bottomrule
+\end{xltabular}
+
+
+\newpage
 # 5. Dataset
 To populate the databases with a substantial volume of realistic data, datasets sourced from Kaggle were employed.
 
@@ -947,213 +1044,125 @@ Creation operations are:
 ### 6.1.2. Read
 Reading operations are:
 
-Sistemare qui
+1. `Find User by username`;
+2. `Get all the Ingredients`;
+3. `Find Ingredient by name`;
+4. `Find Most Recent Top Rated Posts`;
+5. `Find Most Recent Top Rated Posts by set of ingredients`;
+6. `Find Most Recent Posts by minCalories and maxCalories`;
+7. `Find Post by Recipe name`;
+8. `Find Post by _id`;
+9. `Find Users Followed by a User`;
+10. `Find Followers of a User`;
+11. `Find Friends of a User`: a User's friends are the Users that follow him/her and that he/she follows;
+12. `Find Recipes by set of ingredients`;
 
-1. Show users:
-2. Shows posts:
-3. Show comments of a Post:
-4. Show star ranking of a Post:
-5. Show ingredients
-6. Find ingredient by name
-7. Show friends
-8. Show followers
-9. Show followings
-10. Show calories of an ingredient
-11. Show steps of a Recipe 
-12. Show recipe of a Post
-13. Show ingredients of a Recipe
-14. Show recipes filtering by the ingredients
-15. Show recipes filtering by the calories (lower bound and upper bound) (if the totalCalories is the same, we show the ones with the highest star ranking)
-16. Show the most/least recent posts (timestamp) 
 
-#### 6.1.2.1. MongoDB
+**MongoDB**
 
-- Show users
+1. `Find User by username`:
 ```javascript
-db.User.find()
+    db.User.find({
+        username: String
+    })
 ```
 
-- Show posts
+2. `Get all the Ingredients`:
 ```javascript
-db.Post.find()
+    db.Ingredient.find()
 ```
 
-- Show comments
+3. `Find Ingredient by name`:
 ```javascript
-db.Post.find({
-    _id: #,
-}, {
-    comments: 1
-})
+    db.Ingredient.find({
+        name: String
+    })
 ```
 
-- Show star ranking of a Post
+4. `Find Most Recent Top Rated Posts`:
 ```javascript
-db.Post.find({
-    _id: #,
-}, {
-    starRankings: 1
-})
+    db.Post.find({
+        timestamp: {
+            $gte: Long
+        }
+    }).sort({
+        avgStarRanking: -1
+    }).limit(limit)
 ```
 
-- Show ingredients
+5. `Find Most Recent Top Rated Posts by set of ingredients`:
 ```javascript
-db.Ingredient.find()
+    db.Post.find({
+        timestamp: {
+            $gte: Long
+        },
+        "recipe.ingredients.name": {
+            $all: [String, ...]
+        }
+    }).sort({
+        avgStarRanking: -1
+    }).limit(limit)
 ```
 
-- Find ingredient by name
+6. `Find Most Recent Posts by minCalories and maxCalories`:
 ```javascript
-db.Ingredient.find({
-    name: String,
-})
+    db.Post.find({
+        timestamp: {
+            $gte: Long
+        },
+        "recipe.totalCalories": {
+            $gte: minCalories,
+            $lte: maxCalories
+        }
+    }).sort({
+        timestamp: -1
+    }).limit(limit)
 ```
 
-- Show calories of an ingredient (DA NON METTERE IN DB)
+7. `Find Post by Recipe name`:
 ```javascript
-db.Ingredient.find({
-    name: String,
-}, {
-    calories: 1
-})
+    db.Post.find({
+        "recipe.name": {
+            $regex: String,
+            $options: "i"
+        }
+    })
 ```
 
-- Show steps of a Recipe 
+8. `Find Post by _id`:
 ```javascript
-db.Post.find({
-    _id: #,
-}, {
-    recipe: {
-        steps: 1
-    }
-})
-```
-
-- Show recipe of a Post
-```javascript
-db.Post.find({
-    _id: #,
-}, {
-    recipe: {
-        name: 1,
-        image: 1,
-        steps: 1,
-        totalCalories: 1,
-        ingredients: 1
-    }
-})
-```
-
-- Show ingredients of a Recipe
-```javascript
-db.Post.find({
-    _id: #,
-}, {
-    recipe: {
-        ingredients: 1
-    }
-})
-```
-
-- Show recipes filtering by the calories (lower bound and upper bound) (if the totalCalories is the same, we show the ones with the highest star ranking)
-```javascript
-db.Post.find({
-    "recipe.totalCalories": {
-        $gte: lowerBound,
-        $lte: upperBound
-    }
-}).sort({
-    avgStarRanking: -1
-})
-```
-
-- Show the most recent posts (timestamp)
-```javascript
-db.Post.find().sort({
-    timestamp: -1
-})
-```
-- Show the least recent posts (timestamp)
-```javascript
-db.Post.find().sort({
-    timestamp: 1
-})
-```
-
-- Browse most recent top rated Posts
-```javascript
-db.Post.find({
-    timestamp: {
-        $gte: Timestamp
-    }
-}).sort({
-    avgStarRanking: -1
-}).limit(10)
-```
-
-- Browse most recent top rated Posts by set of ingredients. It is necessary that the recipe contains all the ingredients of the set.
-```javascript
-db.Post.find({
-    timestamp: {
-        $gte: Timestamp
-    },
-    "recipe.ingredients.name": {
-        $all: [String, ...]
-    }
-}).sort({
-    avgStarRanking: -1
-}).limit(10)
-```
-
-- Browse most recent posts by minCalories and maxCalories
-```javascript
-db.Post.find({
-    timestamp: {
-        $gte: Timestamp
-    },
-    "recipe.totalCalories": {
-        $gte: minCalories,
-        $lte: maxCalories
-    }
-}).sort({
-    timestamp: -1
-}).limit(10)
-```
-
-- Find post by id
-```javascript
-db.Post.find({
-    _id: #,
-})
+    db.Post.find({
+        _id: ObjectId("..."),
+    })
 ```
 
 
-#### 6.1.2.2. Neo4j
+**Neo4j**
 
-- Show followings / followed
+9. `Find Users Followed by a User`:
 ```javascript
-MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)
-RETURN u2
+    MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)
+    RETURN u2
 ```
 
-- Show followers
+10. `Find Followers of a User`:
 ```javascript
-MATCH (u1:User)-[:FOLLOWS]->(u2:User {username: String})
-RETURN u1
+    MATCH (u1:User)-[:FOLLOWS]->(u2:User {username: String})
+    RETURN u1
 ```
 
-- Show friends
+11. `Find Friends of a User`:
 ```javascript
-MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u1)
-RETURN u2
+    MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u1)
+    RETURN u2
 ```
 
-- Show recipes filtering by the ingredients
+12. `Find Recipes by set of ingredients`:
 ```javascript
-MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)
-WHERE i.name IN [String, ...]   # List of ingredients
-RETURN r
+    MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)
+    WHERE i.name IN [String, ...]
+    RETURN r
 ```
-
 
 
 ### 6.1.3. Update
@@ -1167,424 +1176,244 @@ Update operations are:
 **MongoDB**
 
 1. `Update User's information`:
-
-- Update user's information
-
-"db.User.updateOne({\r\n" + //
-                        "    _id: " + user.getId() + ",\r\n" + //
-                        "}, {\r\n" + //
-                        "    $set: {\r\n" + //
-                        "        password: \"" + user.getPassword() + "\",\r\n" + //
-                        "        name: \"" + user.getName() + "\",\r\n" + //
-                        "        surname: \"" + user.getSurname() + "\"\r\n" + //
-                        "    }\r\n" + //
-                        "})";
-
 ```javascript
-db.User.updateOne({
-    _id: ObjectId("...")
-}, {
-    $set: {
-        password: [HASHEDSTRING],
-        name: String,
-        surname: String
-    }
-})
-```
-- Update name
-```javascript
-db.User.updateOne({
-    _id: #,
-}, {
-    $set: {
-        name: String,
-    }
-})
-```
-
-- Update surname
-```javascript
-db.User.updateOne({
-    _id: #,
-}, {
-    $set: {
-        surname: String,
-    }
-})
-```
-
-- Update password, name, surname
-```javascript
-db.User.updateOne({
-    _id: #,
-}, {
-    $set: {
-        password: hashedString,
-        name: String,
-        surname: String
-    }
-})
-```
-
-- Update post 
-
-- description   
-```javascript
-db.Post.updateOne({
-    _id: #,
-}, {
-    $set: {
-        description: String,
-    }
-})
-```
-
-- Update comment
-```javascript
-db.Post.updateOne({
-    _id: #,
-    comments: {
-        $elemMatch: {
-            idUser: #,
-            timestamp: Timestamp,
+    db.User.updateOne({
+        _id: ObjectId("...")
+    }, {
+        $set: {
+            password: [HASHEDSTRING],
+            name: String,
+            surname: String
         }
-    }
-}, {
-    $set: {
-        "comments.$.text": String,
-    }
-})
+    })
+```
+
+2. `Update Post`:
+```javascript
+    db.Post.updateOne({
+        _id: ObjectId("...")
+    }, {
+        $set: {
+            description: String
+        }
+    })
+```
+
+3. `Update Comment`:
+```javascript
+    db.Post.updateOne({
+        _id: ObjectId("..."),
+        comments: {
+            $elemMatch: {
+                idUser: ObjectId("..."),
+                timestamp: Long
+            }
+        }
+    }, {
+        $set: {
+            "comments.$.text": String
+        }
+    })
 ```
 
 
 ### 6.1.4. Delete
+Deletion operations are:
 
-- [Delete user] : we give the possibility to the user to delete his/her own profile.
+1. `Delete User`: Users have the option to delete their own profiles, bearing in mind that all *non-personal information* will be retained for statistical purposes and to preserve the social network's current state attributed to that user. Although the user's profile becomes invisible, their posts will be preserved, allowing other users to still access the recipes uploaded by him/her in their feed. Once a profile is deleted, re-registration using the previous username is not permitted;
+2. `Delete Post`;
+3. `Delete Post from User`;
+4. `Delete Comment`;
+5. `Delete StarRanking`;
+6. `Delete Recipe`;
+7. `Delete following relationship`;
+8. `Delete / Decrement User-Ingredient relationship`;
 
-When the user deletes his/her own profile, we have to delete all the posts of the user (calling the delete post operation) + we set "delete" = True
+Deletions not allowed:
 
-- Delete post
+- `Delete Ingredient`: it is not possible to delete an Ingredient because otherwise all the Recipes that contain it would be inconsistent;
+- `Delete Ingredient-Ingredient relationship`: this relationship is neither removed nor decremented when a Recipe is deleted, for statistical purposes.
 
-- Delete comment
-- Delete star ranking
-- Delete following relationship
+**MongoDB**
 
-- [Delete ingredient] : no because otherwise we would lose all the information about the ingredient (e.g. recipes, etc.)
-  
-- Delete user-ingredient relationship (see delete a post)
-  
-- Delete ingredient-ingredient relationship (see delete a post)
-
-#### 6.1.4.1. MongoDB
-
-- Delete user
-Before deleting a user we have to call delete post for each post of the user
-But before we can have to delete the recipes inside the posts of the user from Neo4j (calling the delete recipe operation)
-After this operation we can delete the user from Neo4j
+1. `Delete User`: It is important to first mark the User as deleted before proceeding to erase his/her personal information.
 ```javascript
-MATCH (u:User {username: String})
-DELETE u
-```
-
-Now we can delete evry post of the user from the Post collection (delete post operation)
-
-At this point we can delete all the fields from the user collection, leaving only the username
-```javascript
-db.User.updateOne({
-    _id: #,
-}, {
-    $unset: {
-        password: "",
-        name: "",
-        surname: "",
-        posts: "",
-    }
-})
-```
-
-Now we have to add a field called deleted to the user collection
-```javascript
-db.User.updateOne({
-    _id: #,
-}, {
-    $set: {
-        deleted: true,
-    }
-})
-```
-
-- Delete post
-Before deleting a post we have to mantain the consistency of the DBs
-
-We need to delete the post from the User collection
-```javascript
-db.User.updateOne({
-    _id: #,
-}, {
-    $pull: {
-        posts: {
-            idPost: #,
+    db.User.updateOne({
+        _id: ObjectId("...")
+    }, {
+        $set: {
+            deleted: true
         }
-    }
-})
-```
-
-Delete Post
-```javascript
-db.Post.deleteOne({
-    _id: #,
-})
-```
-
-
-We need to delete all the relationships of the recipe contained in the post from Neo4j
-```javascript
-MATCH (r:Recipe {_id: #})
-DETACH DELETE r
-```
-
-(We do not decrement the times in this relationship for statistical purposes...)
-We need to update the times attribute of the relationships of the ingredients used together in the recipe contained in the post from Neo4j
-```javascript
-MATCH (i1:Ingredient {name: String})-[r:USED_WITH]->(i2:Ingredient {name: String})
-SET r.times = r.times - 1
-IF r.times = 0 THEN
-    DELETE r
-END IF
-``` [DA PROVARE]
-
-We need to update the relationships among the user and the ingredients used in the recipe contained in the post from Neo4j
-```javascript
-MATCH (u:User {username: String})-[r:USED]->(i:Ingredient {name: String})
-SET r.times = r.times - 1
-IF r.times = 0 THEN
-    DELETE r
-END IF
-``` [DA PROVARE]
-
-Now we can delete the post from the Post collection
-```javascript
-db.Post.deleteOne({
-    _id: #,
-})
-```
-
-- Delete comment
-```javascript
-db.Post.updateOne({
-    _id: #,
-}, {
-    $pull: {
-        comments: {
-            idUser: #,
-            timestamp: Timestamp,
+    })
+    db.User.updateOne({
+        _id: ObjectId("...")
+    }, {
+        $unset: {
+            password: "",
+            name: "",
+            surname: "",
+            posts: ""
         }
-    }
-})
+    })
 ```
 
-- Delete star ranking
+2. `Delete Post`:
 ```javascript
-db.Post.updateOne({
-    _id: #,
-}, {
-    $pull: {
-        starRankings: {
-            idUser: #
-        }
-    }
-})
+    db.Post.deleteOne({
+        _id: ObjectId("...")
+    })
 ```
 
-#### 6.1.4.2. Neo4j
-
-- Delete following relationship
+3. `Delete Post from User`:
 ```javascript
-MATCH (u1:User {username: String})-[r:FOLLOWS]->(u2:User {username: String})
-DELETE r
-```
-
-
-### 6.1.5. Query
-
-#### 6.1.5.1. Analytics
-
-- Show most active users (da vedere) (DA ELIMINARE)
-- Show most followed users
-- [Show post with most comments] (Ci serve veramente?)
-- Show posts with the highest/lowest star ranking
-- Show most/least used ingredients
-- Show most/least used ingredients by a user
-- Show total amount of calories of a recipe
-- Show the average of the avgStarRanking of a User's posts
-- Average amount of grams of ingredients used in equal set of ingredients.
-- Find recipes filtering the name
-- To add others...
-
-
-##### 6.1.5.1.1. MongoDB
-
-- Show posts with the highest star ranking (if the avgStarRanking is the same, we show the most recent one)
-```javascript
-db.Post.find().sort({
-    avgStarRanking: -1,
-    timestamp: -1
-})
-```
-
-- Show total amount of calories of a recipe
-```javascript
-db.Post.find({
-    _id: #,
-}, {
-    recipe: {
-        totalCalories: 1
-    }
-})
-```
-
-- Show the average of the avgStarRanking of a User's posts
-```javascript
-db.Post.aggregate([
-    {
-        $match: {
-            idUser: #,
-        }
-    },
-    {
-        $group: {
-            _id: null,
-            avgOfAvgStarRanking: {
-                $avg: "$avgStarRanking"
+    db.User.updateOne({
+        _id: ObjectId("...")
+    }, {
+        $pull: {
+            posts: {
+                idPost: ObjectId("...")
             }
         }
-    }
-])
+    })
 ```
 
-- Average amount of grams of ingredients used in equal set of ingredients.
-(Da implementare)
-
-
-- Find Posts by recipes filtering the name
+4. `Delete Comment`:
 ```javascript
-db.Post.find( { "recipe.name": { $regex: "pork", $options: "i" } } )
+    db.Post.updateOne({
+        _id: ObjectId("...")
+    }, {
+        $pull: {
+            comments: {
+                idUser: ObjectId("..."),
+                timestamp: Timestamp
+            }
+        }
+    })
 ```
 
-##### 6.1.5.1.2. Neo4j
-
-- Show most followed users
+5. `Delete StarRanking`:
 ```javascript
-MATCH (u1:User)-[:FOLLOWS]->(u2:User)
-RETURN u2, COUNT(u1) AS followers
-ORDER BY followers DESC
-LIMIT 5
+    db.Post.updateOne({
+        _id: ObjectId("...")
+    }, {
+        $pull: {
+            starRankings: {
+                idUser: ObjectId("...")
+            }
+        }
+    })
 ```
 
-- Show most used ingredients
+
+**Neo4j**
+
+6. `Delete Recipe`:
 ```javascript
-MATCH (u:User)-[r:USED]->(i:Ingredient)
-RETURN i, SUM(r.times) AS times 
-ORDER BY times DESC
-LIMIT 5
+    MATCH (r:Recipe {_id: String})
+    DETACH DELETE r
 ```
 
-- Show least used ingredients
+7. `Delete following relationship`:
 ```javascript
-MATCH (u:User)-[r:USED]->(i:Ingredient)
-RETURN i, SUM(r.times) AS times
-ORDER BY times ASC
-LIMIT 5
+    MATCH (u1:User {username: String})-[r:FOLLOWS]->(u2:User {username: String})
+    DELETE r
 ```
 
-- Show most used ingredients by a user
+8. `Delete / Decrement User-Ingredient relationship`:
 ```javascript
-MATCH (u:User {username: String})-[r:USED]->(i:Ingredient)
-RETURN i, r.times AS times
-ORDER BY times DESC
-LIMIT 5
+    MATCH (u:User {username: String})-[r:USED]->(i:Ingredient {name: String})
+    SET r.times = r.times - 1
+    IF r.times = 0 THEN
+        DELETE r
+    END IF
 ```
 
-(Not interesting)
-- Show least used ingredients by a user
+
+## 6.2. Suggestions and Aggregations
+In this section, more relevant queries are presented, categorized into two sub-sections: suggestions and aggregations. Suggestions queries propose new information to users, based on their preferences and the preferences of their friends. Aggregations queries, instead, offer statistical insights into the stored data.
+
+### 6.2.1. Suggestions
+
+1. `Show Most / Least used Ingredients`;
+2. `Show Most used Ingredients by a User`;
+3. `Suggest users to follow`: a User is suggested to follow the friends of his/her friends;
+4. `Suggest most popular combination of ingredients`;
+5. `Suggest new ingredients based on friends’ usage`;
+6. `Suggest most followed users`;
+7. `Find Users by Ingredient usage`: find Users who have employed a particular ingredient most frequently.
+
+
+**Neo4j**
+
+1. `Show Most / Least used Ingredients`:
 ```javascript
-MATCH (u:User {username: String})-[r:USED]->(i:Ingredient)
-RETURN i, r.times AS times
-ORDER BY times ASC
-LIMIT 5
+    MATCH (u:User)-[r:USED]->(i:Ingredient)
+    RETURN i, SUM(r.times) AS times 
+    ORDER BY times DESC
+    LIMIT 5
+
+    MATCH (u:User)-[r:USED]->(i:Ingredient)
+    RETURN i, SUM(r.times) AS times
+    ORDER BY times ASC
+    LIMIT 5
 ```
 
-#### 6.1.5.2. Suggestions
-
-- Suggest users to follow (based on the user's friends)
-- Suggest users to follow (based on common ingredients)
-- Suggest most popular combination of ingredients
-- Suggest new ingredients based on friends’ usage
-- Suggest most followed users
-- Suggest Users by Ingredient usage
-
-##### 6.1.5.2.1. Neo4j
-
-- Suggest users to follow (based on the user's friends)
+2. `Show Most used Ingredients by a User`:
 ```javascript
-MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u3:User)
-WHERE (u2)-[:FOLLOWS]->(u1)
-AND NOT (u1)-[:FOLLOWS]->(u3)
-RETURN u3
+    MATCH (u:User {username: String})-[r:USED]->(i:Ingredient)
+    RETURN i, r.times AS times
+    ORDER BY times DESC
+    LIMIT 5
 ```
 
-(NON SI implementa più)
-- Suggest users to follow (based on common ingredients). r1.times and r2.times must be both greater than threshold.
+3. `Suggest users to follow`:
 ```javascript
-MATCH (u1:User {username: String})-[r1:USED]->(i:Ingredient)<-[r2:USED]-(u2:User)
-WHERE NOT (u1)-[:FOLLOWS]->(u2)
-AND r1.times > threshold
-AND r2.times > threshold
-RETURN u2
+    MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u3:User)
+    WHERE (u2)-[:FOLLOWS]->(u1)
+    AND NOT (u1)-[:FOLLOWS]->(u3)
+    RETURN u3
 ```
 
-
-- Suggest most popular combination of ingredients
+4. `Suggest most popular combination of ingredients`:
 ```javascript
-MATCH (i1:Ingredient)-[r:USED_WITH]->(i2:Ingredient)
-RETURN i1, i2, r.times AS times
-ORDER BY times DESC
-LIMIT 5
+    MATCH (i1:Ingredient)-[r:USED_WITH]->(i2:Ingredient)
+    RETURN i1, i2, r.times AS times
+    ORDER BY times DESC
+    LIMIT 5
 ```
 
-- Suggest new ingredients based on friends’ usage
+5. `Suggest new ingredients based on friends’ usage`:
 ```javascript
-MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[r:USED]->(i:Ingredient)
-WHERE (u2)-[:FOLLOWS]->(u1)
-AND NOT (u1)-[:USED]->(i)
-RETURN i, r.times AS times
-ORDER BY times DESC
-LIMIT 5
+    MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[r:USED]->(i:Ingredient)
+    WHERE (u2)-[:FOLLOWS]->(u1)
+    AND NOT (u1)-[:USED]->(i)
+    RETURN i, r.times AS times
+    ORDER BY times DESC
+    LIMIT 5
 ```
 
-- Suggest most followed users
+6. `Suggest most followed users`:
 ```javascript
-MATCH (u1:User)-[:FOLLOWS]->(u2:User)
-RETURN u2, COUNT(u1) AS followers
-ORDER BY followers DESC
-LIMIT 5
+    MATCH (u1:User)-[:FOLLOWS]->(u2:User)
+    RETURN u2, COUNT(u1) AS followers
+    ORDER BY followers DESC
+    LIMIT 5
 ```
 
-- Suggest Users by Ingredient usage
+7. `Find Users by Ingredient usage`:
 ```javascript
-MATCH (u:User)-[r:USED]->(i:Ingredient {name: String})
-RETURN u, i, r.times AS times
-ORDER BY times DESC
-LIMIT 10
+    MATCH (u:User)-[r:USED]->(i:Ingredient {name: String})
+    RETURN u, i, r.times AS times
+    ORDER BY times DESC
+    LIMIT 10
 ```
 
+### 6.2.2. Aggregations
 
-
-
-### 6.1.6. Aggregations
-
-- (#1)Show the ratio of interactions (number of comments / number of Posts  and  number of star rankings / number of Posts) and the average of avgStarRanking distinguishing among posts with and without images (i.e. no field image inside recipe)
-
+`(#1):` Compute the *ratio of interactions* and the *average* avgStarRanking by distinguishing between posts with and without images (i.e. no field `image` inside `recipe`). For the Posts with images, the ratio of interactions are computed as follows:
+$$ratioOfComments = \cfrac{TotNumberOfComments}{TotNumberOfPosts}$$
+$$ratioOfStarRankings = \cfrac{TotNumberOfStarRankings}{TotNumberOfPosts}$$
+here $TotNumberOfComments$, $TotNumberOfStarRankings$ and $TotNumberOfPosts$ are computed by considering only the Posts with images. Similarly, the same calculations are performed for Posts without images.
 ```javascript
 db.Post.aggregate([
     {
@@ -1647,15 +1476,14 @@ db.Post.aggregate([
 ])
 ```
 
-- (#2)Given a User, show the number of comments he/she has done, the number of star rankings he/she has done and the average of this star rankings
-
+`(#2):` Given a User, show the *number* of Comments and StarRankings he/she has done and the *average* of this StarRankings.
 ```javascript
 db.Post.aggregate([
     {
         $match: {
             $or: [
-                {"comments.username": "cody_cisneros_28"},
-                {"starRankings.username": "cody_cisneros_28"}
+                {"comments.username": String},
+                {"starRankings.username": String}
             ]
         }
     },
@@ -1665,14 +1493,14 @@ db.Post.aggregate([
                 $filter: {
                     input: "$comments",
                     as: "comment",
-                    cond: {$eq: ["$$comment.username", "cody_cisneros_28"]}
+                    cond: {$eq: ["$$comment.username", String]}
                 }
             },
             filteredStarRankings: {
                 $filter: {
                     input: "$starRankings",
                     as: "starRanking",
-                    cond: {$eq: ["$$starRanking.username", "cody_cisneros_28"]}
+                    cond: {$eq: ["$$starRanking.username", String]}
                 }
             }
         }
@@ -1702,13 +1530,12 @@ db.Post.aggregate([
 ])
 ```
 
-- (#3)After filtering recipes by name, retrieve the average amount of calories of first 10 recipes ordered by descending avgStarRanking
-
+`(#3):` After filtering the Recipes by name, retrieve the *average* amount of calories of the first 10 Recipes ordered by descending avgStarRanking.
 ```javascript
 db.Post.aggregate([
     {
         $match: {
-            "recipe.name": { $regex: "pork", $options: "i" }
+            "recipe.name": { $regex: String, $options: "i" }
         }
     },
     {
@@ -1736,19 +1563,12 @@ db.Post.aggregate([
 ])
 ```
 
-We can use this to show when a post is shown, the average amount of calories of the recipes with similar name 
-
-
-
-Others...
-
-- Given a user, show the average totalCalories of recipes publishished by him/her.
-    
+`(#4):` Given a User, show the *average* `totalCalories` of the Recipes published by him/her.
 ```javascript  
 db.Post.aggregate([ 
     { 
         $match: { 
-            username: "cody_cisneros_28" 
+            username: String 
         } 
     }, 
     {   $project: { 
@@ -1765,76 +1585,22 @@ db.Post.aggregate([
 ])
 ```
 
-# 7. Redundancies
 
-Ridondanze segnate come [REDUNDANCY] nella sezione database
+---
 
-\begin{xltabular}{\textwidth}{X}
-    \caption{Redundancies introduced into the model.}
-    \label{tab:redundancies} \\
-    \toprule
-    \textbf{(1) \texttt{DocumentDB:User:posts:name}} \\
-    \textbf{Reason}: To avoid joins. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:name} \\
-    \midrule
-    \textbf{(2) \texttt{DocumentDB:User:posts:image}} \\
-    \textbf{Reason}: To avoid joins. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:image} \\
-    \midrule
-    \textbf{(3) \texttt{DocumentDB:Post:username}} \\
-    \textbf{Reason}: To avoid joins. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
-    \midrule
-    \textbf{(4) \texttt{DocumentDB:Post:recipe:totalCalories}} \\
-    \textbf{Reason}: To avoid joins and to avoid computing the total calories of a recipe every time a post is shown. \\
-    \textbf{Original/Raw Value}: It is possible to compute the total calories of a recipe by summing the calories of the ingredients contained in the recipe In particular the precise formula is the following: $\sum_i \left( quantity_i\cdot\frac{calories100g_i}{100} \right)$ where $quantity_i$ is the quantity of the $i$-th ingredient contained in the recipe and $calories100g_i$ is the amount of calories contained in 100 grams of the $i$-th ingredient that can be retrieved from the \texttt{Ingredient} collection. \\
-    \midrule
-    \textbf{(5) \texttt{DocumentDB:Post:avgStarRanking}} \\
-    \textbf{Reason}: To avoid computing the average star ranking of a post every time is shown. \\
-    \textbf{Original/Raw Value}: It is possible to compute the average star ranking of a post by averaging the values contained in \texttt{DocumentDB:Post:starRankings:vote} \\
-    \midrule
-    \textbf{(6) \texttt{DocumentDB:Post:starRankings:username}} \\
-    \textbf{Reason}: To avoid joins. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
-    \midrule
-    \textbf{(7) \texttt{DocumentDB:Post:comments:username}} \\
-    \textbf{Reason}: To avoid joins. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
-    \midrule
-    \textbf{(8) \texttt{GraphDB:(User):username}} \\
-    \textbf{Reason}: To avoid joins with the DocumentDB. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
-    \midrule
-    \textbf{(9) \texttt{GraphDB:(Recipe):name}} \\
-    \textbf{Reason}: To avoid joins with the DocumentDB. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:name} \\
-    \midrule
-    \textbf{(10) \texttt{GraphDB:(Ingredient):name}} \\
-    \textbf{Reason}: To avoid joins with the DocumentDB. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:Ingredient:name} \\
-    \midrule
-    \textbf{(11) \texttt{GraphDB:(User)-[:USED]->(Ingredient):times}} \\
-    \textbf{Reason}: To avoid computing the total number of times that a User used an Ingredient. \\
-    \textbf{Original/Raw Value}: It is possible to compute the total number of times that a User used an Ingredient by counting the number of times that the User used that Ingredient in his/her recipes (information that can be retrieved from the DocumentDB). \\
-    \midrule
-    \textbf{(12) \texttt{GraphDB:(Ingredient)-[:USED\_WITH]->(Ingredient):times}} \\
-    \textbf{Reason}: To avoid computing the number of times that an ingredient is used with another one. \\
-    \textbf{Original/Raw Value}: It is possible to compute the number of times that an ingredient is used with another one by counting the number of times that all the users used these two ingredients together in their recipes (information that can be retrieved from the DocumentDB). \\
-    \bottomrule
-\end{xltabular}
+\newpage
+
+# 7. DataBases Deployment
+As it emerged before, the databases that are used for the deployment phase are: mongoDB and neo4j, respectively for the documentDB and the graphDB. In this section we will describe the deployment of these two databases.
+
+## 7.1. MongoDB
+MongoDB was deployed on virtual cluster consisting of 3 machines. The hierarchy of the cluster is composed by one primary node along with 2 secondary nodes. So they take part in a replicaset consisting of 3 nodes. 
+
+### 7.1.1. ReplicaSet
+As just discussed the ReplicaSet, called `lsmdb`, is composed by three nodes. The priority of the primary node is 2, while the two secondary nodes have priorities equal to 1.5 and 1. When the replicaset has been installed in the remote cluster, the write concern has been set to `w: 1` and j unspecified wtimeout = 0. this means that Requests acknowledgment that the write operation has propagated to 1 mongod instance. Not having specified a value for j, this is like having specified it to false, that means The j option requests acknowledgment from MongoDB that the write operation has been written to the on-disk journal. Acknowledgment requires just writing operation in memory. wtimeout=0 means that If you do not specify the wtimeout option and the level of write concern is unachievable, the write operation will block indefinitely. This situation will be handled in the code by specifying there at client level a wtimeout of 5000ms (5 seconds). This means that if the write operation is not completed in 5 seconds, an exception will be thrown. In the code also the read concern will be handled at a client level, by considering a read concern = nearest. This means that the read operation will be performed on the nearest node. (Read from any member node from the set of nodes which respond the fastest. (Responsiveness measured in pings)) NEAREST because in this way we can access the node with the lowest latency
 
 
-
-# 8. CONSISTENCY, AVAILABILITY AND PARTITION TOLERANCE [X]
-
-## 8.1. Distributed Database Design
-
-According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.
-
-### 8.1.1. Replicas
-We deployed mongoDB and neo4j with the following configuration:
-- MongoDB: 3 nodes (1 primary and 2 replicas DA VEDERE SE FARE 3 repliche con stessi poteri)
-- Neo4j: 1 node (1 primary) (we didn't implement the replicas because we would have needed the enterprise edition)
+The j option requests acknowledgment from MongoDB that the write operation has been written to the on-disk journal. j option determines whether the member acknowledges writes after applying the write operation in memory or after writing to the on-disk journal.
 
 Read Operations:
 In WeFood, as in every Social Network, read operations are the most frequent and critical operations. For this reason we have to guarantee the lowest response time possible even if data is not updated to the latest version. So we decided to provide a response from the first available replica.
@@ -1843,12 +1609,7 @@ Write Operations:
 To ensure the low latency that we discussed before, write operations are considered successful 
 when just a replica node (da sistemare dopo che si è scelta configurazione) wrote the data. 
 
-### 8.1.2. Handling inter database consistency
-Using two different databases implemented redundancy of data, so for this reason any fail in insertion/up-date/deletion of data can cause inconsistencies between these to DBs, for this reason, in case of exceptions during write operations on one of the databases causes a rollback.
-If the operation succeeds on MongoDB, a success response is sent to the user, and the graph db becomes eventually consistent: if an exception occurs after this phase, a rollback operation starts bringing back the DBs in a state of consistency.
-Check write operations in the Replicas!
-
-## 8.2. Sharding
+### 7.1.2. Sharding
 
 In our application as it is implemented it is not useful to design the sharding approach. The main reason behind this decision is that we give the users the possibility to find the posts using completely uncorrelated filters that are not linked by a particular relationship (i.e. such as a common field). Indeed if for example we decided to shard the post collection by the timestamp field, we would have latency issues when we have to find the posts using other filters (e.g. by totalCalories). Indeed we would have to query all the shards and then merge the results. This would be a very inefficient approach. For this reason we decided to not implement the sharding approach.
 
@@ -1856,37 +1617,7 @@ For example if WeFood were implemented by considering a category for each recipe
 
 We do not consider the sharding approach for the User collection because we do not expect the users to grow as much as the posts. Indeed we expect that the number of users will be much lower than the number of posts. For this reason we decided to not implement the sharding approach at all.
 
-## 8.3. Configuration of MongoDB (ReplicaSet)
-
-j = false (we do not handle sensitive data and there is no need to wait for the journal to be written to disk)
-w = 1 (write concern)
-wtimeout = 0 (handled in Server Java code)
-
-Read Preferences
-
-// Read Preferences at client level
-MongoClient mongoClient = MongoClients.create(
-"mongodb: //localhost: 27018, localhost: 27019, localhost: 27020/" +
-"?readPreference=nearest");
-
-NEAREST because in this way we can access the node with the lowest latency
-(Read from any member node from the set of nodes which respond the fastest. (Responsiveness measured in pings))
-
-
-// Read Preferences at DB Level
-MongoDatabase db = mongoClient.getDatabase( s: "LSMDB")
-.withReadPreference(ReadPreference. secondary ());
-
-// Read Preferences at collection level
-MongoCollection<Document> myColl = db.getCollection( s: "students")
-.withReadPreference(ReadPreference. secondary ());
-
-(# Load Estimation)
-
-
-## 8.4. Indexes and Constraints
-
-### 8.4.1. MongoDB
+### 7.1.3. Indexes and Constraints
 
 Possible Indexes:
 
@@ -1946,43 +1677,74 @@ In this way we also ensure the unique constraint on the username field
 
 Reason: since the user is the actor of the social network that performs the most number of operations and most of these operations are find operations (e.g. showing posts with different filters) we decided to implement indexes on the above fields. In this way we can speed up the find operations. We estimate that the number of find operations done by the admin will be negligible compared to the number of find operations done by the users.
 
+## 7.2. Neo4j
 
-try {
-    // Prova ad inserire il documento
-    collection.insertOne(nuovoDocumento);
-} catch (MongoWriteException e) {
-    // Controlla se è un errore di duplicazione chiave
-    if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-        System.out.println("Impossibile inserire il documento: il valore è già presente.");
-    } else {
-        System.out.println("Errore durante l'inserimento del documento: " + e.getMessage());
-    }
-}
+- Neo4j: 1 node (1 primary) (we didn't implement the replicas because we would have needed the enterprise edition)
 
-## 8.5. Indexes of Neo4j
-
+### 7.2.1. Indexes
 Da discutere dopo aver caricato tutti i dati ed eventualmente prevedere indice per ricette che sono davvero tante
 
 
-# 9. System Architecture
+## 7.3. Consistency, Availability and Partition Tolerance
 
-MVC
-
-
-## 9.1. Backend
+According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.
 
 
-## 9.2. General description
+## 7.4. Inter-Database Consistency
+Using two different databases implemented redundancy of data, so for this reason any fail in insertion/up-date/deletion of data can cause inconsistencies between these to DBs, for this reason, in case of exceptions during write operations on one of the databases causes a rollback.
+If the operation succeeds on MongoDB, a success response is sent to the user, and the graph db becomes eventually consistent: if an exception occurs after this phase, a rollback operation starts bringing back the DBs in a state of consistency.
+Check write operations in the Replicas!
+Explain how the rollback is implemented and that neo4j is waited to be consistent before sending the response to the user...
 
-## 9.3. Frameworks and components
+//questo è stato spiegato all'interno del server
 
-# 10. Implementation
+\newpage
 
+# 8. Implementation
 
-I have a login api in java spring and i want that other apis are accessible only after the login is performed
-DIRE in breve come si doveva fare per rendere API non pubbliche
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-e poi dire come si è fatto e perchè, per semplificare l'implementazione....
+## 8.1. System Architecture - Frameworks and components
+
+The architecture of your application is composed by two main component:
+-Client
+-Server
+
+Firstly, let's take a closer look at the Client component. The client serves as the interface through which users interact with your application. It plays a crucial role in initiating communication with the server by sending HTTP requests. The client component is responsible for creating a seamless and intuitive user experience, encapsulating the presentation and user interface logic.
+
+Moving on to the Server component, it serves as the backbone of your application, handling the requests received from the client. The server adopts a Model-View-Controller (MVC) architecture, a widely adopted design pattern that promotes a modular and organized approach to software development. In this context, the Model represents the data and business logic and the Controller manages the flow of information. Is it common, like in this case, to no have the view, because we make use of APIs to manage the comunication between client and server.
+
+The server's role is not only to process the incoming requests but also to efficiently manage the data and comunicate with our databases. The use of MVC helps to maintain a separation of concerns, making the codebase more modular, scalable, and easier to maintain. This design pattern contributes to the overall robustness and flexibility of the server-side architecture.
+
+A key characteristic of your communication model is its adherence to RESTful principles. REST, or Representational State Transfer, is an architectural style that emphasizes a stateless and standardized approach to communication between systems. In your case, all information essential for communication is encapsulated within the body of the HTTP requests, formatted in JSON (JavaScript Object Notation).
+
+This RESTful communication approach offers advantages such as scalability, flexibility, and simplicity. By embracing a stateless communication model, your application becomes more resilient, making it easier to scale horizontally as the user base grows.
+
+In summary, the architecture of your application revolves around a well-defined interaction between the client and server components. The client, responsible for user interaction, initiates communication through HTTP requests, while the server, structured with an MVC architecture, efficiently processes these requests and manages the application's data and business logic. The adoption of RESTful communication, with information conveyed in JSON format, adds a layer of standardization and efficiency to the overall system, contributing to a robust and scalable application design.
+
+### 8.1.1. Server
+
+Our server is structured in this way:
+In the deepest part of our code, there are the two Base classes, found in the repository/base package, which act as a driver to handle query in a "coherent" way. In particular the BaseMongoDB class act as a string parser, reading all the strings provided by the classes above it and building step by step the Java queries each time the parser find a new component. The parser is also able to understand the content of the document to perform different queries. This is done so that from the classes above it will be possible to send queries exaclty how a human would write the queries in the mongo shell, so that each time a new query shoul be tested or implemented, is not necessary to build the method from scratch, but it will be necessary just to send the string to the Base class and all the steps to create the query will be done inside the class.
+
+Going above we have all the interfaces, which provides the structure of all the classes found in the mongodb and neo4j packages, which will implement all the queries as strings (this is possible for the reasons described before).
+
+Going even further above, we have the DAOs and the DTOs.
+DAO classes will call all the methods found in the respective classes of the mongodb/neo4j packages. DTOs are more interesting in our case. They will provided a rapresentation of the classes found in the model package which is elaborated with respect to the original one. For instance the PostDTO rapresents what the user sees before clicking on a post, like Instagram feed page, before seeing comments or informations about the post, every user sees just the image. The image (and in our case the recipe name), is our PageDTO.
+
+In the service package we find all the classes which, in some cases, also handle the consistency in the two databases and inside the single database. In general four cases of consistency management can be found:
+User creation consistency:
+    If a user is created in MongoDB, we try the creation in Neo4j. If it fails in Neo4j, we display server-side that the databases are not synchronized.
+Ingredient creation consistency:
+    The same as described in the case of the user.
+Post consistency:
+    During the creation of a post, first of all we try the creation in MongoDB in the Post collection. After this we update the redunducies in the User collection. If the latter fails, an inconsistency in MongoDB is displayed server-side (we know the updated version of the database can be found in the Post collection).
+    After all this steps, we have to create nodes and the relations in Neo4j. This are the Recipe node, the ingredient-ingredient relations, the user-ingredient relation and the recipe-ingredient relation. We try as the first step, to create the node. If this fails, we handle the case of the failed operation in Neo4j (described at the end). If this goes through, we start the creation of the relations. If one of this creations fails, we try to delete the recipe node and we display that Neo4j remains consistent but with a failed operation. If the ingredient-ingredient operation fails, the deletion of the recipe-ingredient relation is not handled separately. In fact the deletion of the recipe node is done in a way so that also all the relations are delete (DETACH DELETE). If the creation of user-ingredient fails, the ingredient-ingredient relations are not deleted, because utilized just for statistical purposes, and the user will never directly see that his informations are not precise. But this is not a problem since the most important thing is to show to the user some "good" informations that makes him stay active in the social network. If the creation in Neo4j of all the previous described steps fails, we try a rollback in MongoDB. We try to remove the post from the User collection. If the operation fails, we display that the databases are not consistent. Otherwise, we try to delete the Post also in the Post collection. If the operation fails, we display that MongoDB is not consistent and that the databases are not synchronized. Otherwise we only display that the operations was not completed successfuly (databases in this case are synchronized and consistent). 
+
+    During the deletion of a post, we start from deleting informations from MongoDB, in particular from the User collection. If it fails, we display that the operation failed, otherwise we try also the deletion in the Post collection. If it fails we display the inconsistency in MongoDB and we display that the operation failed. If the operation is completed, we try the deletion in Neo4j, where we try to delete the recipe and all the relations to ingredients. If this operation fails, we display that the databases are not synchronized and the operation fails. Otherwise we try to delete the relation user-ingredient. If it fails, we display an inconsistency in Neo4j and the fact that the databases are not synchronized and the operation fails. Otherwise the operation is completed.
+
+    There are several techniques to handle the inconsistency (eventual consistency) wich can remain from the steps described before while still giving the opportunity to use the social network, such as inserting a trigger at the start of Neo4j which verifies that the graph is consistent with all the informations stored in the MongoDB collections. To handle inconsistencies in MongoDB, we could try with a series of actions (routine) to run every x hours/days etc.., that restore the consistency. In general, handling the eventual consistency depends on the type of service that you want to provide to the users. For instance, we could offer a limited set of functinalities in Neo4j, like how instagram functionalities some time are blocked, or start a maintenance period where all the consistencies are restored.
+
+Last but not least, controller package and the apidto package manage all the comunication with the client and provide a possibility for the client to interact with all the classes described before.
+
 
 
 More details on the classes and their attributes are as follows.
@@ -2037,15 +1799,121 @@ More details on the classes and their attributes are as follows.
 - name: `String`
 - calories: `Double`
 
-# 11. PERFORMANCE TEST
+Fare riferimento a deployment database
+private static final String MONGODB_DATABASE = "WeFood";
+    private static final String WRITE_CONCERN = "1";
+    private static final String WTIMEOUT = "5000";
+    private static final String READ_PREFERENCE = "nearest";
+    private static final String mongoString = String.format("mongodb://%s/%s/?w=%s&wtimeout=%s&readPreference=%s", MONGODB_HOST, MONGODB_DATABASE, WRITE_CONCERN, WTIMEOUT, READ_PREFERENCE);
 
 
-# 12. USER MANUAL
+### 8.1.2. Client
+
+In the client we can find actor classes, which inside have the main shell with all the commands for the users. 
+Also we have methods wich guides the user through the steps to complete an operation an this methods also call the classes found in httprequest. The latters sends an http request to the server and if the status code is 200 (ok), a conversion from the response body to the desired object is perfomed. This objects can be found in model, dto, or apidto. The print of the object is done at the end inside the method called before by the Printer or Java print (System.out.println).
+
+## 8.2. Future Works
+I have a login api in java spring and i want that other apis are accessible only after the login is performed
+DIRE in breve come si doveva fare per rendere API non pubbliche
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+e poi dire come si è fatto e perchè, per semplificare l'implementazione....
+
+Some possible future works that can be done to improve our application are the following:
+Firstly, one crucial step would be to implement Hypertext Transfer Protocol Secure (HTTPS), a secure communication protocol, to ensure a protected and encrypted experience for all users within the social network.
+
+Then the utilization of additional replicas in Neo4j could be a way to procede. Presently, this is constrained by licensing limitations. By doing so, we can enhance the scalability and fault tolerance of our application.
+
+Addressing the challenge of eventual consistency, as previously discussed during the server presentation, implementing one of the viable strategies for managing eventual consistency will contribute to a more reliable user experience.
+
+Furthermore, to expand the feature set of our social network, it is necessary to introduce additional functionalities. To do so, optimizing our parser to handle these new queries will be fundamental to achieve a more versatile and feature-rich social networking platform.
+
+In conclusion, the future trajectory of our application involves not only ensuring security through HTTPS implementation but also overcoming licensing barriers to explore multiple replicas in Neo4j. Additionally, addressing issues related to eventual consistency and expanding the functional scope with new queries in MongoDB are pivotal steps in ensuring the sustained growth and improvement of our social network.
+
+---
+
+<!-- # PERFORMANCE TEST -->
+
+\newpage
+
+# 9. User Manual
+
+This guide outlines the general approach to navigating and utilizing the features of our social network application. After this introduction, you'll find comprehensive instructions on interacting with the user interface, tailored for registered users, as well as an overview for non-registered users on accessing limited functionalities. A table presents all possible commands that users can input into the interface along with their corresponding outcomes.
+
+For non-registered users, browsing recent posts sorted by upload date is permitted. However, all other operations, except for registration, are restricted until users complete the registration process. Upon registration, users are greeted with an empty personal profile page, zero followers/followed, and zero posts. The interface displays a personal shell prompting users to insert commands. The subsequent table details various commands and their corresponding results.
+
+\begin{tabular}{|l|l|}
+    \hline
+    \textbf{Comando} & \textbf{Operazione} \\
+    \hline
+    \texttt{login} & To login\\
+    \texttt{logout} & To logout \\
+    \texttt{findIngredientByName} & To find an ingredient by name \\
+    \texttt{findIngredientsUsedWithIngredient} & To show suggestions about ingredients based on ingredient combinations \\
+    \texttt{findNewIngredientsBasedOnFriendsUsage} & To show suggestions about ingredients based on friends \\
+    \texttt{findUsersToFollowBasedOnUserFriends} & To show suggestions on new followers based on friends\\
+    \texttt{findMostFollowedUsers} & To show suggestions about the most followed users\\
+    \texttt{findUsersByIngredientUsage} & To show suggestions about users based on ingredients usage \\
+    \texttt{findMostUsedIngredientByUser} & To find the most used ingredient \\
+    \texttt{findMostLeastUsedIngredient} & To show an overview about ingredient usage \\
+    \texttt{uploadPost} & To upload a post \\
+    \texttt{modifyPost} & To modify a post \\
+    \texttt{deletePost} & To delete a post \\
+    \texttt{browseMostRecentTopRatedPosts} & To browse the most recent and top rated posts \\
+    \texttt{browseMostRecentTopRatedPostByIngredients} & To browse the most recent and top rated posts by ingredients \\
+    \texttt{browseMostRecentPostsByCalories} & To browse the most recent posts by calories \\
+    \texttt{findPostByRecipeName} & To find a post by recipe name \\
+    \texttt{averageTotalCaloriesByUser} & Statistics about calories \\
+    \texttt{findRecipeByIngredients} & To find a recipe by ingredients \\
+    \texttt{modifyPersonalInformation} & To find personal informations \\
+    \texttt{deleteUser} & To delete your personal profile \\
+    \texttt{followUser} & To follow a user \\
+    \texttt{unfollowUser} & To unfollow a user \\
+    \texttt{findFriends} & To find your friends \\
+    \texttt{findFollowers} & To find your followers \\
+    \texttt{findFollowed} & To find your followed users \\
+    \texttt{exit} & TO exit from the site \\
+    \hline
+\end{tabular}
+
+After entering a command, the user will receive on-screen guidance to complete the operation. Accuracy in providing information is crucial; any inaccuracies will result in a failed operation, necessitating a restart. Notably, there is no back button available, meaning completed operations cannot be reversed. A pop-up message informs users of the success or failure of an operation, redirecting them to the main shell.
+
+For post browsing, a folder is dynamically created/deleted upon issuing the relevant command, and the folder's path is displayed on the screen.
+
+The admin of the social network is pre-registered, and credentials are communicated through various channels (e.g., voice, messages). The admin interacts with a personal shell using specific commands. Similar to regular users, the admin lacks a back button, and once an operation is correctly completed, it cannot be reversed.
+
+The following table outlines admin-specific commands:
+
+\begin{table}
+    \begin{center}
+    \label{tab:table2}
+    \begin{tabular}{|l|l|}
+    \hline
+    \textbf{Command} & \textbf{Operation} \
+    \hline
+        login & Enter the social network \
+        logout & Exit from the social network \
+        createIngredient & Create a new ingredient \
+        banUser & Ban a user from the site \
+        unbanUser & Unban a user \
+        findIngredient & Find information about a specific ingredient \
+        getAllIngredients & Retrieve all information about ingredients \
+        findIngredientsUsedWithIngredient & Find combinations of ingredients from a starting ingredient \
+        mostPopularCombinationOfIngredients & Statistics about the most popular combinations of ingredients \
+        exit & Close the application \
+    \hline
+    \end{tabular}
+    \caption{Admin commands.}
+    \end{center}
+\end{table}
+
+This detailed guide aims to provide users, whether regular or admin, with a clear understanding of the social network's functionalities and the corresponding commands to interact effectively.
 
 Da fare più mettere screen
 
 
-# 13. References
+\newpage
+
+# 10. References
 
 `[1]` Calories in Food Items (per 100 grams) - \url{https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams} - Accessed: December 2023.
 

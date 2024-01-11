@@ -42,10 +42,6 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientService.findIngredientsUsedWithIngredient(request));
     }
 
-    @PostMapping("/createIngredientIngredientRelationship")
-    public ResponseEntity<Boolean> createIngredientIngredientRelationship(@RequestBody List<String> request) {
-        return ResponseEntity.ok(ingredientService.createIngredientIngredientRelationship(request));
-    }
     @PostMapping("/mostPopularCombinationOfIngredients")
     public ResponseEntity<List<String>> mostPopularCombinationOfIngredients(@RequestBody String request){
         return ResponseEntity.ok(ingredientService.mostPopularCombinationOfIngredients(request));

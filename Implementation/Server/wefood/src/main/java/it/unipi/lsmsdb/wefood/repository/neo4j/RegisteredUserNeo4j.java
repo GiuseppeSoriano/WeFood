@@ -43,6 +43,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;       
     }
+
     public boolean unfollowUser(RegisteredUserDTO user, String usernameToUnfollow) throws IllegalStateException, Neo4jException {
         String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[r:FOLLOWS]->(u2:User {username: '" + usernameToUnfollow + "'})" +
                         "DELETE r";
@@ -126,7 +127,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         String query = "MATCH (u:User)-[r:USED]->(i:Ingredient {name: '" + ingredientName + "'})\r\n" + //
                        "RETURN u, i, r.times AS times\r\n" + //
                        "ORDER BY times DESC\r\n" + //
-                       "LIMIT 20";
+                       "LIMIT 10";
         List<Record> results = BaseNeo4j.executeQuery(query);
         List<RegisteredUserDTO> suggestedUsers = new ArrayList<RegisteredUserDTO>();
         for(Record result: results){

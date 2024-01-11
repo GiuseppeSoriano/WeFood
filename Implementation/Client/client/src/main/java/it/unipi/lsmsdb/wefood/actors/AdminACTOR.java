@@ -3,59 +3,56 @@ package it.unipi.lsmsdb.wefood.actors;
 import java.util.List;
 import java.util.Scanner;
 
+import it.unipi.lsmsdb.wefood.dto.PostDTO;
 // import it.unipi.lsmsdb.wefood.apidto.LoginRequestDTO;
 import it.unipi.lsmsdb.wefood.httprequests.AdminHTTP;
 import it.unipi.lsmsdb.wefood.httprequests.IngredientHTTP;
+import it.unipi.lsmsdb.wefood.httprequests.PostHTTP;
 import it.unipi.lsmsdb.wefood.model.Admin;
 import it.unipi.lsmsdb.wefood.model.Ingredient;
 import it.unipi.lsmsdb.wefood.utility.Printer;
 import it.unipi.lsmsdb.wefood.utility.Reader;
+import it.unipi.lsmsdb.wefood.utility.Cleaner;
+import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
 
 public class AdminACTOR{
     private static Admin info = null;
     private final static AdminHTTP adminHTTP = new AdminHTTP();
     private final static IngredientHTTP ingredientHTTP = new IngredientHTTP();
+    private final static PostHTTP postHTTP = new PostHTTP();
     private final static Scanner scanner = new Scanner(System.in);
+    private static List<PostDTO> postDTOs = null;
+    private static List<RecipeDTO> recipeDTOs = null;
 
-    public static void login(){
-        if(info != null){
-            System.out.println("You are already logged in as admin");
+    public static void login(Admin admin){
+        if(info == null){
+            System.out.println("Wrong credentials!");
             return;
         }
-        if(RegisteredUserACTOR.getInfo() != null){
-            System.out.println("You are already logged in as user");
-            return;
-        }
-        info = adminHTTP.loginAdmin(Reader.readLoginRequestDTO());
-        if(info != null)
-            System.out.println("Logged in as admin");
-        else
-            System.out.println("Error while logging in");
+        info = admin;
+        System.out.println("Logged in as " + info.getUsername() + "!");
+        executeAdminShell();
     }
     
-    public static void logout(){
-        info = null;
-        System.out.println("Logged out");
-    }
 
     public static Admin getInfo(){
         return info;
     }
 
-    public static void createIngredient(){
+    private static void createIngredient(){
         if(info == null){
             System.out.println("You must be logged in as admin to create an ingredient");
             return;
         }
 
-        boolean state = adminHTTP.createIngredient(Reader.readIngredient());
+        boolean state = adminHTTP.createIngredient(Reader.readNewIngredient());
         if(state)
             System.out.println("Ingredient created successfully");
         else
             System.out.println("Error while creating ingredient");
     }
     
-    public static void banUser(){
+    private static void banUser(){
         if(info == null){
             System.out.println("You must be logged in as admin to ban a user");
             return;
@@ -71,7 +68,7 @@ public class AdminACTOR{
             System.out.println("Error while banning user");
     }
 
-    public static void unbanUser(){
+    private static void unbanUser(){
         if(info == null){
             System.out.println("You must be logged in as admin to unban a user");
             return;
@@ -87,7 +84,7 @@ public class AdminACTOR{
             System.out.println("Error while unbanning user");
     }
 
-    public static void findIngredientByName(){
+    private static void findIngredientByName(){
         if(info == null){
             System.out.println("You must be logged in to find an ingredient by name");
             return;
@@ -103,17 +100,17 @@ public class AdminACTOR{
             System.out.println("Error while finding ingredient");
     }
 
-    public static void getAllIngredients(){
+    private static void getAllIngredients(){
         if(info == null){
             System.out.println("You must be logged in to get all ingredients");
             return;
         }
 
-        for(Ingredient ingredient : ingredientHTTP.getAllIngredients())
+        for(Ingredient ingredient : Reader.getAllIngredients())
             Printer.printIngredient(ingredient);
     }
 
-    public static void findIngredientsUsedWithIngredient(){
+    private static void findIngredientsUsedWithIngredient(){
         if(info == null){
             System.out.println("You must be logged in to get ingredients by calories");
             return;
@@ -124,9 +121,9 @@ public class AdminACTOR{
             System.out.println(ingredient);
     }
 
-    // SERVE QUELLO DI DEFAULT?? COME FARE??
+    // SERVE QUELLO DI DEFAULT?? COME FARE?? Che vuol dire? Sei Giuse? Io sono Gio
 
-    public static void mostPopularCombinationOfIngredients(){
+    private static void mostPopularCombinationOfIngredients(){
         if(info == null){
             System.out.println("You must be logged in to get the most popular combination of ingredients");
             return;
@@ -140,29 +137,188 @@ public class AdminACTOR{
             System.out.println(ingredient);
     }
 
-    public static void findMostUsedIngredientsByUser(){
+    private static void findMostLeastUsedIngredients(){
+        if(info == null){
+            System.out.println("You must be logged in to get the most and least used ingredients");
+            return;
+        }
 
+        System.out.println("Insert if you want the most or least used ingredients (M or L): ");
+        String choice = scanner.nextLine();
+
+        List<String> ingredients = null;
+        if(choice.equals("M"))
+            ingredients = ingredientHTTP.findMostLeastUsedIngredients(true);
+        else if(choice.equals("L"))
+            ingredients = ingredientHTTP.findMostLeastUsedIngredients(false);
+        
+        if(ingredients == null){
+            System.out.println("Wrong character inserted");
+            return;
+        }
+        for(String ingredient : ingredients)
+            System.out.println(ingredient);
     }
 
-    public static void main(String[] args) {
-        while (true) {
-            System.out.println("1. Esegui un'azione");
-            System.out.println("2. Esci");
-            System.out.print("Scegli un'opzione: ");
-            int choice = scanner.nextInt();
+    private static void browseMostRecentTopRatedPosts(){
+        if(info == null){
+            System.out.println("You must be logged in to browse the most recent top rated posts");
+            return;
+        }
 
-            switch (choice) {
-                case 1:
-                    // Implementa l'azione
+        postDTOs = null;
+        Cleaner.cleanTempFolder();
+        postDTOs = postHTTP.browseMostRecentTopRatedPosts(Reader.readPostTopRatedRequestDTO());
+        
+        if(postDTOs == null){
+            System.out.println("No Posts found");
+            return;
+        }
+        Printer.printListOfPostDTO(postDTOs);
+    }
+
+    public void browseMostRecentTopRatedPostsByIngredients(){
+    
+    }
+
+    public void browseMostRecentPostsByCalories(){
+        if(info == null){
+            System.out.println("You must be logged in to browse the most recent top rated posts");
+            return;
+        }
+
+        postDTOs = null;
+        Cleaner.cleanTempFolder();
+        postDTOs = postHTTP.browseMostRecentPostsByCalories(Reader.readPostByCaloriesRequestDTO());
+        
+        if(postDTOs == null){
+            System.out.println("No Posts found");
+            return;
+        }
+        Printer.printListOfPostDTO(postDTOs);
+    }
+    
+    public void findPostsByRecipeName(){
+        if(info == null){
+            System.out.println("You must be logged in to browse the most recent top rated posts");
+            return;
+        }
+        
+        postDTOs = null;
+        Cleaner.cleanTempFolder();
+        System.out.println("Insert recipe name: ");
+        String recipeName = scanner.nextLine();
+        postDTOs = postHTTP.findPostsByRecipeName(recipeName);
+        
+        if(postDTOs == null){
+            System.out.println("No Posts found");
+            return;
+        }
+        Printer.printListOfPostDTO(postDTOs);
+    }
+
+    public void interactionsAnalysis(){
+        if(info == null){
+            System.out.println("You must be logged in to browse the most recent top rated posts");
+            return;
+        }
+
+        Printer.printMapDouble(postHTTP.interactionsAnalysis());
+    }
+
+    public void userInteractionsAnalysis(){
+        if(info == null){
+            System.out.println("You must be logged in to browse the most recent top rated posts");
+            return;
+        }
+        System.out.println("Insert username: ");
+        String username = scanner.nextLine();
+
+        Printer.printMapDouble(postHTTP.userInteractionsAnalysis(username));
+    }
+
+    public void caloriesAnalysis(){
+        if(info == null){
+            System.out.println("You must be logged in to browse the most recent top rated posts");
+            return;
+        }
+        System.out.println("Insert recipe name: ");
+        String recipeName = scanner.nextLine();
+        
+        System.out.println("User average total calories per post: " + postHTTP.caloriesAnalysis(recipeName));
+    }
+
+    // GIUSE bisogna sistemare il println .... anche sopra!!!!!!!!!
+    public void averageTotalCaloriesByUser(){
+        if(info == null){
+            System.out.println("You must be logged in to browse the most recent top rated posts");
+            return;
+        }
+        System.out.println("Insert username: ");
+        String username = scanner.nextLine();
+        
+        System.out.println("User average total calories per post: " + postHTTP.caloriesAnalysis(username));
+    }
+
+    public void findRecipeByIngredients(){
+        if(info == null){
+            System.out.println("You must be logged in to find Recipes By Ingredients");
+            return;
+        }
+
+        recipeDTOs = null;
+        Cleaner.cleanTempFolder();
+        recipeDTOs = postHTTP.findRecipeByIngredients(Reader.readListOfIngredientNames());
+        
+        if(recipeDTOs == null){
+            System.out.println("No Recipes found");
+            return;
+        }
+        Printer.printListOfRecipeDTO(recipeDTOs);
+    }
+
+    public static void executeAdminShell(){
+        boolean exit = false;
+        while(!exit){
+            System.out.println("Insert command: ");
+            String command = scanner.nextLine();
+            switch(command){
+                case "logout":
+                    info = null;
+                    System.out.println("Logged out");
+                    exit = true;
                     break;
-                case 2:
-                    System.out.println("Chiusura del terminale...");
-                    System.exit(0);
+                case "createIngredient":
+                    createIngredient();
+                    break;
+                case "banUser":
+                    banUser();
+                    break;
+                case "unbanUser":
+                    unbanUser();
+                    break;
+                case "findIngredientByName":
+                    findIngredientByName();
+                    break;
+                case "getAllIngredients":
+                    getAllIngredients();
+                    break;
+                case "findIngredientsUsedWithIngredient":
+                    findIngredientsUsedWithIngredient();
+                    break;
+                case "mostPopularCombinationOfIngredients":
+                    mostPopularCombinationOfIngredients();
+                    break;
+                case "exit":
+                    exit = true;
                     break;
                 default:
-                    System.out.println("Opzione non valida. Riprova.");
+                    System.out.println("Command not found");
+                    break;
             }
         }
     }
+
+
 
 }

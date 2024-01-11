@@ -78,7 +78,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
         String  query = "db.User.updateOne({\r\n" + //
-                        "    _id: " + user.getId() + ",\r\n" + //
+                        "    _id: " + user.getId() + "\r\n" + //
                         "}, {\r\n" + //
                         "    $set: {\r\n" + //
                         "        password: \"" + user.getPassword() + "\",\r\n" + //
@@ -98,7 +98,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         // and then we have to set the field deleted to true
 
         String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.getId() + ",\r\n" + //
+                       "    _id: " + user.getId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $set: {\r\n" + //
                        "        deleted: true\r\n" + //
@@ -108,7 +108,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         List<Document> result = BaseMongoDB.executeQuery(query);
 
         query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.getId() + ",\r\n" + //
+                       "    _id: " + user.getId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $unset: {\r\n" + //
                        "        password: \"\",\r\n" + //
@@ -126,7 +126,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean banUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
-                       "    username: \"" + username + "\",\r\n" + //
+                       "    username: \"" + username + "\"\r\n" + //
                        "}, {\r\n" + //
                        "    $set: {\r\n" + //
                        "        deleted: true\r\n" + //
@@ -140,7 +140,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
-                       "    username: \"" + username + "\",\r\n" + //
+                       "    username: \"" + username + "\"\r\n" + //
                        "}, {\r\n" + //
                        "    $unset: {\r\n" + //
                        "        deleted: \"\"\r\n" + //
@@ -164,7 +164,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean addPost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.getId() + ",\r\n" + //
+                       "    _id: " + user.getId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $push: {\r\n" + //
                        "        posts: {\r\n" + //
@@ -183,7 +183,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean removePost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.getId() + ",\r\n" + //
+                       "    _id: " + user.getId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $pull: {\r\n" + //
                        "        posts: {\r\n" + //

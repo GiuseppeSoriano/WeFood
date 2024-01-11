@@ -47,10 +47,10 @@ public class PostMongoDB implements PostMongoDBInterface{
     public boolean modifyPost(Post post, PostDTO postDTO) {
 
         String query = "db.Post.updateOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + ",\r\n" + //
+                       "    _id: " + postDTO.getId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $set: {\r\n" + //
-                       "        description: \"" + post.getDescription() + "\",\r\n" + //
+                       "        description: \"" + post.getDescription() + "\"\r\n" + //
                        "    }\r\n" + //
                        "})";
 
@@ -63,7 +63,7 @@ public class PostMongoDB implements PostMongoDBInterface{
     public boolean deletePost(PostDTO postDTO) {
 
         String query = "db.Post.deleteOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + ",\r\n" + //
+                       "    _id: " + postDTO.getId() + "\r\n" + //
                        "})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -170,7 +170,7 @@ public class PostMongoDB implements PostMongoDBInterface{
     public Post findPostById(String _id) {
         // I'm sure that _id exists, so the result will contain one and only one document
         String query = "db.Post.find({\r\n" + //
-                       "    _id: " + _id + ",\r\n" + //
+                       "    _id: " + _id + "\r\n" + //
                        "})";
         Document result = BaseMongoDB.executeQuery(query).get(0);
 

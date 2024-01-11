@@ -15,7 +15,7 @@ public class CommentMongoDB implements CommentMongoDBInterface {
     public boolean commentPost(RegisteredUser user, Comment comment, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
 
         String query = "db.Post.updateOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + ",\r\n" + //
+                       "    _id: " + postDTO.getId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $push: {\r\n" + //
                        "        comments: {\r\n" + //
@@ -41,12 +41,12 @@ public class CommentMongoDB implements CommentMongoDBInterface {
                        "    comments: {\r\n" + //
                        "        $elemMatch: {\r\n" + //
                        "            idUser: " + user.getId() + ",\r\n" + //
-                       "            timestamp: " + comment.getTimestamp().getTime() + ",\r\n" + //
+                       "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
                        "        }\r\n" + //
                        "    }\r\n" + //
                        "}, {\r\n" + //
                        "    $set: {\r\n" + //
-                       "        \"comments.$.text\": \"" + comment.getText() + "\",\r\n" + //
+                       "        \"comments.$.text\": \"" + comment.getText() + "\"\r\n" + //
                        "    }\r\n" + //
                        "})";
 
@@ -59,12 +59,12 @@ public class CommentMongoDB implements CommentMongoDBInterface {
     public boolean deleteComment(RegisteredUser user, Comment comment, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         
         String query = "db.Post.updateOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + ",\r\n" + //
+                       "    _id: " + postDTO.getId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $pull: {\r\n" + //
                        "        comments: {\r\n" + //
                        "            idUser: " + user.getId() + ",\r\n" + //
-                       "            timestamp: " + comment.getTimestamp().getTime() + ",\r\n" + //
+                       "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
                        "        }\r\n" + //
                        "    }\r\n" + //
                        "})";

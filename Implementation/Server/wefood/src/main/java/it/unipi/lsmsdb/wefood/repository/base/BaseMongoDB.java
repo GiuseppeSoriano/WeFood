@@ -29,10 +29,13 @@ import com.mongodb.client.model.Updates;
 
 public abstract class BaseMongoDB {
     
-    // private static final String MONGODB_HOST = "10.1.1.25:27017,10.1.1.24:27017"; // ,10.1.1.23:27017";
-    private static final String MONGODB_HOST = "localhost:27017";
+    // private static final String MONGODB_HOST = "localhost:27017";
+    private static final String MONGODB_HOST = "10.1.1.25:27017,10.1.1.24:27017,10.1.1.23:27017";
     private static final String MONGODB_DATABASE = "WeFood";
-    private static final String mongoString = String.format("mongodb://%s/%s", MONGODB_HOST, MONGODB_DATABASE);
+    private static final String WRITE_CONCERN = "1";
+    private static final String WTIMEOUT = "5000";
+    private static final String READ_PREFERENCE = "nearest";
+    private static final String mongoString = String.format("mongodb://%s/%s?w=%s&wtimeout=%s&readPreference=%s", MONGODB_HOST, MONGODB_DATABASE, WRITE_CONCERN, WTIMEOUT, READ_PREFERENCE);
 
     private static final String SET_REGEX = "\\$set:";
     private static final String UNSET_REGEX = "\\$unset:";

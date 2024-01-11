@@ -85,7 +85,6 @@ public class PostHTTP{
             e.printStackTrace();
             return null;
         }
-
     }
 
     public List<PostDTO> browseMostRecentTopRatedPostsByIngredients(PostByIngredientsRequestDTO request){
