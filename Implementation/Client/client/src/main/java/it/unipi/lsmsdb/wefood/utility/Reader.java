@@ -2,6 +2,7 @@ package it.unipi.lsmsdb.wefood.utility;
 
 import java.util.Scanner;
 
+import it.unipi.lsmsdb.wefood.Main;
 import it.unipi.lsmsdb.wefood.apidto.CommentRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.IngredientAndLimitRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.LoginRequestDTO;
@@ -46,7 +47,7 @@ public class Reader {
 
 
     public static void getAllIngredientsFromDatabase(){
-        ingredients = ingredientHTTP.getAllIngredients();
+        ingredients = Main.getIngredients();
     }
 
     public static List<Ingredient> getAllIngredients(){
@@ -139,7 +140,6 @@ public class Reader {
         // Ingredients and quantities
         singleIngredient = true;
         do{
-
             ingredients_inserted.clear();
             readIngredients();
             for(Ingredient ingredient : ingredients){
@@ -206,7 +206,6 @@ public class Reader {
         return new PostByIngredientsRequestDTO(ingredients_inserted, hours, limit);
     }
 
-
     public static List<String> readListOfIngredientNames(){
         
         // Real-time ingredient suggestion
@@ -216,8 +215,6 @@ public class Reader {
     
         return ingredients_inserted;
     }
-
-
 
     // -----------------------------------------------------------------------
     // ------------------ Real-time ingredient suggestion --------------------

@@ -13,16 +13,16 @@ import com.mongodb.MongoException;
 public class StarRankingMongoDB implements StarRankingMongoDBInterface {
     
     public boolean votePost(RegisteredUser user, StarRanking starRanking, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException{
-        String query = "db.Post.updateOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + ",\r\n" + //
-                       "}, {\r\n" + //
-                       "    $push: {\r\n" + //
-                       "        starRankings: {\r\n" + //
-                       "            idUser: " + user.editedGetId() + ",\r\n" + //
-                       "            username: \"" + user.getUsername() + "\",\r\n" + //
-                       "            vote: " + starRanking.getVote() + "\r\n" + //
-                       "        }\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.updateOne({" + //
+                            "_id: " + postDTO.editedGetId() + "," + //
+                       "}, {" + //
+                            "$push: {" + //
+                                "starRankings: {" + //
+                                    "idUser: " + user.editedGetId() + "," + //
+                                    "username: \"" + user.getUsername() + "\"," + //
+                                    "vote: " + starRanking.getVote() + //
+                                "}" + //
+                            "}" + //
                        "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
         System.out.println(result.get(0).toJson());
@@ -31,14 +31,14 @@ public class StarRankingMongoDB implements StarRankingMongoDBInterface {
     }
 
     public boolean deleteVote(StarRanking starRanking, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException{
-        String query = "db.Post.updateOne({\r\n" + //
-               "    _id: " + postDTO.getId() + ",\r\n" + //
-               "}, {\r\n" + //
-               "    $pull: {\r\n" + //
-               "        starRankings: {\r\n" + //
-               "            username: \"" + starRanking.getUsername() + "\"\r\n" + //
-               "        }\r\n" + //
-               "    }\r\n" + //
+        String query = "db.Post.updateOne({" + //
+                    "_id: " + postDTO.editedGetId() + "," + //
+               "}, {" + //
+                    "$pull: {" + //
+                        "starRankings: {" + //
+                            "username: \"" + starRanking.getUsername() + "\"" + //
+                        "}" + //
+                    "}" + //
                "})";
         BaseMongoDB.executeQuery(query);
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -48,12 +48,12 @@ public class StarRankingMongoDB implements StarRankingMongoDBInterface {
     }
 
     public boolean updateAvgStarRanking(PostDTO postDTO, Double newAvgStarRanking) throws MongoException, IllegalArgumentException, IllegalStateException{
-        String query = "db.Post.updateOne({\r\n" + //
-               "    _id: " + postDTO.getId() + ",\r\n" + //
-               "}, {\r\n" + //
-               "    $set: {\r\n" + //
-               "        avgStarRanking: " + newAvgStarRanking + "\r\n" + //
-               "    }\r\n" + //
+        String query = "db.Post.updateOne({" + //
+                    "_id: " + postDTO.editedGetId() + "," + //
+               "}, {" + //
+                    "$set: {" + //
+                        "avgStarRanking: " + newAvgStarRanking + //
+                    "}" + //
                "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
         System.out.println(result.get(0).toJson());
@@ -62,13 +62,13 @@ public class StarRankingMongoDB implements StarRankingMongoDBInterface {
     }
 
     public boolean unsetStarRankings(PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException{
-        String query = "db.Post.updateOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + ",\r\n" + //
-                       "}, {\r\n" + //
-                       "    $unset: {\r\n" + //
-                       "        avgStarRanking: \"\",\r\n" + //
-                       "        starRankings: \"\"\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.updateOne({" + //
+                            "_id: " + postDTO.editedGetId() + "," + //
+                       "}, {" + //
+                            "$unset: {" + //
+                                "avgStarRanking: \"\"," + //
+                                "starRankings: \"\"" + //
+                            "}" + //
                        "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
         System.out.println(result.get(0).toJson());

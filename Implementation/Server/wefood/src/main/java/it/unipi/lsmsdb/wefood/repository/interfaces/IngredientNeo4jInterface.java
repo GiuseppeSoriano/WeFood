@@ -10,10 +10,6 @@ public interface IngredientNeo4jInterface {
 
     boolean createIngredient(IngredientDTO ingredientDTO);
 
-    // Suggest most popular combination of ingredients 
-    List<String> findIngredientsUsedWithIngredient(String ingredientName, int limit) throws IllegalStateException, Neo4jException;
-    List<String> findIngredientsUsedWithIngredient(String ingredientName) throws IllegalStateException, Neo4jException;
-    
     boolean createIngredientIngredientRelationship(List<String> ingredientNames) throws IllegalStateException, Neo4jException;
 
     List<String> mostPopularCombinationOfIngredients(String ingredientName) throws IllegalStateException, Neo4jException;

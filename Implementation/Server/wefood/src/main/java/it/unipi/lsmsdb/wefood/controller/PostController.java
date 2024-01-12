@@ -60,6 +60,7 @@ public class PostController {
     @PostMapping("/browseMostRecentTopRatedPosts")
     public ResponseEntity<List<PostDTO>> browseMostRecentTopRatedPosts(@RequestBody PostTopRatedRequestDTO request){
         List<PostDTO> postDTOList = recipeImageService.postDTOconverter(postService.browseMostRecentTopRatedPosts(request.getHours(), request.getLimit()));
+        System.out.println("SIZE: " + postDTOList.size());
         return ResponseEntity.ok(postDTOList);
     }
 

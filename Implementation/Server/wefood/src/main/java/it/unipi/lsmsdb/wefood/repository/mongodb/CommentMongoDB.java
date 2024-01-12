@@ -14,17 +14,17 @@ public class CommentMongoDB implements CommentMongoDBInterface {
     
     public boolean commentPost(RegisteredUser user, Comment comment, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
 
-        String query = "db.Post.updateOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + "\r\n" + //
-                       "}, {\r\n" + //
-                       "    $push: {\r\n" + //
-                       "        comments: {\r\n" + //
-                       "            idUser: " + user.editedGetId() + ",\r\n" + //
-                       "            username: \"" + user.getUsername() + "\",\r\n" + //
-                       "            text: \"" + comment.getText() + "\",\r\n" + //
-                       "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
-                       "        }\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.updateOne({" + //
+                                "_id: " + postDTO.editedGetId() + //
+                            "}, {" + //
+                                "$push: {" + //
+                                    "comments: {" + //
+                                        "idUser: " + user.editedGetId() + "," + //
+                                        "username: \"" + user.getUsername() + "\"," + //
+                                        "text: \"" + comment.getText() + "\"," + //
+                                        "timestamp: " + comment.getTimestamp().getTime() + //
+                                "}" + //
+                            "}" + //
                        "})"; //
         
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -36,18 +36,18 @@ public class CommentMongoDB implements CommentMongoDBInterface {
 
     public boolean updateComment(RegisteredUser user, Comment comment, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
 
-        String query = "db.Post.updateOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + ",\r\n" + //
-                       "    comments: {\r\n" + //
-                       "        $elemMatch: {\r\n" + //
-                       "            idUser: " + user.editedGetId() + ",\r\n" + //
-                       "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
-                       "        }\r\n" + //
-                       "    }\r\n" + //
-                       "}, {\r\n" + //
-                       "    $set: {\r\n" + //
-                       "        \"comments.$.text\": \"" + comment.getText() + "\"\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.updateOne({" + //
+                            "_id: " + postDTO.editedGetId() + "," + //
+                            "comments: {" + //
+                                "$elemMatch: {" + //
+                                    "idUser: " + user.editedGetId() + "," + //
+                                    "timestamp: " + comment.getTimestamp().getTime() + //
+                                "}" + //
+                            "}" + //
+                       "}, {" + //
+                            "$set: {" + //
+                                "\"comments.$.text\": \"" + comment.getText() + "\"" + //
+                            "}" + //
                        "})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -58,15 +58,15 @@ public class CommentMongoDB implements CommentMongoDBInterface {
 
     public boolean deleteComment(RegisteredUser user, Comment comment, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         
-        String query = "db.Post.updateOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + "\r\n" + //
-                       "}, {\r\n" + //
-                       "    $pull: {\r\n" + //
-                       "        comments: {\r\n" + //
-                       "            idUser: " + user.editedGetId() + ",\r\n" + //
-                       "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
-                       "        }\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.updateOne({" + //
+                            "_id: " + postDTO.editedGetId() + //
+                       "}, {" + //
+                            "$pull: {" + //
+                                "comments: {" + //
+                                    "idUser: " + user.editedGetId() + "," + //
+                                    "timestamp: " + comment.getTimestamp().getTime() + //
+                                "}" + //
+                            "}" + //
                        "})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);

@@ -15,11 +15,11 @@ public class UnregisteredUserMongoDB implements UnregisteredUserMongoDBInterface
         
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         
-        String query = "db.User.insertOne({\r\n" + //
-                       "    username: \"" + username+ "\",\r\n" + //
-                       "    password: \"" + hashedPassword + "\",\r\n" + //
-                       "    name: \"" + name + "\",\r\n" + //
-                       "    surname: \"" + surname + "\"\r\n" + //
+        String query = "db.User.insertOne({" + //
+                            "username: \"" + username+ "\"," + //
+                            "password: \"" + hashedPassword + "\"," + //
+                            "name: \"" + name + "\"," + //
+                            "surname: \"" + surname + "\"" + //
                        "})";
 
 

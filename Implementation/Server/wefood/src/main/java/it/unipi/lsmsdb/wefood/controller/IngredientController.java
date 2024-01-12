@@ -32,16 +32,6 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientService.getAllIngredients());
     }
 
-    @PostMapping("/findIngredientsUsedWithIngredientCustomLimit")
-    public ResponseEntity<List<String>> findIngredientsUsedWithIngredient(@RequestBody IngredientAndLimitRequestDTO request) {
-        return ResponseEntity.ok(ingredientService.findIngredientsUsedWithIngredient(request.getIngredientName(), request.getLimit()));
-    }
-
-    @PostMapping("/findIngredientsUsedWithIngredient")
-    public ResponseEntity<List<String>> findIngredientsUsedWithIngredient(@RequestBody String request) {
-        return ResponseEntity.ok(ingredientService.findIngredientsUsedWithIngredient(request));
-    }
-
     @PostMapping("/mostPopularCombinationOfIngredients")
     public ResponseEntity<List<String>> mostPopularCombinationOfIngredients(@RequestBody String request){
         return ResponseEntity.ok(ingredientService.mostPopularCombinationOfIngredients(request));

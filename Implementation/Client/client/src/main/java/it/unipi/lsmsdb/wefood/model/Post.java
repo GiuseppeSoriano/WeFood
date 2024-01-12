@@ -1,5 +1,7 @@
 package it.unipi.lsmsdb.wefood.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +18,10 @@ public class Post {
     private Double avgStarRanking;
 
 
-    public Post(String username, String description, Date timestamp, Recipe recipe) {
+    public Post(@JsonProperty("username") String username,
+                @JsonProperty("description") String description,
+                @JsonProperty("timestamp") Date timestamp,
+                @JsonProperty("recipe") Recipe recipe) {
         this.username = username;
         this.description = description;
         this.timestamp = timestamp;

@@ -14,7 +14,7 @@ public class IngredientHTTP{
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final BaseHttpRequest baseHttpRequest = new BaseHttpRequest();
     
-    
+    // DA ELIMINARE? ABBIAMO GLI INGREDIENTI IN LOCALE
     public Ingredient findIngredientByName(String request) {
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientByName", request);
@@ -46,11 +46,11 @@ public class IngredientHTTP{
         }
     }
 
-    
+    // DA ELIMINARE?
     public List<String> findIngredientsUsedWithIngredient(IngredientAndLimitRequestDTO request) {
         try{
             String requestBody = objectMapper.writeValueAsString(request);
-            HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientsUsedWithIngredient", requestBody);
+            HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientsUsedWithIngredientCustomLimit", requestBody);
             if(result.statusCode() == 200)
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<String>>(){});
@@ -63,7 +63,7 @@ public class IngredientHTTP{
         }
     }
 
-    
+    // DA ELIMINARE?
     public List<String> findIngredientsUsedWithIngredient(String request) {
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientsUsedWithIngredient", request);

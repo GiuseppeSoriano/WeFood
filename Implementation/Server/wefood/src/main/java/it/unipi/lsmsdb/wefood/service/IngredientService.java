@@ -109,42 +109,6 @@ public class IngredientService {
         }
     }
 
-    public List<String> findIngredientsUsedWithIngredient(String ingredientName, int limit){
-        try{
-            return IngredientDAO.findIngredientsUsedWithIngredient(ingredientName, limit);
-        }
-        catch(Neo4jException e){
-            System.out.println("Neo4JException in IngredientService.findIngredientsUsedWithIngredient: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in IngredientService.findIngredientsUsedWithIngredient: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in IngredientService.findIngredientsUsedWithIngredient: " + e.getMessage());
-            return null;
-        }
-    }
-
-    public List<String> findIngredientsUsedWithIngredient(String ingredientName){
-        try{
-            return IngredientDAO.findIngredientsUsedWithIngredient(ingredientName);
-        }
-        catch(Neo4jException e){
-            System.out.println("Neo4JException in IngredientService.findIngredientsUsedWithIngredient: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in IngredientService.findIngredientsUsedWithIngredient: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in IngredientService.findIngredientsUsedWithIngredient: " + e.getMessage());
-            return null;
-        }
-    }
-
     public List<String> mostPopularCombinationOfIngredients(String ingredientName){
         try{
             return IngredientDAO.mostPopularCombinationOfIngredients(ingredientName);

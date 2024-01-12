@@ -68,9 +68,8 @@ public class RecipeImageService {
         }
         catch(IOException e){
             System.out.println("IOException in getWebImage: " + e);
+            return null;
         }
-
-        return null;
     }
 
     private String getLocalImage(String localPath) {
@@ -107,9 +106,8 @@ public class RecipeImageService {
         }
         catch(IOException e){
             System.out.println("IOException in localImageCoverter: " + e);
+            return null;
         }
-
-        return null;
     }
 
     public List<PostDTO> postDTOconverter(List<PostDTO> posts) {
@@ -121,7 +119,7 @@ public class RecipeImageService {
             else
                 postDTO.setImage(getLocalImage(postDTO.getImage()));
         }
-        return null;
+        return posts;
     }
 
     public Post postConverter(Post post) {

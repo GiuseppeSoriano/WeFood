@@ -1,4 +1,6 @@
 package it.unipi.lsmsdb.wefood.model;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 
 public class Comment {
@@ -6,7 +8,9 @@ public class Comment {
     private String text;
     private Date timestamp;
 
-    public Comment(String username, String text, Date timestamp) {
+    public Comment(@JsonProperty("username") String username,
+                   @JsonProperty("text") String text,
+                   @JsonProperty("timestamp") Date timestamp) {
         this.username = username;
         this.text = text;
         this.timestamp = timestamp;

@@ -23,7 +23,6 @@ public class Printer {
     }
 
     public static void printPostDTO(PostDTO postDTO, int postNumber){
-        // System.out.println("Post ID: " + postDTO.getId());
         System.out.println("Recipe name: " + postDTO.getRecipeName());
         ImageConverter.fromStringToImage(postDTO.getImage(), String.valueOf(postNumber));
         // Image Preview
@@ -154,7 +153,9 @@ public class Printer {
                     printPostByPostDTO(postDTOs.get(i), i);
                     break;
                 case "N":
-                    System.out.println("Next post...");
+                    if(i != postDTOs.size()-1){
+                        System.out.println("Next post...");
+                    }
                     break;
                 case "P":
                     if(i == 0){

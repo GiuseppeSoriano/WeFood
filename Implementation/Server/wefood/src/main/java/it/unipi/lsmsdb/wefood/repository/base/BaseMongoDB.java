@@ -75,11 +75,7 @@ public abstract class BaseMongoDB {
                         ")"
         ),
         FIND(
-                "db.Ingredient.find({\n" +
-                        "   \"name\": \"Pippo\"\n" +
-                        "}," +
-                        "sort({\"name\": 1}), limit(1)" +
-                        ")"
+                "db.Post.find({ timestamp: { $gte: 1389712493188 } }).sort({avgStarRanking:-1}).limit(10)"
         ),
         AGGREGATE(
                 "db.Ingredient.aggregate([\n" +
@@ -454,16 +450,28 @@ public abstract class BaseMongoDB {
     public static void main(String[] args) {
         try {
             openMongoClient(); // Ensure client is created
-            String mongosh_string = QueryType.DELETE_ONE.getQuery();
+            String mongosh_string = QueryType.FIND.getQuery();
        
-            mongosh_string = "db.Post.aggregate([{$match: {$expr:{ $eq:[{$toString:\"$_id\"}, '658572b7d312a33aeb784cfc']}} }])";
+//            mongosh_string = "db.Post.aggregate([{$match: {$expr:{ $eq:[{$toString:\"$_id\"}, '658572b7d312a33aeb784cfc']}} }])";
+            System.out.println("Query: " + mongosh_string);
+//            mongosh_string = "db.Post.find({ timestamp: { $gte: " + 1389712493188L + " } }).sort({ avgStarRanking: -1 }).limit(" + 10+ ")";
+            mongosh_string =    "db.Post.find({" + //
+                                    "timestamp: {" + //
+                                        "$gte: " + 1389712493188L +  //
+                                    "}" + //
+                                "}).sort({" + //
+                                    "avgStarRanking: -1" + //
+                                "}).limit(" + 10 + ")";
+
+            System.out.println("Query: " + mongosh_string);
             
             List<Document> result =executeQuery(mongosh_string);
 
             System.out.println();
             System.out.println("Result: ");
             for(Document doc : result){
-                System.out.println(doc.toJson());
+                System.out.println(doc.get("avgStarRanking").toString());
+//                System.out.println(doc.toJson());
             }
             
         } finally {

@@ -6,10 +6,7 @@ import java.util.Scanner;
 import it.unipi.lsmsdb.wefood.apidto.UnregisteredUserRequestDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
-import it.unipi.lsmsdb.wefood.httprequests.AdminHTTP;
-import it.unipi.lsmsdb.wefood.httprequests.PostHTTP;
-import it.unipi.lsmsdb.wefood.httprequests.RegisteredUserHTTP;
-import it.unipi.lsmsdb.wefood.httprequests.UnregisteredUserHTTP;
+import it.unipi.lsmsdb.wefood.httprequests.*;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.utility.Cleaner;
 import it.unipi.lsmsdb.wefood.utility.Printer;
@@ -21,6 +18,7 @@ public class UnregisteredUserACTOR {
     private final static UnregisteredUserHTTP unregisteredUserHTTP = new UnregisteredUserHTTP();
     private final static AdminHTTP adminHTTP = new AdminHTTP();
     private final static PostHTTP postHTTP = new PostHTTP();
+    private final static IngredientHTTP ingredientHTTP = new IngredientHTTP();
     private final static Scanner scanner = new Scanner(System.in);
 
     private static List<PostDTO> postDTOs = null;
@@ -107,12 +105,11 @@ public class UnregisteredUserACTOR {
         System.out.println("Insert recipe name: ");
         String recipeName = scanner.nextLine();
 
-        List<PostDTO> posts = postHTTP.findPostsByRecipeName(recipeName);
-        for(PostDTO post : posts)
-            System.out.println(post);
+        List<PostDTO> postDTOs = postHTTP.findPostsByRecipeName(recipeName);
+        Printer.printListOfPostDTO(postDTOs);
     }
 
-    public void findRecipeByIngredients(){
+    public static void findRecipeByIngredients(){
         recipeDTOs = null;
         Cleaner.cleanTempFolder();
         recipeDTOs = postHTTP.findRecipeByIngredients(Reader.readListOfIngredientNames());
@@ -124,14 +121,29 @@ public class UnregisteredUserACTOR {
         Printer.printListOfRecipeDTO(recipeDTOs);
     }
 
+    public static void mostPopularCombinationOfIngredients(){
+        System.out.println("Insert ingredient name: ");
+        String ingredientName = scanner.nextLine();
+        List<String> ingredients_found = ingredientHTTP.mostPopularCombinationOfIngredients(ingredientName);
+        if(ingredients_found == null){
+            System.out.println("No ingredients found");
+            return;
+        }
+        for(String ingredient : ingredients_found)
+            System.out.println(ingredient);
+    }
+
 
     private static void printAvailableCommands(){
         System.out.println("Available commands:");
+        System.out.println("-> register");
         System.out.println("-> login");
         System.out.println("-> browseMostRecentTopRatedPosts");
         System.out.println("-> browseMostRecentTopRatedPostsByIngredients");
         System.out.println("-> browseMostRecentPostsByCalories");
         System.out.println("-> findPostsByRecipeName");
+        System.out.println("-> findRecipeByIngredients");
+        System.out.println("-> mostPopularCombinationOfIngredients");
         System.out.println("-> exit");
     }
 
@@ -145,6 +157,24 @@ public class UnregisteredUserACTOR {
                     break;
                 case "register":
                     register();
+                    break;
+                case "browseMostRecentTopRatedPosts":
+                    browseMostRecentTopRatedPosts();
+                    break;
+                case "browseMostRecentTopRatedPostsByIngredients":      // TO CHECK
+                    browseMostRecentTopRatedPostsByIngredients();
+                    break;
+                case "browseMostRecentPostsByCalories":
+                    browseMostRecentPostsByCalories();
+                    break;
+                case "findPostsByRecipeName":
+                    findPostsByRecipeName();
+                    break;
+                case "findRecipeByIngredients":                         // TO CHECK
+                    findRecipeByIngredients();
+                    break;
+                case "mostPopularCombinationOfIngredients":             // TO INSERT SEARCH INGREDIENT
+                    mostPopularCombinationOfIngredients();
                     break;
                 case "help":
                     printAvailableCommands();

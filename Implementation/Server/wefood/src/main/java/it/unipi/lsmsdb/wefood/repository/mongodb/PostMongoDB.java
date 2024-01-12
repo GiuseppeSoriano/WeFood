@@ -24,18 +24,18 @@ public class PostMongoDB implements PostMongoDBInterface{
 
     public String uploadPost(Post post, RegisteredUser user) throws MongoException, IllegalStateException, IllegalArgumentException {
 
-        String query = "db.Post.insertOne({\r\n" + //
-                       "    idUser: " + user.editedGetId() + ",\r\n" + //
-                       "    username: \"" + user.getUsername() + "\",\r\n" + //
-                       "    description: \"" + post.getDescription() + "\",\r\n" + //
-                       "    timestamp: " + post.getTimestamp().getTime() + ",\r\n" + //
-                       "    recipe: {\r\n" + //
-                       "                name: \"" + post.getRecipe().getName() + "\",\r\n" + //
-                       "                image: \"" + post.getRecipe().getImage() +"\",\r\n" + //
-                       "                steps: " + post.getRecipe().getStepsString() + ",\r\n" + //
-                       "                totalCalories: " + post.getRecipe().getTotalCalories() + ",\r\n" + //
-                       "                ingredients: " + post.getRecipe().getIngredientsString() + "\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.insertOne({" + //
+                            "idUser: " + user.editedGetId() + "," + //
+                            "username: \"" + user.getUsername() + "\"," + //
+                            "description: \"" + post.getDescription() + "\"," + //
+                            "timestamp: " + post.getTimestamp().getTime() + "," + //
+                            "recipe: {" + //
+                                "name: \"" + post.getRecipe().getName() + "\"," + //
+                                "image: \"" + post.getRecipe().getImage() +"\"," + //
+                                "steps: " + post.getRecipe().stepsGetString() + "," + //
+                                "totalCalories: " + post.getRecipe().getTotalCalories() + "," + //
+                                "ingredients: " + post.getRecipe().ingredientsGetString() +  //
+                            "}" + //
                        "})";
         
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -46,12 +46,12 @@ public class PostMongoDB implements PostMongoDBInterface{
 
     public boolean modifyPost(Post post, PostDTO postDTO) {
 
-        String query = "db.Post.updateOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + "\r\n" + //
-                       "}, {\r\n" + //
-                       "    $set: {\r\n" + //
-                       "        description: \"" + post.getDescription() + "\"\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.updateOne({" + //
+                            "_id: " + postDTO.editedGetId() + //
+                       "}, {" + //
+                            "$set: {" + //
+                                "description: \"" + post.getDescription() + "\"" + //
+                            "}" + //
                        "})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -62,8 +62,8 @@ public class PostMongoDB implements PostMongoDBInterface{
 
     public boolean deletePost(PostDTO postDTO) {
 
-        String query = "db.Post.deleteOne({\r\n" + //
-                       "    _id: " + postDTO.getId() + "\r\n" + //
+        String query = "db.Post.deleteOne({" + //
+                            "_id: " + postDTO.editedGetId() +  //
                        "})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -76,23 +76,23 @@ public class PostMongoDB implements PostMongoDBInterface{
         long curr_timestamp = System.currentTimeMillis();
         long milliseconds = hours * 3600000;
         long timestamp = curr_timestamp - milliseconds; 
-        String query = "db.Post.find({\r\n" + //
-                       "    timestamp: {\r\n" + //
-                       "        $gte: " + timestamp + "\r\n" + //
-                       "    }\r\n" + //
-                       "}).sort({\r\n" + //
-                       "    avgStarRanking: -1\r\n" + //
-                       "}).limit(" + limit + ")";
+        String query =  "db.Post.find({" + //
+                                "timestamp: {" + //
+                                "$gte: " + timestamp +  //
+                            "}" + //
+                        "}).sort({" + //
+                            "avgStarRanking:-1" + //
+                        "}).limit(" + limit + ")";
         List<Document> result = BaseMongoDB.executeQuery(query);
-        System.out.println(result.size());
-        List<PostDTO> posts = new ArrayList<PostDTO>();
+
+        List<PostDTO> posts = new ArrayList<>();
         
         for(Document doc : result){
             Document recipe = (Document) doc.get("recipe");
             String image = (recipe.get("image") == null) ? "DEFAULT" : recipe.get("image").toString();
-            PostDTO post = new PostDTO(doc.get("_id").toString(), image, recipe.get("name").toString());
+            PostDTO post = new PostDTO(doc.getObjectId("_id").toHexString(), image, recipe.get("name").toString());
             posts.add(post);
-        }  
+        }
 
         return posts;
     }
@@ -113,15 +113,15 @@ public class PostMongoDB implements PostMongoDBInterface{
         long curr_timestamp = System.currentTimeMillis();
         long milliseconds = hours * 3600000;
         long timestamp = curr_timestamp - milliseconds; 
-        String query = "db.Post.find({\r\n" + //
-                       "    timestamp: {\r\n" + //
-                       "        $gte: " + timestamp + "\r\n" + //
-                       "    },\r\n" + //
-                       "    \"recipe.ingredients.name\": {\r\n" + //
-                       "        $all: " + ingredientNamesToString(ingredientNames) + "\r\n" + //
-                       "    }\r\n" + //
-                       "}).sort({\r\n" + //
-                       "    avgStarRanking: -1\r\n" + //
+        String query = "db.Post.find({" + //
+                            "timestamp: {" + //
+                                "$gte: " + timestamp +  //
+                            "}," + //
+                            "\"recipe.ingredients.name\": {" + //
+                                "$all: " + ingredientNamesToString(ingredientNames) + //
+                            "}" + //
+                       "}).sort({" + //
+                            "avgStarRanking: -1" + //
                        "}).limit(" + limit + ")";
         List<Document> result = BaseMongoDB.executeQuery(query);
         List<PostDTO> posts = new ArrayList<PostDTO>();
@@ -141,16 +141,16 @@ public class PostMongoDB implements PostMongoDBInterface{
         long milliseconds = hours * 3600000;
         long timestamp = curr_timestamp - milliseconds; 
 
-        String query = "db.Post.find({\r\n" + //
-                       "    timestamp: {\r\n" + //
-                       "        $gte: " + timestamp + "\r\n" + //
-                       "    },\r\n" + //
-                       "    \"recipe.totalCalories\": {\r\n" + //
-                       "        $gte: " + minCalories + ",\r\n" + //
-                       "        $lte: " + maxCalories + "\r\n" + //
-                       "    }\r\n" + //
-                       "}).sort({\r\n" + //
-                       "    timestamp: -1\r\n" + //
+        String query = "db.Post.find({" + //
+                            "timestamp: {" + //
+                                "$gte: " + timestamp + //
+                            "}," + //
+                            "\"recipe.totalCalories\": {" + //
+                                "$gte: " + minCalories + "," + //
+                                "$lte: " + maxCalories + //
+                            "}" + //
+                       "}).sort({" + //
+                            "timestamp: -1" + //
                        "}).limit(" + limit + ")";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -169,8 +169,8 @@ public class PostMongoDB implements PostMongoDBInterface{
     
     public Post findPostById(String _id) {
         // I'm sure that _id exists, so the result will contain one and only one document
-        String query = "db.Post.find({\r\n" + //
-                       "    _id: " + _id + "\r\n" + //
+        String query = "db.Post.find({" + //
+                            "_id: " + _id + //
                        "})";
         Document result = BaseMongoDB.executeQuery(query).get(0);
 
@@ -184,12 +184,7 @@ public class PostMongoDB implements PostMongoDBInterface{
 
         List<String> steps = new ArrayList<String>();
         steps = recipe_doc.getList("steps", String.class);
-        //System.out.println(steps.get(0));
-        //System.out.println(steps.get(1));
-        //for(Document step : ){
-        //    steps.add(step.toString());
-        //}
-
+        
         String image = (recipe_doc.get("image") == null) ? "DEFAULT" : recipe_doc.get("image").toString();
         Recipe recipe = new Recipe(recipe_doc.get("name").toString(), image, steps, ingredients, Double.parseDouble(recipe_doc.get("totalCalories").toString()));
         
@@ -220,11 +215,11 @@ public class PostMongoDB implements PostMongoDBInterface{
     } 
     
     public Post findPostByPostDTO(PostDTO postDTO) {
-        return findPostById(postDTO.getId());
+        return findPostById(postDTO.editedGetId());
     }
 
     public List<PostDTO> findPostsByRecipeName(String recipeName) {
-        String query = "db.Post.find( { \"recipe.name\": { $regex: \"" + recipeName + "\", $options: \"i\" } } )";
+        String query = "db.Post.find( { \"recipe.name\": { $regex: \"" + recipeName + "\", $options: \"i\" } } ).limit(10)";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
         List<PostDTO> posts = new ArrayList<PostDTO>();
@@ -232,7 +227,7 @@ public class PostMongoDB implements PostMongoDBInterface{
         for(Document doc : result){
             Document recipe = (Document) doc.get("recipe"); 
             String image = (recipe.get("image") == null) ? "DEFAULT" : recipe.get("image").toString();
-            PostDTO post = new PostDTO(doc.get("_id").toString(), image, recipe.get("name").toString());
+            PostDTO post = new PostDTO(doc.getObjectId("_id").toHexString(), image, recipe.get("name").toString());
             posts.add(post);
         }  
 
@@ -241,64 +236,64 @@ public class PostMongoDB implements PostMongoDBInterface{
 
     // #1 Aggregation
     public Map<String, Double> interactionsAnalysis(){
-        String query = "db.Post.aggregate([\r\n" + //
-                       "    {\r\n" + //
-                       "        $project: {\r\n" + //
-                       "            _id: 1,\r\n" + //
-                       "            hasImage: {\r\n" + //
-                       "                $cond: {\r\n" + //
-                       "                    if: {\r\n" + //
-                       "                         $eq: [{ $type: \"$recipe.image\" }, \"missing\"]\r\n" + //
-                       "                    },\r\n" + //
-                       "                    then: false,\r\n" + //
-                       "                    else: true\r\n" + //
-                       "                }\r\n" + //
-                       "            },\r\n" + //
-                       "            comments: {\r\n" + //
-                       "                $size: {\r\n" + //
-                       "                    $ifNull: [\"$comments\", []]\r\n" + //
-                       "                }\r\n" + //
-                       "            },\r\n" + //
-                       "            starRankings: {\r\n" + //
-                       "                $size: {\r\n" + //
-                       "                    $ifNull: [\"$starRankings\", []]\r\n" + //
-                       "                }\r\n" + //
-                       "            },\r\n" + //
-                       "            avgStarRanking: {\r\n" + //
-                       "                $ifNull: [\"$avgStarRanking\", 0]\r\n" + //
-                       "            }\r\n" + //
-                       "        }\r\n" + //
-                       "    },\r\n" + //
-                       "    {\r\n" + //
-                       "        $group: {\r\n" + //
-                       "            _id: \"$hasImage\",\r\n" + //
-                       "            numberOfPosts: {\r\n" + //
-                       "                $sum: 1\r\n" + //
-                       "            },\r\n" + //
-                       "            totalComments: {\r\n" + //
-                       "                $sum: \"$comments\"\r\n" + //
-                       "            },\r\n" + //
-                       "            totalStarRankings: {\r\n" + //
-                       "                $sum: \"$starRankings\"\r\n" + //
-                       "            },\r\n" + //
-                       "            avgOfAvgStarRanking: {\r\n" + //
-                       "                $avg: \"$avgStarRanking\"\r\n" + //
-                       "            }\r\n" + //
-                       "        }\r\n" + //
-                       "    },\r\n" + //
-                       "    {\r\n" + //
-                       "        $project: {\r\n" + //
-                       "            _id: 0,\r\n" + //
-                       "            hasImage: \"$_id\",\r\n" + //
-                       "            ratioOfComments: {\r\n" + //
-                       "                $divide: [\"$totalComments\", \"$numberOfPosts\"]\r\n" + //
-                       "            },\r\n" + //
-                       "            ratioOfStarRankings: {\r\n" + //
-                       "                $divide: [\"$totalStarRankings\", \"$numberOfPosts\"]\r\n" + //
-                       "            },\r\n" + //
-                       "            avgOfAvgStarRanking: 1\r\n" + //
-                       "        }\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.aggregate([" + //
+                            "{" + //
+                                "$project: {" + //
+                                    "_id: 1," + //
+                                    "hasImage: {" + //
+                                        "$cond: {" + //
+                                            "if: {" + //
+                                                "$eq: [{ $type: \"$recipe.image\" }, \"missing\"]" + //
+                                            "}," + //
+                                            "then: false," + //
+                                            "else: true" + //
+                                        "}" + //
+                                    "}," + //
+                                    "comments: {" + //
+                                        "$size: {" + //
+                                            "$ifNull: [\"$comments\", []]" + //
+                                        "}" + //
+                                    "}," + //
+                                    "starRankings: {" + //
+                                        "$size: {" + //
+                                            "$ifNull: [\"$starRankings\", []]" + //
+                                        "}" + //
+                                    "}," + //
+                                    "avgStarRanking: {" + //
+                                        "$ifNull: [\"$avgStarRanking\", 0]" + //
+                                    "}" + //
+                                "}" + //
+                            "}," + //
+                            "{" + //
+                                "$group: {" + //
+                                    "_id: \"$hasImage\"," + //
+                                    "numberOfPosts: {" + //
+                                        "$sum: 1" + //
+                                    "}," + //
+                                    "totalComments: {" + //
+                                        "$sum: \"$comments\"" + //
+                                    "}," + //
+                                    "totalStarRankings: {" + //
+                                        "$sum: \"$starRankings\"" + //
+                                    "}," + //
+                                    "avgOfAvgStarRanking: {" + //
+                                        "$avg: \"$avgStarRanking\"" + //
+                                    "}" + //
+                                "}" + //
+                            "}," + //
+                            "{" + //
+                                "$project: {" + //
+                                    "_id: 0," + //
+                                    "hasImage: \"$_id\"," + //
+                                    "ratioOfComments: {" + //
+                                        "$divide: [\"$totalComments\", \"$numberOfPosts\"]" + //
+                                    "}," + //
+                                    "ratioOfStarRankings: {" + //
+                                        "$divide: [\"$totalStarRankings\", \"$numberOfPosts\"]" + //
+                                    "}," + //
+                                    "avgOfAvgStarRanking: 1" + //
+                                "}" + //
+                            "}" + //
                        "])";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -323,55 +318,55 @@ public class PostMongoDB implements PostMongoDBInterface{
 
     // #2 Aggregation
     public Map<String, Double> userInteractionsAnalysis(String username){
-        String query = "db.Post.aggregate([\r\n" + //
-                       "    {\r\n" + //
-                       "        $match: {\r\n" + //
-                       "            $or: [\r\n" + //
-                       "                {\"comments.username\": \"" + username + "\"},\r\n" + //
-                       "                {\"starRankings.username\": \"" + username + "\"}\r\n" + //
-                       "            ]\r\n" + //
-                       "        }\r\n" + //
-                       "    },\r\n" + //
-                       "    {\r\n" + //
-                       "        $project: {\r\n" + //
-                       "            filteredComments: {\r\n" + //
-                       "                $filter: {\r\n" + //
-                       "                    input: \"$comments\",\r\n" + //
-                       "                    as: \"comment\",\r\n" + //
-                       "                    cond: {$eq: [\"$$comment.username\", \"" + username + "\"]}\r\n" + //
-                       "                }\r\n" + //
-                       "            },\r\n" + //
-                       "            filteredStarRankings: {\r\n" + //
-                       "                $filter: {\r\n" + //
-                       "                    input: \"$starRankings\",\r\n" + //
-                       "                    as: \"starRanking\",\r\n" + //
-                       "                    cond: {$eq: [\"$$starRanking.username\", \"" + username + "\"]}\r\n" + //
-                       "                }\r\n" + //
-                       "            }\r\n" + //
-                       "        }\r\n" + //
-                       "    },\r\n" + //
-                       "    {\r\n" + //
-                       "        $group: {\r\n" + //
-                       "            _id: null,\r\n" + //
-                       "            avgOfStarRankings: {\r\n" + //
-                       "                $avg: {$sum: \"$filteredStarRankings.vote\"}\r\n" + //
-                       "            },\r\n" + //
-                       "            numberOfStarRankings: {\r\n" + //
-                       "                $sum: {$size: \"$filteredStarRankings\"}\r\n" + //
-                       "            },\r\n" + //
-                       "            numberOfComments: {\r\n" + //
-                       "                $sum: {$size: \"$filteredComments\"}\r\n" + //
-                       "            }\r\n" + //
-                       "        }\r\n" + //
-                       "    },\r\n" + //
-                       "    {\r\n" + //
-                       "        $project: {\r\n" + //
-                       "            _id: 0,\r\n" + //
-                       "            numberOfComments: 1,\r\n" + //
-                       "            numberOfStarRankings: 1,\r\n" + //
-                       "            avgOfStarRankings: 1\r\n" + //
-                       "        }\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.aggregate([" + //
+                            "{" + //
+                                "$match: {" + //
+                                    "$or: [" + //
+                                        "{\"comments.username\": \"" + username + "\"}," + //
+                                        "{\"starRankings.username\": \"" + username + "\"}" + //
+                                    "]" + //
+                                "}" + //
+                            "}," + //
+                            "{" + //
+                                "$project: {" + //
+                                    "filteredComments: {" + //
+                                        "$filter: {" + //
+                                            "input: \"$comments\"," + //
+                                            "as: \"comment\"," + //
+                                            "cond: {$eq: [\"$$comment.username\", \"" + username + "\"]}" + //
+                                        "}" + //
+                                    "}," + //
+                                    "filteredStarRankings: {" + //
+                                        "$filter: {" + //
+                                            "input: \"$starRankings\"," + //
+                                            "as: \"starRanking\"," + //
+                                            "cond: {$eq: [\"$$starRanking.username\", \"" + username + "\"]}" + //
+                                        "}" + //
+                                    "}" + //
+                                "}" + //
+                            "}," + //
+                            "{" + //
+                                "$group: {" + //
+                                    "_id: null," + //
+                                    "avgOfStarRankings: {" + //
+                                        "$avg: {$sum: \"$filteredStarRankings.vote\"}" + //
+                                    "}," + //
+                                    "numberOfStarRankings: {" + //
+                                        "$sum: {$size: \"$filteredStarRankings\"}" + //
+                                    "}," + //
+                                    "numberOfComments: {" + //
+                                        "$sum: {$size: \"$filteredComments\"}" + //
+                                    "}" + //
+                                "}" + //
+                            "}," + //
+                            "{" + //
+                                "$project: {" + //
+                                    "_id: 0," + //
+                                    "numberOfComments: 1," + //
+                                    "numberOfStarRankings: 1," + //
+                                    "avgOfStarRankings: 1" + //
+                                "}" + //
+                            "}" + //
                        "])";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -391,34 +386,34 @@ public class PostMongoDB implements PostMongoDBInterface{
 
     // #3 Aggregation
     public Double caloriesAnalysis(String recipeName){
-        String query = "db.Post.aggregate([\r\n" + //
-                       "    {\r\n" + //
-                       "        $match: {\r\n" + //
-                       "            \"recipe.name\": { $regex: \"" + recipeName + "\", $options: \"i\" }\r\n" + //
-                       "        }\r\n" + //
-                       "    },\r\n" + //
-                       "    {\r\n" + //
-                       "        $sort: {\r\n" + //
-                       "            avgStarRanking: -1\r\n" + //
-                       "        }\r\n" + //
-                       "    },\r\n" + //
-                       "    {\r\n" + //
-                       "        $limit: 10\r\n" + //
-                       "    },\r\n" + //
-                       "    {\r\n" + //
-                       "        $group: {\r\n" + //
-                       "            _id: null,\r\n" + //
-                       "            avgOfTotalCalories: {\r\n" + //
-                       "                $avg: \"$recipe.totalCalories\"\r\n" + //
-                       "            }\r\n" + //
-                       "        }\r\n" + //
-                       "    },\r\n" + //
-                       "    {\r\n" + //
-                       "        $project: {\r\n" + //
-                       "            _id: 0,\r\n" + //
-                       "            avgOfTotalCalories: 1\r\n" + //
-                       "        }\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.aggregate([" + //
+                            "{" + //
+                                "$match: {" + //
+                                    "\"recipe.name\": { $regex: \"" + recipeName + "\", $options: \"i\" }" + //
+                                "}" + //
+                            "}," + //
+                            "{" + //
+                                "$sort: {" + //
+                                    "avgStarRanking: -1" + //
+                                "}" + //
+                            "}," + //
+                            "{" + //
+                                "$limit: 10" + //
+                            "}," + //
+                            "{" + //
+                                "$group: {" + //
+                                    "_id: null," + //
+                                    "avgOfTotalCalories: {" + //
+                                        "$avg: \"$recipe.totalCalories\"" + //
+                                    "}" + //
+                                "}" + //
+                            "}," + //
+                            "{" + //
+                                "$project: {" + //
+                                    "_id: 0," + //
+                                    "avgOfTotalCalories: 1" + //
+                                "}" + //
+                            "}" + //
                        "])";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -432,23 +427,23 @@ public class PostMongoDB implements PostMongoDBInterface{
 
 
     public Double averageTotalCaloriesByUser(String username){
-        String query = "db.Post.aggregate([ \r\n" + //
-                       "    { \r\n" + //
-                       "        $match: { \r\n" + //
-                       "            username: \"" + username + "\" \r\n" + //
-                       "        } \r\n" + //
-                       "    }, \r\n" + //
-                       "    {   $project: { \r\n" + //
-                       "            recipeCalories: \"$recipe.totalCalories\" \r\n" + //
-                       "        } \r\n" + //
-                       "    }, \r\n" + //
-                       "    {   $group: { \r\n" + //
-                       "            _id: null, \r\n" + //
-                       "            avgCalories: { \r\n" + //
-                       "                $avg: \"$recipeCalories\" \r\n" + //
-                       "            } \r\n" + //
-                       "        } \r\n" + //
-                       "    }\r\n" + //
+        String query = "db.Post.aggregate([ " + //
+                            "{ " + //
+                                "$match: { " + //
+                                    "username: \"" + username + "\" " + //
+                                "} " + //
+                            "}, " + //
+                            "{   $project: { " + //
+                                    "recipeCalories: \"$recipe.totalCalories\" " + //
+                                "} " + //
+                            "}, " + //
+                            "{   $group: { " + //
+                                    "_id: null, " + //
+                                    "avgCalories: { " + //
+                                        "$avg: \"$recipeCalories\" " + //
+                                    "} " + //
+                                "} " + //
+                            "}" + //
                        "])";
 
         List<Document> result = BaseMongoDB.executeQuery(query);

@@ -83,9 +83,9 @@ public class ImageConverter {
 
 
 
-    public static void main(String[] args) {
-        System.out.println(convertImageToAsciiArt("image"));
-    }
+//    public static void main(String[] args) {
+//        System.out.println(convertImageToAsciiArt("image"));
+//    }
 
     public static String convertImageToAsciiArt(String imagePath) {
         try {

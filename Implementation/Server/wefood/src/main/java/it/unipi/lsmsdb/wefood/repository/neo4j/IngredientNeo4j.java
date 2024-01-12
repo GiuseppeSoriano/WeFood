@@ -27,27 +27,6 @@ public class IngredientNeo4j implements IngredientNeo4jInterface {
         return true;
     }
 
-    public List<String> findIngredientsUsedWithIngredient(String ingredientName, int limit) throws IllegalStateException, Neo4jException {
-        
-        String query = "MATCH (i1:Ingredient{name:'" + ingredientName + "'})-[r:USED_WITH]->(i2:Ingredient)\r\n" + //
-                       "RETURN i2, r.times AS times\r\n" + //
-                       "ORDER BY times DESC\r\n" + //
-                       "LIMIT " + limit + "\r\n";
-
-        List<Record> results = BaseNeo4j.executeQuery(query);
-        List<String> resultSet = new ArrayList<String>();
-        
-        for(Record record: results) {
-            resultSet.add(record.get("i2").get("name").asString());
-        }
-
-        return resultSet; 
-    }
-
-    public List<String> findIngredientsUsedWithIngredient(String ingredientName) throws IllegalStateException, Neo4jException {
-        return findIngredientsUsedWithIngredient(ingredientName, 5);
-    }  
-
     public boolean createIngredientIngredientRelationship(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         
         for(String ingredientName1: ingredientNames){

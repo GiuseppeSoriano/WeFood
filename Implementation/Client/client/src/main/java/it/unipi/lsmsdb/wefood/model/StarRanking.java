@@ -1,11 +1,14 @@
 package it.unipi.lsmsdb.wefood.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class StarRanking {
     
     private String username;
     private Double vote;
 
-    public StarRanking(String username, Double vote) {
+    public StarRanking(@JsonProperty("username") String username,
+                       @JsonProperty("vote") Double vote) {
         this.username = username;
         this.vote = vote;
     }

@@ -40,7 +40,7 @@ public class Recipe {
         return steps;
     }
 
-    public String getStepsString() {
+    public String stepsGetString() {
         String str = "[";
         for(int i=0; i<steps.size(); i++){
             str += "'" + steps.get(i) + "'";
@@ -60,7 +60,7 @@ public class Recipe {
         return ingredients;
     }
 
-    public String getIngredientsString() {
+    public String ingredientsGetString() {
         String str = "[";
         int i = 0;
         for (Map.Entry<String, Double> entry : ingredients.entrySet()) {

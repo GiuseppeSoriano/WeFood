@@ -38,13 +38,6 @@ public class IngredientDAO {
         return ingredientMongoDBInterface.getAllIngredients();
     }
 
-    public static List<String> findIngredientsUsedWithIngredient(String ingredientName, int limit) throws IllegalStateException, Neo4jException  {
-        return ingredientNeo4jInterface.findIngredientsUsedWithIngredient(ingredientName, limit);
-    }
-    public static List<String> findIngredientsUsedWithIngredient(String ingredientName) throws IllegalStateException, Neo4jException {
-        return ingredientNeo4jInterface.findIngredientsUsedWithIngredient(ingredientName);
-    }
-
     public static boolean createIngredientIngredientRelationship(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         return ingredientNeo4jInterface.createIngredientIngredientRelationship(ingredientNames);
     }

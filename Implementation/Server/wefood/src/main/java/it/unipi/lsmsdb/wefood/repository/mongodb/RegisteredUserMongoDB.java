@@ -68,7 +68,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         List<Document> posts = user_doc.getList(user_doc, Document.class);
         for(Document post : posts) { 
             String image = (post.get("image") == null) ? "DEFAULT" : post.get("image").toString();
-            PostDTO postDTO = new PostDTO(post.get("idPost").toString(), image, post.getString("name"));  
+            PostDTO postDTO = new PostDTO(post.getObjectId("idPost").toHexString(), image, post.getString("name"));  
             postDTOs.add(postDTO);
         }
         
@@ -171,7 +171,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
                        "}, {\r\n" + //
                        "    $push: {\r\n" + //
                        "        posts: {\r\n" + //
-                       "            idPost: " + postDTO.getId() + ",\r\n" + //
+                       "            idPost: " + postDTO.editedGetId() + ",\r\n" + //
                        "            name: \"" + postDTO.getRecipeName() + "\",\r\n" + //
                        "            image: \"" + postDTO.getImage() + "\"\r\n" + //
                        "        }\r\n" + //
@@ -190,7 +190,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
                        "}, {\r\n" + //
                        "    $pull: {\r\n" + //
                        "        posts: {\r\n" + //
-                       "            idPost: " + postDTO.getId() + "\r\n" + //
+                       "            idPost: " + postDTO.editedGetId() + "\r\n" + //
                        "        }\r\n" + //
                        "    }\r\n" + //
                        "})"; //

@@ -75,9 +75,9 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/browseMostRecentTopRatedPosts", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200){
                 // HTTP 200 OK
-                return objectMapper.readValue(result.body(), new TypeReference<List<PostDTO>>(){});
+                return objectMapper.readValue(result.body(), new TypeReference<List<PostDTO>>(){});}
             // Unauthorized (401) or other errors
             return null;
         }
@@ -91,9 +91,9 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/browseMostRecentTopRatedPostsByIngredients", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200){
                 // HTTP 200 OK
-                return objectMapper.readValue(result.body(), new TypeReference<List<PostDTO>>(){});
+                return objectMapper.readValue(result.body(), new TypeReference<List<PostDTO>>(){});}
             // Unauthorized (401) or other errors
             return null;
         }
@@ -123,9 +123,10 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/findPostByPostDTO", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200){
                 // HTTP 200 OK
-                return objectMapper.readValue(result.body(), Post.class);
+
+                return objectMapper.readValue(result.body(), Post.class);}
             // Unauthorized (401) or other errors
             return null;
         }

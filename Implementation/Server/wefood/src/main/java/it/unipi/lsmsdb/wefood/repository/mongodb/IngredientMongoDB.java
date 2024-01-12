@@ -14,9 +14,9 @@ public class IngredientMongoDB implements IngredientMongoDBInterface {
 
     public String createIngredient(Ingredient ingredient) throws MongoException, IllegalArgumentException, IllegalStateException {
         
-        String query = "db.Ingredient.insertOne({\r\n" + //
-                       "    name: \"" + ingredient.getName() +"\",\r\n" + //
-                       "    calories: " + ingredient.getCalories() +",\r\n" + //
+        String query = "db.Ingredient.insertOne({" + //
+                            "name: \"" + ingredient.getName() +"\"," + //
+                            "calories: " + ingredient.getCalories() +"," + //
                        "})"; 
         
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -27,8 +27,8 @@ public class IngredientMongoDB implements IngredientMongoDBInterface {
 
     
     public Ingredient findIngredientByName(String name) throws MongoException, IllegalArgumentException, IllegalStateException {
-        String query = "db.Ingredient.find({\r\n" + //
-                       "    name: \"" + name + "\",\r\n" + //
+        String query = "db.Ingredient.find({" + //
+                            "name: \"" + name + "\"," + //
                        "})"; 
         
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -55,8 +55,8 @@ public class IngredientMongoDB implements IngredientMongoDBInterface {
     };
 
     public boolean deleteIngredient(String _id) throws MongoException, IllegalArgumentException, IllegalStateException {
-        String query = "db.Ingredient.deleteOne({\r\n" + //
-                       "    _id: " + _id + "\r\n" + //
+        String query = "db.Ingredient.deleteOne({" + //
+                            "_id: " + _id + //
                        "})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);

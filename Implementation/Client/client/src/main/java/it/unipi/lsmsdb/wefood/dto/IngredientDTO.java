@@ -10,11 +10,11 @@ public class IngredientDTO {
         this.name = name;
     }
 
-    public String mongoDBgetId() {
+    public String editedGetId() {
         return "ObjectId('" + this._id + "')";
     }
 
-    public String neo4JgetId(){
+    public String getId(){
         return _id;
     }
 
