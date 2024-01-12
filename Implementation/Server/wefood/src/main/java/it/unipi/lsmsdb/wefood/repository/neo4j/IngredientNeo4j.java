@@ -17,7 +17,7 @@ public class IngredientNeo4j implements IngredientNeo4jInterface {
     public boolean createIngredient(IngredientDTO ingredientDTO) throws IllegalStateException, Neo4jException {
         
         String query = "CREATE (i:Ingredient {\r\n" + //
-                       "    _id: \"" + ingredientDTO.neo4JgetId() + "\",\r\n" + //
+                       "    _id: \"" + ingredientDTO.getId() + "\",\r\n" + //
                        "    name: \"" + ingredientDTO.getName() + "\"\r\n" + //
                        "})";
 

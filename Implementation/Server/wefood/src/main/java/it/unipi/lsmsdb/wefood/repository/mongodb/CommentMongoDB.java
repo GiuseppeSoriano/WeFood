@@ -19,7 +19,7 @@ public class CommentMongoDB implements CommentMongoDBInterface {
                        "}, {\r\n" + //
                        "    $push: {\r\n" + //
                        "        comments: {\r\n" + //
-                       "            idUser: " + user.getId() + ",\r\n" + //
+                       "            idUser: " + user.editedGetId() + ",\r\n" + //
                        "            username: \"" + user.getUsername() + "\",\r\n" + //
                        "            text: \"" + comment.getText() + "\",\r\n" + //
                        "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
@@ -40,7 +40,7 @@ public class CommentMongoDB implements CommentMongoDBInterface {
                        "    _id: " + postDTO.getId() + ",\r\n" + //
                        "    comments: {\r\n" + //
                        "        $elemMatch: {\r\n" + //
-                       "            idUser: " + user.getId() + ",\r\n" + //
+                       "            idUser: " + user.editedGetId() + ",\r\n" + //
                        "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
                        "        }\r\n" + //
                        "    }\r\n" + //
@@ -63,7 +63,7 @@ public class CommentMongoDB implements CommentMongoDBInterface {
                        "}, {\r\n" + //
                        "    $pull: {\r\n" + //
                        "        comments: {\r\n" + //
-                       "            idUser: " + user.getId() + ",\r\n" + //
+                       "            idUser: " + user.editedGetId() + ",\r\n" + //
                        "            timestamp: " + comment.getTimestamp().getTime() + "\r\n" + //
                        "        }\r\n" + //
                        "    }\r\n" + //

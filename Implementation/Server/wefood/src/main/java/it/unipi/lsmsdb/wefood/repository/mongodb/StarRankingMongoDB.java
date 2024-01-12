@@ -18,7 +18,7 @@ public class StarRankingMongoDB implements StarRankingMongoDBInterface {
                        "}, {\r\n" + //
                        "    $push: {\r\n" + //
                        "        starRankings: {\r\n" + //
-                       "            idUser: " + user.getId() + ",\r\n" + //
+                       "            idUser: " + user.editedGetId() + ",\r\n" + //
                        "            username: \"" + user.getUsername() + "\",\r\n" + //
                        "            vote: " + starRanking.getVote() + "\r\n" + //
                        "        }\r\n" + //

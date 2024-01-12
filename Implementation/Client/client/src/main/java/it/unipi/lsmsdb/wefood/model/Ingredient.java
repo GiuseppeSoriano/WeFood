@@ -1,11 +1,14 @@
 package it.unipi.lsmsdb.wefood.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Ingredient {
 
     private String name;
     private Double calories;
 
-    public Ingredient(String name, Double calories) {
+    public Ingredient(@JsonProperty("name") String name,
+                      @JsonProperty("calories") Double calories) {
         this.name = name;
         this.calories = calories;
     }

@@ -29,12 +29,13 @@ public class RegisteredUserACTOR {
     private static List<PostDTO> postDTOs = null;
 
     public static void login(RegisteredUser user){
-        if(info == null){
+        if(user == null){
             System.out.println("Wrong credentials!");
             return;
         }
         info = user;
         System.out.println("Logged in as " + info.getUsername() + "!");
+        System.out.println(info.getId());
         System.out.println("Welcome " + info.getName() + " " + info.getSurname() + "!");
         executeUserShell();
     }
@@ -518,10 +519,10 @@ public class RegisteredUserACTOR {
                     uploadPost();
                     break;
                 case "modifyPost":
-                    uploadPost();
+                    modifyPost();
                     break;
                 case "deletePost":
-                    uploadPost();
+                    deletePost();
                     break;
                 //aggiungere le operazioni possibili solo all'interno del post
                 case "browseMostRecentTopRatedPosts":
@@ -560,11 +561,12 @@ public class RegisteredUserACTOR {
                 case "findFollowers":
                     findFollowers();
                     break;
-                case "findFollowrd":
+                case "findFollowed":
                     findFollowed();
                     break;
                 case "exit":
                     exit = true;
+                    UnregisteredUserACTOR.unsetAppIsRunning();
                     break;
                 default:
                     System.out.println("Command not found");

@@ -25,7 +25,7 @@ public class AdminACTOR{
     private static List<RecipeDTO> recipeDTOs = null;
 
     public static void login(Admin admin){
-        if(info == null){
+        if(admin == null){
             System.out.println("Wrong credentials!");
             return;
         }
@@ -311,6 +311,7 @@ public class AdminACTOR{
                     break;
                 case "exit":
                     exit = true;
+                    UnregisteredUserACTOR.unsetAppIsRunning();
                     break;
                 default:
                     System.out.println("Command not found");

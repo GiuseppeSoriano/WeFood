@@ -25,7 +25,7 @@ public class PostMongoDB implements PostMongoDBInterface{
     public String uploadPost(Post post, RegisteredUser user) throws MongoException, IllegalStateException, IllegalArgumentException {
 
         String query = "db.Post.insertOne({\r\n" + //
-                       "    idUser: " + user.getId() + ",\r\n" + //
+                       "    idUser: " + user.editedGetId() + ",\r\n" + //
                        "    username: \"" + user.getUsername() + "\",\r\n" + //
                        "    description: \"" + post.getDescription() + "\",\r\n" + //
                        "    timestamp: " + post.getTimestamp().getTime() + ",\r\n" + //

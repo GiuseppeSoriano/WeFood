@@ -14,7 +14,11 @@ public class RecipeDTO {
         return this.name;
     }
 
-    public String getID() {
+    public String editedGetId() {
+        return this._id;
+    }
+
+    public String getId() {
         return this._id;
     }
 

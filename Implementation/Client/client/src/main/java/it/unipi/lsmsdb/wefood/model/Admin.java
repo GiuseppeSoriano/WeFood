@@ -1,11 +1,14 @@
 package it.unipi.lsmsdb.wefood.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Admin extends User {
 
     private String username;
     private String password;
 
-    public Admin(String username, String password){
+    public Admin(@JsonProperty("username") String username,
+                 @JsonProperty("password") String password){
         this.username = username;
         this.password = password;
     }

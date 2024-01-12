@@ -3,8 +3,10 @@ package it.unipi.lsmsdb.wefood.controller;
 import it.unipi.lsmsdb.wefood.apidto.LoginRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.RegisteredUserRequestDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
+import it.unipi.lsmsdb.wefood.model.Admin;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.service.RegisteredUserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +24,8 @@ public class RegisteredUserController {
     }
     @PostMapping("/login")
     public ResponseEntity<RegisteredUser> login(@RequestBody LoginRequestDTO request){
-        return ResponseEntity.ok(registeredUserService.login(request.getUsername(), request.getPassword()));
+        RegisteredUser user = registeredUserService.login(request.getUsername(), request.getPassword());
+        return user != null ? ResponseEntity.ok(user) : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PostMapping("/modifyPersonalInformation")

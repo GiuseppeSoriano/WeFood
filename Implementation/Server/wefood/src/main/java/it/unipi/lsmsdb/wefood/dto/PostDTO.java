@@ -26,8 +26,12 @@ public class PostDTO {
         this.recipeName = recipeName;
     }
 
-    public String getId() {
+    public String editedGetId() {
         return "ObjectId('" + this._id + "')";
+    }
+
+    public String getId() {
+        return this._id;
     }
     
     public String getImage() {

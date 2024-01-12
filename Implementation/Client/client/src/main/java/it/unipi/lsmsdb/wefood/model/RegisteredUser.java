@@ -1,5 +1,7 @@
 package it.unipi.lsmsdb.wefood.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class RegisteredUser extends User {
 
     private String _id;
@@ -9,7 +11,11 @@ public class RegisteredUser extends User {
     private String surname;
 
 
-    public RegisteredUser(String _id, String username, String password, String name, String surname) {
+    public RegisteredUser(@JsonProperty("id") String _id,
+                          @JsonProperty("username") String username,
+                          @JsonProperty("password") String password,
+                          @JsonProperty("name") String name,
+                          @JsonProperty("surname") String surname) {
         this._id = _id;
         this.username = username;
         this.password = password;
@@ -21,7 +27,7 @@ public class RegisteredUser extends User {
     }
 
     public String getId() {
-        return "ObjectId('" + this._id + "')";
+        return this._id;
     }
 
     public void setId(String id) {
@@ -59,5 +65,4 @@ public class RegisteredUser extends User {
     public void setSurname(String surname) {
         this.surname = surname;
     }
-
 }

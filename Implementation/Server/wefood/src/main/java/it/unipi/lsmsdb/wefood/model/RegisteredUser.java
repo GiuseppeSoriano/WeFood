@@ -21,6 +21,10 @@ public class RegisteredUser extends User {
     }
 
     public String getId() {
+        return this._id;
+    }
+
+    public String editedGetId() {
         return "ObjectId('" + this._id + "')";
     }
 

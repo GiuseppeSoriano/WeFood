@@ -17,7 +17,6 @@ public class UnregisteredUserDAO {
         return registeredUserMongoDB.register(username, password, name, surname);
     };
 
-    // Accorpare i due metodi in uno solo e gestire il caso allo stesso modo di ingredient?
     public static boolean createRegisteredUser(RegisteredUserDTO registeredUser) throws IllegalStateException, Neo4jException  {
         return unregisteredUserNeo4j.createRegisteredUser(registeredUser);
     };

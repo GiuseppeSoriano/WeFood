@@ -35,7 +35,8 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
                 // The user is not an Admin
                 if(BCrypt.checkpw(password, user.getString("password"))){
                     // The password is correct
-                    return new RegisteredUser(user.getString("_id"), user.getString("username"), user.getString("password"), user.getString("name"), user.getString("surname"));
+                    System.out.println(user.getObjectId("_id").toHexString());
+                    return new RegisteredUser(user.getObjectId("_id").toHexString(), user.getString("username"), user.getString("password"), user.getString("name"), user.getString("surname"));
                 } 
                 else {
                     // The password is not correct
@@ -71,14 +72,14 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
             postDTOs.add(postDTO);
         }
         
-        RegisteredUserPageDTO user = new RegisteredUserPageDTO(user_doc.get("_id").toString(), user_doc.getString("username"), postDTOs);
+        RegisteredUserPageDTO user = new RegisteredUserPageDTO(user_doc.getObjectId("_id").toHexString(), user_doc.getString("username"), postDTOs);
         
         return user;
     }
 
     public boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
         String  query = "db.User.updateOne({\r\n" + //
-                        "    _id: " + user.getId() + "\r\n" + //
+                        "    _id: " + user.editedGetId() + "\r\n" + //
                         "}, {\r\n" + //
                         "    $set: {\r\n" + //
                         "        password: \"" + user.getPassword() + "\",\r\n" + //
@@ -94,11 +95,11 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     };
 
     public boolean deleteUser(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
-        // We heve to unset the following fields: password, name, surname and posts
+        // We have to unset the following fields: password, name, surname and posts,
         // and then we have to set the field deleted to true
 
         String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.getId() + "\r\n" + //
+                       "    _id: " + user.editedGetId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $set: {\r\n" + //
                        "        deleted: true\r\n" + //
@@ -108,7 +109,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         List<Document> result = BaseMongoDB.executeQuery(query);
 
         query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.getId() + "\r\n" + //
+                       "    _id: " + user.editedGetId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $unset: {\r\n" + //
                        "        password: \"\",\r\n" + //
@@ -117,6 +118,8 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
                        "        posts: \"\"\r\n" + //
                        "    }\r\n" + //
                        "})";
+
+        result = BaseMongoDB.executeQuery(query);
 
         System.out.println(result.get(0).toJson());
         // If it does not throw an exception, it means that the query has been executed successfully
@@ -164,7 +167,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean addPost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.getId() + "\r\n" + //
+                       "    _id: " + user.editedGetId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $push: {\r\n" + //
                        "        posts: {\r\n" + //
@@ -183,7 +186,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean removePost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.getId() + "\r\n" + //
+                       "    _id: " + user.editedGetId() + "\r\n" + //
                        "}, {\r\n" + //
                        "    $pull: {\r\n" + //
                        "        posts: {\r\n" + //
