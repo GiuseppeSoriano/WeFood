@@ -1376,7 +1376,7 @@ In this section, more relevant queries are presented, categorized into two sub-s
 
 4. `Suggest most popular combination of ingredients`:
 ```javascript
-    MATCH (i1:Ingredient)-[r:USED_WITH]->(i2:Ingredient)
+    MATCH (i1:Ingredient {name: String})-[r:USED_WITH]->(i2:Ingredient)
     RETURN i1, i2, r.times AS times
     ORDER BY times DESC
     LIMIT 5
@@ -1586,110 +1586,142 @@ db.Post.aggregate([
 ```
 
 
----
-
 \newpage
 
 # 7. DataBases Deployment
-As it emerged before, the databases that are used for the deployment phase are: mongoDB and neo4j, respectively for the documentDB and the graphDB. In this section we will describe the deployment of these two databases.
+As previously mentioned, MongoDB and Neo4j are the chosen databases for the deployment phase, serving as the documentDB and graphDB, respectively. The subsequent discussion will focus on the precautions taken when deploying these databases in a real-world setting.
 
 ## 7.1. MongoDB
-MongoDB was deployed on virtual cluster consisting of 3 machines. The hierarchy of the cluster is composed by one primary node along with 2 secondary nodes. So they take part in a replicaset consisting of 3 nodes. 
+MongoDB is the first database to be deployed, and it has been set up in a cluster with *three* machines to improve fault tolerance.
 
 ### 7.1.1. ReplicaSet
-As just discussed the ReplicaSet, called `lsmdb`, is composed by three nodes. The priority of the primary node is 2, while the two secondary nodes have priorities equal to 1.5 and 1. When the replicaset has been installed in the remote cluster, the write concern has been set to `w: 1` and j unspecified wtimeout = 0. this means that Requests acknowledgment that the write operation has propagated to 1 mongod instance. Not having specified a value for j, this is like having specified it to false, that means The j option requests acknowledgment from MongoDB that the write operation has been written to the on-disk journal. Acknowledgment requires just writing operation in memory. wtimeout=0 means that If you do not specify the wtimeout option and the level of write concern is unachievable, the write operation will block indefinitely. This situation will be handled in the code by specifying there at client level a wtimeout of 5000ms (5 seconds). This means that if the write operation is not completed in 5 seconds, an exception will be thrown. In the code also the read concern will be handled at a client level, by considering a read concern = nearest. This means that the read operation will be performed on the nearest node. (Read from any member node from the set of nodes which respond the fastest. (Responsiveness measured in pings)) NEAREST because in this way we can access the node with the lowest latency
+To deploy MongoDB across different machines, a *ReplicaSet* was necessary. A ReplicaSet is a collection of `mongod` instances organized hierarchically to ensure *redundancy and high availability*. The ReplicaSet, named `lsmdb`, comprises a Primary node with a priority of `2` and two Secondary nodes with priorities of `1.5` and `1`. The Primary node is the sole member capable of receiving write operations. Once a write operation is executed on the Primary node, the Secondary nodes replicate the same operation in their datasets. 
+Configuring the ReplicaSet settings allows specifying the desired level of acknowledgment for a write operation, known as the *write concern*. In the proposed scenario of *WeFood*, having a social network that handles non-sensitive data, waiting for all nodes to acknowledge the operation is unnecessary. In the event of a primary node that crash immediately after a write operation, resulting in the failure to replicate to secondary nodes, the data loss is acceptable. Users can simply redo the operation (after the secondary nodes have elected a new primary node) without encountering dangerous or critical consequences. Therefore, a write concern of `w: 1` is adopted, allowing the ReplicaSet to return control once *one* node has acknowledged the write operation.
 
+Additional configurable options include `j` and `wtimeout`. 
 
-The j option requests acknowledgment from MongoDB that the write operation has been written to the on-disk journal. j option determines whether the member acknowledges writes after applying the write operation in memory or after writing to the on-disk journal.
+- The `j` option determines when a node acknowledges writes, either after applying the write operation in memory or after writing to the *on-disk journal*. The default, when `w: 1`, is as if it were specified as false, acknowledging writes after the write in memory. 
 
-Read Operations:
-In WeFood, as in every Social Network, read operations are the most frequent and critical operations. For this reason we have to guarantee the lowest response time possible even if data is not updated to the latest version. So we decided to provide a response from the first available replica.
+- The `wtimeout` specifies the time limit for an operation, and the default is `0`, meaning the write operation will block indefinitely if the level of write concern is unachievable. This situation will be handled in the code by setting a *client-level* `wtimeout` of `5000ms` (5 seconds), causing an exception to be thrown if the write operation is not completed within this time frame.
 
-Write Operations:
-To ensure the low latency that we discussed before, write operations are considered successful 
-when just a replica node (da sistemare dopo che si è scelta configurazione) wrote the data. 
+Regarding reading operations, all members of the replica set *can* accept read operations, although by *default*, applications direct reads to the primary member. In the case of a social network like *WeFood*, read operations can be directed to secondary nodes, even if they are not as updated as the primary node, as MongoDB asynchronously updates data to the secondary nodes. Thus, to ensure the lowest response time for read operations, the *read concern* is set to `nearest` at the *client-level*, meaning read operations will be performed on the nearest node (i.e. the node with the lowest latency). 
 
 ### 7.1.2. Sharding
+When it comes to *Sharding*, it is crucial to assess before the potential benefits it can bring. Sharding is the horizontally partitioning of data across multiple servers, the can help in enhancing scalability and performance. However, in certain situations, opting for sharding may prove impractical or undesirable. For instance, in the current implementation of *WeFood*, sharding the Post collection based on a specific field, such as `timestamp`, could result in latency issues when querying with unrelated filters (e.g., by `totalCalories` or by `avgStarRanking`), leading to an inefficient process.
 
-In our application as it is implemented it is not useful to design the sharding approach. The main reason behind this decision is that we give the users the possibility to find the posts using completely uncorrelated filters that are not linked by a particular relationship (i.e. such as a common field). Indeed if for example we decided to shard the post collection by the timestamp field, we would have latency issues when we have to find the posts using other filters (e.g. by totalCalories). Indeed we would have to query all the shards and then merge the results. This would be a very inefficient approach. For this reason we decided to not implement the sharding approach.
+To elaborate a little further, if the application was designed with predefined *Categories* for Recipes, sharding the Post collection based on the `category` field might achieve balanced load distribution among shards. However, this approach was *intentionally avoided* to offer users the flexibility to explore diverse recipes without constraints. Users indeed, in the current implementation, can search for Recipes using *various filters*, discovering Recipes *beyond* fixed categories.
 
-For example if WeFood were implemented by considering a category for each recipe, where the category could be chosen from a fixed set of categories (e.g. geographic area, culture, ..), we could have decided to shard the post collection by the category field of the recipe. In this way we would have reached a good balancing of the load among the shards. But we decided not to proceed in this direction because we wanted to give the users the possibility to explore different recipes without any constraint.
+Similarly, the decision not to implement the Sharding for the User collection is justified by the fact that it is realistic to expect that the User collection will not grow as much as the Post collection. For this reason, the complexity of implementing and managing the Sharding for the User collection is deemed unnecessary.
 
-We do not consider the sharding approach for the User collection because we do not expect the users to grow as much as the posts. Indeed we expect that the number of users will be much lower than the number of posts. For this reason we decided to not implement the sharding approach at all.
+In summary, while sharding can significantly enhance database performance, its appropriateness is strictly tied to the specific demands of the application. In this case, considerations regarding uncorrelated filters, diverse exploration, and distinct growth rates between Users and Posts *influence* the decision not to adopt a sharding approach.
 
 ### 7.1.3. Indexes and Constraints
+Considering the different collections stored in MongoDB, the following indexes and constraints have been implemented:
 
-Possible Indexes:
+- `Ingredient`:
+  - `name`: basic index (ascending order) *and* unique constraint.
 
-- Ingredient: name
+- `Post`:
+  - `timestamp`: basic index (ascending order);
+  - `recipe.totalCalories`: basic index (ascending order).
 
+- `User`:
+  - `username`: basic index (ascending order) *and* unique constraint.
+
+Specifically:
+
+`--> Ingredient:name`
+
+```javascript
 db.Ingredient.createIndex( { "name": 1 }, { unique: true } )
+```
 
-In this way we also ensure the unique constraint on the name field
+| Index | `nReturned` | `executionTimeMillis` | `totalKeysExamined` | `totalDocsExamined` |
+|-------|-------------|-----------------------|---------------------|---------------------|
+| No    | 1           | 4                     | 0                   | 1911                |
+| Yes   | 1           | 0                     | 1                   | 1                   |
 
+**Operation**: Find Ingredient by `name`.
 
-Find Ingredient by name
-
-| Index | nReturned | executionTimeMillis | totalKeysExamined | totalDocsExamined |
-|-------|-----------|---------------------|-------------------|-------------------|
-| No    | 1         | 4                   | 0                 | 1911              |
-| Yes   | 1         | 0                   | 1                 | 1                 |
-
-
-We can clearly see that by adding an index on the name field we can speed up the find operation. We do not have any disadvantage in adding this index because the writing operations are not frequent on the Ingredient collection. Because the admin is the only one that can add new ingredients and we do not expect that the admin will add new ingredients very frequently.
+**Reason**: It becomes evident that the inclusion of an index on the `name` field can speed up the find operation. Furthermore, the drawbacks of adding this index are negligible, given the infrequency of writing operations on the Ingredient collection: only the admin has the authority to introduce new ingredients, and the expectation is that such additions will occur rarely. On the other hand, the reading operations like the one that has been analyzed are expected to be frequent among the Users because all the social network is based on Recipes and so on Ingredients. So, adding an index on the `name` field will improve the User experience.
 
 
-- Post: timestamp
+`--> Post:timestamp`
 
-Find the 100 most recent posts
+```javascript
+db.Post.createIndex( { "timestamp": 1 } )
+```
 
-| Index | nReturned | executionTimeMillis | totalKeysExamined | totalDocsExamined |
-|-------|-----------|---------------------|-------------------|-------------------|
-| No    | 100       | 109                 | 0                 | 231323            |
-| Yes   | 100       | 3                   | 100               | 100               |
+| Index | `nReturned` | `executionTimeMillis` | `totalKeysExamined` | `totalDocsExamined` |
+|-------|-------------|-----------------------|---------------------|---------------------|
+| No    | 100         | 109                   | 0                   | 231323              |
+| Yes   | 100         | 3                     | 100                 | 100                 |
 
-
-Reason: we expect to have more read operations than write operations. And furthermore the writing operations are already ordered because posts are published in a chronological order. 
-
-
-- Post: recipe: totalCalories 
+**Operation**: Find the 100 most recent Posts.
 
 
-| Index | nReturned | executionTimeMillis | totalKeysExamined | totalDocsExamined |
-|-------|-----------|---------------------|-------------------|-------------------|
-| No    | 100       | 144                 | 0                 | 231323            |
-| Yes   | 100       | 7                   | 100               | 100               |
+`--> Post:recipe.totalCalories`
+
+```javascript
+db.Post.createIndex( { "recipe.totalCalories": 1 } )
+```
+
+| Index | `nReturned` | `executionTimeMillis` | `totalKeysExamined` | `totalDocsExamined` |
+|-------|-------------|-----------------------|---------------------|---------------------|
+| No    | 100         | 144                   | 0                   | 231323              |
+| Yes   | 100         | 7                     | 100                 | 100                 |
+
+**Operation**: Find 100 Posts with totalCalories between `minCalories` and `maxCalories`.
+
+**Reasons**: Given the substantial volume of the Post collection, it is necessary to define specific indexes, as outlined above. This approach ensures that operations frequently executed by users of *WeFood* yield significant benefits. Since a larger number of users browse posts compared to those creating new posts, the presence of these indexes is justified, despite the potential slowdown in write operations required to maintain them. 
+
+It's worth noting a subtle aspect: the decision not to define an index on the `avgStarRanking` field. This choice is thoughtful because this field is updated every time a user rates a post. Introducing an index on `avgStarRanking` would necessitate frequent updates with every rating, resulting in more write operations than the potential benefits conferred by the index.
+
+In contrast, the fields `totalCalories` and `timestamp` remain the same after the initial Post creation. As a result, the indexes defined on them experience updates only once. This distinction is crucial for optimizing the overall performance of the system.
 
 
+`--> User:username`
 
-- User: username
-
+```javascript
 db.User.createIndex( { "username": 1 }, { unique: true } )
-
-In this way we also ensure the unique constraint on the username field
-
+```
 
 | Index | nReturned | executionTimeMillis | totalKeysExamined | totalDocsExamined |
 |-------|-----------|---------------------|-------------------|-------------------|
 | No    | 1         | 78                  | 0                 | 27901             |
 | Yes   | 1         | 2                   | 1                 | 1                 |
 
+**Operation**: Find User by `username`.
 
-Reason: since the user is the actor of the social network that performs the most number of operations and most of these operations are find operations (e.g. showing posts with different filters) we decided to implement indexes on the above fields. In this way we can speed up the find operations. We estimate that the number of find operations done by the admin will be negligible compared to the number of find operations done by the users.
+**Reason**: The inclusion of an index on the `username` field for the Users, as illustrated in the table, proves highly beneficial in significantly reducing the execution time of queries involving `username` lookup. This optimization is particularly valuable during the login phase and when Users or administrators need to access a User Profile. Examining potential drawbacks in this scenario, it becomes evident that the index does not require frequent updates. Specifically, updates are unnecessary after the creation (i.e., sign up) of a new user, as users cannot change their usernames. Similarly, updates are not required when a user decides to delete their account from the platform. This is because the `username` information is retained even after account deletion, preventing other users from signing up with the same `username`.
 
 ## 7.2. Neo4j
+The deployment of Neo4j was more straightforward compared to the previous setup. This ease was attributed to the deployment on a single machine, whereas setting up a cluster on multiple machines with replicas would have required the enterprise edition of Neo4j.
 
-- Neo4j: 1 node (1 primary) (we didn't implement the replicas because we would have needed the enterprise edition)
+--- 
 
 ### 7.2.1. Indexes
-Da discutere dopo aver caricato tutti i dati ed eventualmente prevedere indice per ricette che sono davvero tante
+
+An index on the ingredient name in the Ingredient nodes is also a key component in helping the user browsing accross posts specifying different subset of ingredients. We expect that this operations, along with the previously described, will be very frequent and so should be optimized to provide a better experience for the user.
 
 
 ## 7.3. Consistency, Availability and Partition Tolerance
 
-According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.
+In accordance with the predefined non-functional requirements, our primary objective is to ensure the Availability and Partition tolerance of the system, allowing for a certain degree of relaxation in consistency constraints. This strategic approach is tailored to the specific characteristics of the application at hand, which happens to be a social network with users as the central actors in the system. Our design is intentionally aligned with the Availability and Partition tolerance intersection of the CAP theorem, placing a high value on achieving eventual consistency.
 
+The CAP theorem, also known as Brewer's theorem, highlights the inherent trade-offs that exist among three key attributes in a distributed system: Consistency, Availability, and Partition tolerance.
 
+Consistency (C): This aspect ensures that all nodes in a distributed system have a consistent view of the data. In other words, if a piece of data is updated, all subsequent accesses to that data should reflect the latest version. Consistency ensures that all nodes in the system agree on the current state of the data.
+
+Availability (A): Availability implies that every request to the distributed system receives a response, without any guarantee regarding the consistency of the data. In other words, even if some nodes in the system fail or are unreachable, the system should still be able to respond to requests.
+
+Partition tolerance (P): Partition tolerance deals with the system's ability to function even when communication between nodes is unreliable or may be completely lost. Partitions refer to the inability of some nodes to communicate with others due to network failures or delays.
+
+The CAP theorem asserts that it is impossible for a distributed system to simultaneously provide all three guarantees—Consistency, Availability, and Partition tolerance. In any distributed system, when faced with a network partition (P), a choice must be made between maintaining Consistency (C) or providing Availability (A). This means that during a network partition, a system must decide whether to continue operating (Availability) with potentially inconsistent data or to halt operations until consistency can be ensured.
+
+Within the unique context of a social network, our emphasis revolves around the necessity to consistently present data to users, even if it may not be the most current information available. For example, consider the scenario where a user experiences a delay in accessing the latest posts from their friends. While this initial delay might elicit a sense of disappointment, we acknowledge that this is a transient issue. The system is intentionally architected to eventually deliver the updated content to the user, mitigating any inconvenience and ensuring a seamless user experience over time.
+
+%da vedere se tenere
 ## 7.4. Inter-Database Consistency
 Using two different databases implemented redundancy of data, so for this reason any fail in insertion/up-date/deletion of data can cause inconsistencies between these to DBs, for this reason, in case of exceptions during write operations on one of the databases causes a rollback.
 If the operation succeeds on MongoDB, a success response is sent to the user, and the graph db becomes eventually consistent: if an exception occurs after this phase, a rollback operation starts bringing back the DBs in a state of consistency.
@@ -1697,6 +1729,9 @@ Check write operations in the Replicas!
 Explain how the rollback is implemented and that neo4j is waited to be consistent before sending the response to the user...
 
 //questo è stato spiegato all'interno del server
+
+
+
 
 \newpage
 
@@ -1841,39 +1876,35 @@ This guide outlines the general approach to navigating and utilizing the feature
 
 For non-registered users, browsing recent posts sorted by upload date is permitted. However, all other operations, except for registration, are restricted until users complete the registration process. Upon registration, users are greeted with an empty personal profile page, zero followers/followed, and zero posts. The interface displays a personal shell prompting users to insert commands. The subsequent table details various commands and their corresponding results.
 
-\begin{tabular}{|l|l|}
-    \hline
-    \textbf{Comando} & \textbf{Operazione} \\
-    \hline
-    \texttt{login} & To login\\
-    \texttt{logout} & To logout \\
-    \texttt{findIngredientByName} & To find an ingredient by name \\
-    \texttt{findIngredientsUsedWithIngredient} & To show suggestions about ingredients based on ingredient combinations \\
-    \texttt{findNewIngredientsBasedOnFriendsUsage} & To show suggestions about ingredients based on friends \\
-    \texttt{findUsersToFollowBasedOnUserFriends} & To show suggestions on new followers based on friends\\
-    \texttt{findMostFollowedUsers} & To show suggestions about the most followed users\\
-    \texttt{findUsersByIngredientUsage} & To show suggestions about users based on ingredients usage \\
-    \texttt{findMostUsedIngredientByUser} & To find the most used ingredient \\
-    \texttt{findMostLeastUsedIngredient} & To show an overview about ingredient usage \\
-    \texttt{uploadPost} & To upload a post \\
-    \texttt{modifyPost} & To modify a post \\
-    \texttt{deletePost} & To delete a post \\
-    \texttt{browseMostRecentTopRatedPosts} & To browse the most recent and top rated posts \\
-    \texttt{browseMostRecentTopRatedPostByIngredients} & To browse the most recent and top rated posts by ingredients \\
-    \texttt{browseMostRecentPostsByCalories} & To browse the most recent posts by calories \\
-    \texttt{findPostByRecipeName} & To find a post by recipe name \\
-    \texttt{averageTotalCaloriesByUser} & Statistics about calories \\
-    \texttt{findRecipeByIngredients} & To find a recipe by ingredients \\
-    \texttt{modifyPersonalInformation} & To find personal informations \\
-    \texttt{deleteUser} & To delete your personal profile \\
-    \texttt{followUser} & To follow a user \\
-    \texttt{unfollowUser} & To unfollow a user \\
-    \texttt{findFriends} & To find your friends \\
-    \texttt{findFollowers} & To find your followers \\
-    \texttt{findFollowed} & To find your followed users \\
-    \texttt{exit} & TO exit from the site \\
-    \hline
-\end{tabular}
+| Command | Operation |
+| --- | --- |
+| `login` | To login |
+| `logout` | To logout |
+| `findIngredientByName` | To find an ingredient by name |
+| `findIngredientsUsedWithIngredient` | To show suggestions about ingredients based on ingredient combinations |
+| `findNewIngredientsBasedOnFriendsUsage` | To show suggestions about ingredients based on friends |
+| `findUsersToFollowBasedOnUserFriends` | To show suggestions on new followers based on friends |
+| `findMostFollowedUsers` | To show suggestions about the most followed users |
+| `findUsersByIngredientUsage` | To show suggestions about users based on ingredients usage |
+| `findMostUsedIngredientByUser` | To find the most used ingredient |
+| `findMostLeastUsedIngredient` | To show an overview about ingredient usage |
+| `uploadPost` | To upload a post |
+| `modifyPost` | To modify a post |
+| `deletePost` | To delete a post |
+| `browseMostRecentTopRatedPosts` | To browse the most recent and top rated posts |
+| `browseMostRecentTopRatedPostByIngredients` | To browse the most recent and top rated posts by ingredients |
+| `browseMostRecentPostsByCalories` | To browse the most recent posts by calories |
+| `findPostByRecipeName` | To find a post by recipe name |
+| `averageTotalCaloriesByUser` | Statistics about calories |
+| `findRecipeByIngredients` | To find a recipe by ingredients |
+| `modifyPersonalInformation` | To modify personal informations |
+| `deleteUser` | To delete your personal profile |
+| `followUser` | To follow a user |
+| `unfollowUser` | To unfollow a user |
+| `findFriends` | To find your friends |
+| `findFollowers` | To find your followers |
+| `findFollowed` | To find your followed users |
+| `exit` | To exit from the site |
 
 After entering a command, the user will receive on-screen guidance to complete the operation. Accuracy in providing information is crucial; any inaccuracies will result in a failed operation, necessitating a restart. Notably, there is no back button available, meaning completed operations cannot be reversed. A pop-up message informs users of the success or failure of an operation, redirecting them to the main shell.
 
@@ -1883,28 +1914,18 @@ The admin of the social network is pre-registered, and credentials are communica
 
 The following table outlines admin-specific commands:
 
-\begin{table}
-    \begin{center}
-    \label{tab:table2}
-    \begin{tabular}{|l|l|}
-    \hline
-    \textbf{Command} & \textbf{Operation} \
-    \hline
-        login & Enter the social network \
-        logout & Exit from the social network \
-        createIngredient & Create a new ingredient \
-        banUser & Ban a user from the site \
-        unbanUser & Unban a user \
-        findIngredient & Find information about a specific ingredient \
-        getAllIngredients & Retrieve all information about ingredients \
-        findIngredientsUsedWithIngredient & Find combinations of ingredients from a starting ingredient \
-        mostPopularCombinationOfIngredients & Statistics about the most popular combinations of ingredients \
-        exit & Close the application \
-    \hline
-    \end{tabular}
-    \caption{Admin commands.}
-    \end{center}
-\end{table}
+| Command | Operation |
+| --- | --- |
+| `login` | To login |
+| `logout` | To logout |
+| `createIngredient` | To create a new ingredient |
+| `banUser` | To ban a user from the site |
+| `unbanUser` | To unban a user |
+| `findIngredient` | To find information about a specific ingredient |
+| `getAllIngredients` | To retrieve all information about ingredients |
+| `findIngredientsUsedWithIngredient` | To find combinations of ingredients from a starting ingredient |
+| `mostPopularCombinationOfIngredients` | Statistics about the most popular combinations of ingredients |
+| `exit` | To close the application |
 
 This detailed guide aims to provide users, whether regular or admin, with a clear understanding of the social network's functionalities and the corresponding commands to interact effectively.
 
