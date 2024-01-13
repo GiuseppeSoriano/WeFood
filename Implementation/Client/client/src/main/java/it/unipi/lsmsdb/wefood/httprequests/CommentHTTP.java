@@ -14,7 +14,7 @@ public class CommentHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("comment/create", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -30,7 +30,7 @@ public class CommentHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("comment/update", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -46,7 +46,7 @@ public class CommentHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("comment/delete", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors

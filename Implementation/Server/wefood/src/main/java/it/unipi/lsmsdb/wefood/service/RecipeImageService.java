@@ -19,8 +19,10 @@ public class RecipeImageService {
     
     public String storePostImage(Post post){
         String username = post.getUsername();
-        String timestamp = "time"+post.getTimestamp().toString();
+        String timestamp = "time_"+post.getTimestamp().getTime();
         String image = post.getRecipe().getImage();
+        if(image == null)
+            return null;
         
         String localPath = username + "/" + timestamp + "/" + "image.jpg";
         String relativePath = LOCAL_RECIPES_IMAGES_PATH + localPath;

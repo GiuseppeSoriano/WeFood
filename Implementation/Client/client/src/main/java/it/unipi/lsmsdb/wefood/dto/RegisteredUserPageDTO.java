@@ -1,5 +1,7 @@
 package it.unipi.lsmsdb.wefood.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class RegisteredUserPageDTO {
@@ -8,7 +10,9 @@ public class RegisteredUserPageDTO {
     private String username;
     private List<PostDTO> posts;
 
-    public RegisteredUserPageDTO(String _id, String username, List<PostDTO> posts) {
+    public RegisteredUserPageDTO(@JsonProperty("id") String _id,
+                                 @JsonProperty("username") String username,
+                                 @JsonProperty("posts") List<PostDTO> posts) {
         this._id = _id;
         this.username = username;
         this.posts = posts;

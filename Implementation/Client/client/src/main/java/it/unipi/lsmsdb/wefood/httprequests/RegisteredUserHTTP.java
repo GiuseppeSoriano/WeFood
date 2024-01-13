@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.unipi.lsmsdb.wefood.apidto.LoginRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.RegisteredUserRequestDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
+import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 
 import java.net.http.HttpResponse;
@@ -20,7 +21,7 @@ public class RegisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/login", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), RegisteredUser.class);
             // Unauthorized (401) or other errors
@@ -36,7 +37,7 @@ public class RegisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/modifyPersonalInformation", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -52,7 +53,7 @@ public class RegisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/deleteUser", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -68,7 +69,7 @@ public class RegisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/followUser", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -84,7 +85,7 @@ public class RegisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/unfollowUser", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -100,7 +101,7 @@ public class RegisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/findFriends", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<RegisteredUserDTO>>(){});
             // Unauthorized (401) or other errors
@@ -116,7 +117,7 @@ public class RegisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/findFollowers", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<RegisteredUserDTO>>(){});
             // Unauthorized (401) or other errors
@@ -132,7 +133,7 @@ public class RegisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/findFollowed", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<RegisteredUserDTO>>(){});
             // Unauthorized (401) or other errors
@@ -148,7 +149,7 @@ public class RegisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/findUsersToFollowBasedOnUserFriends", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<RegisteredUserDTO>>(){});
             // Unauthorized (401) or other errors
@@ -163,7 +164,7 @@ public class RegisteredUserHTTP{
     public List<RegisteredUserDTO> findMostFollowedUsers(){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/findMostFollowedUsers", "");
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<RegisteredUserDTO>>(){});
             // Unauthorized (401) or other errors
@@ -178,9 +179,24 @@ public class RegisteredUserHTTP{
     public List<RegisteredUserDTO> findUsersByIngredientUsage(String request){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/findUsersByIngredientUsage", request);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<RegisteredUserDTO>>(){});
+            // Unauthorized (401) or other errors
+            return null;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public RegisteredUserPageDTO findRegisteredUserPageByUsername(String request){
+        try{
+            HttpResponse<String> result = baseHttpRequest.sendRequest("registereduser/findRegisteredUserPageByUsername", request);
+            if(result.statusCode() == 200 && !result.body().isEmpty())
+                // HTTP 200 OK
+                return objectMapper.readValue(result.body(), RegisteredUserPageDTO.class);
             // Unauthorized (401) or other errors
             return null;
         }

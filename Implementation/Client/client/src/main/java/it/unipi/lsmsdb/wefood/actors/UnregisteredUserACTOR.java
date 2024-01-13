@@ -122,10 +122,8 @@ public class UnregisteredUserACTOR {
     }
 
     public static void mostPopularCombinationOfIngredients(){
-        System.out.println("Insert ingredient name: ");
-        String ingredientName = scanner.nextLine();
-        List<String> ingredients_found = ingredientHTTP.mostPopularCombinationOfIngredients(ingredientName);
-        if(ingredients_found == null){
+        List<String> ingredients_found = ingredientHTTP.mostPopularCombinationOfIngredients(Reader.readIngredient());
+        if(ingredients_found == null || ingredients_found.isEmpty()){
             System.out.println("No ingredients found");
             return;
         }
@@ -161,7 +159,7 @@ public class UnregisteredUserACTOR {
                 case "browseMostRecentTopRatedPosts":
                     browseMostRecentTopRatedPosts();
                     break;
-                case "browseMostRecentTopRatedPostsByIngredients":      // TO CHECK
+                case "browseMostRecentTopRatedPostsByIngredients":
                     browseMostRecentTopRatedPostsByIngredients();
                     break;
                 case "browseMostRecentPostsByCalories":
@@ -170,10 +168,10 @@ public class UnregisteredUserACTOR {
                 case "findPostsByRecipeName":
                     findPostsByRecipeName();
                     break;
-                case "findRecipeByIngredients":                         // TO CHECK
+                case "findRecipeByIngredients":
                     findRecipeByIngredients();
                     break;
-                case "mostPopularCombinationOfIngredients":             // TO INSERT SEARCH INGREDIENT
+                case "mostPopularCombinationOfIngredients":
                     mostPopularCombinationOfIngredients();
                     break;
                 case "help":

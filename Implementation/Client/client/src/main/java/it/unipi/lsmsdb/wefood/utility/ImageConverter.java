@@ -54,7 +54,7 @@ public class ImageConverter {
         ClassLoader classLoader = ImageConverter.class.getClassLoader();
         File resourcesDirectory = new File(classLoader.getResource("").getFile());
         // imageName is the name of the image without the extension
-        String path = resourcesDirectory.getAbsolutePath() + TEMP_IMAGES_PATH + imageName + IMAGE_EXTENSION;
+        String path = resourcesDirectory.getAbsolutePath() + "\\" + TEMP_IMAGES_PATH + imageName + IMAGE_EXTENSION;
         return path;
     }
 

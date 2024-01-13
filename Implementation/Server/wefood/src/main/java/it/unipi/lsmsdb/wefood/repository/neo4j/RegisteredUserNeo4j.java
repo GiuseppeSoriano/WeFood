@@ -17,29 +17,26 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
             String query = "MATCH (u:User {username: '" + registeredUserDTO.getUsername() + "'}), (i:Ingredient {name: '" + ingredientName + "'})\r\n" + //
                            "MERGE (u)-[r:USED]->(i) ON CREATE SET r.times = 1 ON MATCH SET r.times = r.times + 1";
             List<Record> results = BaseNeo4j.executeQuery(query);
-            System.out.println(results.get(0));
         }
         return true;
     }
 
     public boolean deleteUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         for(String ingredientName: ingredientNames){
-            String query = "MATCH (i1:Ingredient {name: '" + registeredUserDTO.getUsername() + "'})-[r:USED_WITH]->(i2:Ingredient {name: '" + ingredientName + "'})\r\n" + //
-                           "SET r.times = r.times - 1\r\n" + //
-                           "IF r.times = 0 THEN\r\n" + //
-                           "    DELETE r\r\n" + //
-                           "END IF";
+            String query = "MATCH (u:User {username: '\"" + registeredUserDTO.getUsername() + "\"'})-[r:USED]->(i2:Ingredient {name: '\"" + ingredientName + "\"'})\n" +
+                            "SET r.times = r.times - 1\n" +
+                            "WITH r\n" +
+                            "WHERE r.times = 0\n" +
+                            "DELETE r\n";
             List<Record> results = BaseNeo4j.executeQuery(query);
-            System.out.println(results.get(0));
         }
         return true;
     }
 
     public boolean followUser(RegisteredUserDTO user, String usernameToFollow) throws IllegalStateException, Neo4jException {
         String query = "MATCH (u1:User {username: '" + user.getUsername() + "'}), (u2:User {username: '" + usernameToFollow + "'})" +
-                        "CREATE (u1)-[:FOLLOWS]->(u2)";
+                        "MERGE (u1)-[:FOLLOWS]->(u2)";
         List<Record> results = BaseNeo4j.executeQuery(query);
-        System.out.println(results.get(0));
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;       
     }
@@ -48,7 +45,6 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[r:FOLLOWS]->(u2:User {username: '" + usernameToUnfollow + "'})" +
                         "DELETE r";
         List<Record> results = BaseNeo4j.executeQuery(query);
-        System.out.println(results.get(0));
         // If it does not throw an exception, it means that the query has been executed successfully
         return true; 
     }
@@ -97,7 +93,8 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         String query = "MATCH (u1:User {username: '" + user.getUsername() + "'})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u3:User)\r\n" + //
                        "WHERE (u2)-[:FOLLOWS]->(u1)\r\n" + //
                        "AND NOT (u1)-[:FOLLOWS]->(u3)\r\n" + //
-                       "RETURN u3";
+                       "RETURN u3\r\n" +
+                       "LIMIT 10";
         List<Record> results = BaseNeo4j.executeQuery(query);
         List<RegisteredUserDTO> suggestedUsers = new ArrayList<RegisteredUserDTO>();
         for(Record result: results){
@@ -131,8 +128,8 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         List<Record> results = BaseNeo4j.executeQuery(query);
         List<RegisteredUserDTO> suggestedUsers = new ArrayList<RegisteredUserDTO>();
         for(Record result: results){
-            RegisteredUserDTO suggestedUser = new RegisteredUserDTO(result.get("u2").get("_id").asString(),
-                                                                   result.get("u2").get("username").asString());
+            RegisteredUserDTO suggestedUser = new RegisteredUserDTO(result.get("u").get("_id").asString(),
+                                                                   result.get("u").get("username").asString());
             suggestedUsers.add(suggestedUser);
         }
         return suggestedUsers;

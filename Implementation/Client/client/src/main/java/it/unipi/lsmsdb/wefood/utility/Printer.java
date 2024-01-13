@@ -6,6 +6,8 @@ import java.util.Scanner;
 
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
+import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
+import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;
 import it.unipi.lsmsdb.wefood.httprequests.PostHTTP;
 import it.unipi.lsmsdb.wefood.model.Ingredient;
 import it.unipi.lsmsdb.wefood.model.Comment;
@@ -26,7 +28,7 @@ public class Printer {
         System.out.println("Recipe name: " + postDTO.getRecipeName());
         ImageConverter.fromStringToImage(postDTO.getImage(), String.valueOf(postNumber));
         // Image Preview
-        System.out.println(ImageConverter.convertImageToAsciiArt(String.valueOf(postNumber)));
+        // System.out.println(ImageConverter.convertImageToAsciiArt(String.valueOf(postNumber)));
         System.out.println("Image Path: " + ImageConverter.getPathOfTempImage(String.valueOf(postNumber)));
     }
 
@@ -34,19 +36,22 @@ public class Printer {
         System.out.println("Recipe name: " + recipeDTO.getName());
     }
 
-    public static void printPostByPostDTO(PostDTO postDTO, int pos){
+    public static void printPostByPostDTO(PostDTO postDTO, int pos, boolean author){
         Post post = postHTTP.findPostByPostDTO(postDTO);
-        printPost(postDTO, post, pos);
+        printPost(postDTO, post, pos, author);
     }
     
     public static void PrintPostByRecipeDTO(RecipeDTO recipeDTO, int pos){
-        Post post = postHTTP.findPostById(recipeDTO.getID());
+        Post post = postHTTP.findPostById(recipeDTO.editedGetID());
         PostDTO postDTO = new PostDTO(recipeDTO.getID(), post.getRecipe().getImage(), recipeDTO.getName());
         ImageConverter.fromStringToImage(postDTO.getImage(), String.valueOf(pos));
         printPost(postDTO, post, pos);
     }
 
     public static void printPost(PostDTO postDTO, Post post, int pos){
+        printPost(postDTO, post, pos, false);
+    }
+    public static void printPost(PostDTO postDTO, Post post, int pos, boolean author){
         System.out.println("Post [" + pos + "]");
         System.out.println("Author: " + post.getUsername());
         System.out.println("Description: " + post.getDescription());
@@ -56,7 +61,7 @@ public class Printer {
         System.out.println("Recipe: ");
         System.out.println("Name: " + post.getRecipe().getName());
         // Image Preview
-        System.out.println(ImageConverter.convertImageToAsciiArt(String.valueOf(pos)));
+        // System.out.println(ImageConverter.convertImageToAsciiArt(String.valueOf(pos)));
         System.out.println("Image Path: " + ImageConverter.getPathOfTempImage(String.valueOf(pos)));
         System.out.println("Calories: " + post.getRecipe().getTotalCalories());
         System.out.println("Steps: ");
@@ -78,9 +83,9 @@ public class Printer {
         for(StarRanking starRanking : post.getStarRankings()){
             System.out.println("Left by " + starRanking.getUsername() + ": " + starRanking.getVote());
         }
-
+        String string_author = author ? "modify post 'M', delete post 'D', " : "";
         while(true){
-            System.out.println("Insert 'C' to comment, 'S' to star rank, 'E' to exit: ");
+            System.out.println("Insert 'C' to comment, 'S' to star rank, " + string_author + "'E' to exit: ");
             String input = scanner.nextLine();
             String input2;
             switch(input){
@@ -124,6 +129,20 @@ public class Printer {
                             break;
                     }
                     break;
+                case "M":
+                    if(!author) {
+                        System.out.println("Invalid input");
+                        break;
+                    }
+                    RegisteredUserACTOR.modifyPost(postDTO, post);
+                    break;
+                case "D":
+                    if(!author) {
+                        System.out.println("Invalid input");
+                        break;
+                    }
+                    RegisteredUserACTOR.deletePost(postDTO, post);
+                    break;
                 case "E":
                     System.out.println("Exiting...");
                     return;
@@ -134,9 +153,10 @@ public class Printer {
         }
     }
 
-    
-
     public static void printListOfPostDTO(List<PostDTO> postDTOs){
+        printListOfPostDTO(postDTOs, false);
+    }
+    public static void printListOfPostDTO(List<PostDTO> postDTOs, boolean author){
         for(int i = 0; i < postDTOs.size(); i++){
             // I need to print the Post number because
             // inside the TempImages folder the images
@@ -150,7 +170,7 @@ public class Printer {
             switch(input){
                 case "V":
                     System.out.println("Opening post...");
-                    printPostByPostDTO(postDTOs.get(i), i);
+                    printPostByPostDTO(postDTOs.get(i), i, author);
                     break;
                 case "N":
                     if(i != postDTOs.size()-1){
@@ -219,4 +239,16 @@ public class Printer {
             System.out.println(key + ": " + map.get(key));
         }
     }
+
+
+    public static void printRegisteredUserDTO(RegisteredUserDTO registeredUserDTO){
+        System.out.println("Username: " + registeredUserDTO.getUsername());
+    }
+
+
+    public static void printRegisteredUserPageDTO(RegisteredUserPageDTO registeredUserPageDTO, boolean author){
+        System.out.println("Username: " + registeredUserPageDTO.getUsername());
+        printListOfPostDTO(registeredUserPageDTO.getPosts(), author);
+    }
+
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
+import org.bson.BsonString;
 import org.bson.Document;
 
 import org.bson.conversions.Bson;
@@ -234,8 +235,39 @@ public abstract class BaseMongoDB {
 
         return Aggregates.group(groupJson.isNull("_id") ? null : groupJson.get("_id"), fieldAccumulators.toArray(new BsonField[0]));
     }
+/*
+    private static Bson handleGroupOperation(JSONObject groupJson) throws IllegalArgumentException {
+        List<BsonField> fieldAccumulators = new ArrayList<>();
 
+        // Gestione del campo "_id"
+        Object idField = groupJson.get("_id");
+        Bson id;
+        if (idField instanceof JSONObject) {
+            // Se "_id" è un JSONObject, convertilo in Document
+            id = new Document(((JSONObject) idField).toMap());
+        } else if (idField instanceof String) {
+            // Se "_id" è una stringa, crea un Bson che rappresenti il riferimento al campo
+            id = new Document(idField.toString(), 1);
+        } else {
+            // Gestisci altri casi o lancia un'eccezione
+            throw new IllegalArgumentException("Il campo '_id' deve essere un JSONObject o una stringa.");
+        }
 
+        // Gestione degli altri campi
+        for (String key : groupJson.keySet()) {
+            if (!"_id".equals(key)) {
+                Object value = groupJson.get(key);
+                if (value instanceof JSONObject) {
+                    fieldAccumulators.add(new BsonField(key, new Document(((JSONObject) value).toMap())));
+                } else {
+                    // Gestisci altri casi o aggiungi logica per altri tipi di valori
+                }
+            }
+        }
+
+        return Aggregates.group(id, fieldAccumulators.toArray(new BsonField[0]));
+    }
+*/
 
     // INSERT
 
@@ -309,7 +341,7 @@ public abstract class BaseMongoDB {
         UpdateResult result = collection.updateOne(filter, updateOperation);
         
         // Converti l'ID del documento in un oggetto Document
-        documents.add(new Document("result", result.toString()));
+        documents.add(new Document("result", result.getMatchedCount()));
         
         return documents;
     }
@@ -451,21 +483,71 @@ public abstract class BaseMongoDB {
         try {
             openMongoClient(); // Ensure client is created
             String mongosh_string = QueryType.FIND.getQuery();
-       
-//            mongosh_string = "db.Post.aggregate([{$match: {$expr:{ $eq:[{$toString:\"$_id\"}, '658572b7d312a33aeb784cfc']}} }])";
-            System.out.println("Query: " + mongosh_string);
-//            mongosh_string = "db.Post.find({ timestamp: { $gte: " + 1389712493188L + " } }).sort({ avgStarRanking: -1 }).limit(" + 10+ ")";
-            mongosh_string =    "db.Post.find({" + //
-                                    "timestamp: {" + //
-                                        "$gte: " + 1389712493188L +  //
-                                    "}" + //
-                                "}).sort({" + //
-                                    "avgStarRanking: -1" + //
-                                "}).limit(" + 10 + ")";
 
-            System.out.println("Query: " + mongosh_string);
+
+            String query = "db.Post.aggregate([" + //
+                    "{" + //
+                        "$project: {" + //
+                            "_id: 1," + //
+                    "hasImage: {" + //
+                    "$cond: {" + //
+                    "if: {" + //
+                    "$eq: [{ $type: \"$recipe.image\" }, \"missing\"]" + //
+                    "}," + //
+                    "then: false," + //
+                    "else: true" + //
+                    "}" + //
+                    "}," + //
+                    "comments: {" + //
+                    "$size: {" + //
+                    "$ifNull: [\"$comments\", []]" + //
+                    "}" + //
+                    "}," + //
+                    "starRankings: {" + //
+                    "$size: {" + //
+                    "$ifNull: [\"$starRankings\", []]" + //
+                    "}" + //
+                    "}," + //
+                    "avgStarRanking: {" + //
+                    "$ifNull: [\"$avgStarRanking\", 0]" + //
+                    "}" + //
+                    "}" + //
+                    "}," + //
+                    "{" + //
+                    "$group: {" + //
+                    "_id: \"$hasImage\"," + //
+                    "numberOfPosts: {" + //
+                    "$sum: 1" + //
+                    "}," + //
+                    "totalComments: {" + //
+                    "$sum: \"$comments\"" + //
+                    "}," + //
+                    "totalStarRankings: {" + //
+                    "$sum: \"$starRankings\"" + //
+                    "}," + //
+                    "avgOfAvgStarRanking: {" + //
+                    "$avg: \"$avgStarRanking\"" + //
+                    "}" + //
+                    "}" + //
+                    "}," + //
+                    "{" + //
+                    "$project: {" + //
+                    "_id: 0," + //
+                    "hasImage: \"$_id\"," + //
+                    "ratioOfComments: {" + //
+                    "$divide: [\"$totalComments\", \"$numberOfPosts\"]" + //
+                    "}," + //
+                    "ratioOfStarRankings: {" + //
+                    "$divide: [\"$totalStarRankings\", \"$numberOfPosts\"]" + //
+                    "}," + //
+                    "avgOfAvgStarRanking: 1" + //
+                    "}" + //
+                    "}" + //
+                    "])";
+
+            System.out.println("Query: " + query);
             
-            List<Document> result =executeQuery(mongosh_string);
+            List<Document> result =executeQuery(query);
 
             System.out.println();
             System.out.println("Result: ");

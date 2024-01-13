@@ -18,7 +18,7 @@ public class IngredientHTTP{
     public Ingredient findIngredientByName(String request) {
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientByName", request);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Ingredient.class);
             // errors
@@ -34,7 +34,7 @@ public class IngredientHTTP{
     public List<Ingredient> getAllIngredients() {
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/getAllIngredients", "");
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<Ingredient>>(){});
             // errors
@@ -51,7 +51,7 @@ public class IngredientHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientsUsedWithIngredientCustomLimit", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<String>>(){});
             // errors
@@ -67,7 +67,7 @@ public class IngredientHTTP{
     public List<String> findIngredientsUsedWithIngredient(String request) {
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientsUsedWithIngredient", request);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<String>>(){});
             // errors
@@ -82,7 +82,7 @@ public class IngredientHTTP{
     public List<String> mostPopularCombinationOfIngredients(String request){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/mostPopularCombinationOfIngredients", request);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<String>>(){});
             // errors
@@ -98,7 +98,7 @@ public class IngredientHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findNewIngredientsBasedOnFriendsUsage", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<String>>(){});
             // errors
@@ -115,7 +115,7 @@ public class IngredientHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findMostUsedIngredientsByUser", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<String>>(){});
             // errors
@@ -132,7 +132,7 @@ public class IngredientHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findMostLeastUsedIngredients", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<String>>(){});
             // errors

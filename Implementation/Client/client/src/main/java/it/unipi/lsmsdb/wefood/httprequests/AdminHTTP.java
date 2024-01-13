@@ -17,7 +17,7 @@ public class AdminHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(credentials);
             HttpResponse<String> result = baseHttpRequest.sendRequest("admin/login", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Admin.class);
             // Unauthorized (401) or other errors
@@ -33,7 +33,7 @@ public class AdminHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(ingredient);
             HttpResponse<String> result = baseHttpRequest.sendRequest("admin/createIngredient", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -48,7 +48,7 @@ public class AdminHTTP{
     public Boolean banUser(String username){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("admin/banUser", username);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -63,7 +63,7 @@ public class AdminHTTP{
     public Boolean unbanUser(String username){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("admin/unbanUser", username);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors

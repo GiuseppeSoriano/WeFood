@@ -111,7 +111,7 @@ public class PostController {
 
     @PostMapping("/averageTotalCaloriesByUser")
     public ResponseEntity<Double> averageTotalCaloriesByUser(@RequestBody String request){
-        return ResponseEntity.ok(postService.caloriesAnalysis(request));
+        return ResponseEntity.ok(postService.averageTotalCaloriesByUser(request));
     }
 
     @PostMapping("/findRecipeByIngredients")

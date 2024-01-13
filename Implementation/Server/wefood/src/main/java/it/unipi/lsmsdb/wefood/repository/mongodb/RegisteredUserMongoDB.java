@@ -65,7 +65,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
         List<PostDTO> postDTOs = new ArrayList<PostDTO>();
 
-        List<Document> posts = user_doc.getList(user_doc, Document.class);
+        List<Document> posts = user_doc.getList("posts", Document.class);
         for(Document post : posts) { 
             String image = (post.get("image") == null) ? "DEFAULT" : post.get("image").toString();
             PostDTO postDTO = new PostDTO(post.getObjectId("idPost").toHexString(), image, post.getString("name"));  
@@ -78,11 +78,12 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     }
 
     public boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
+        String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
         String  query = "db.User.updateOne({\r\n" + //
                         "    _id: " + user.editedGetId() + "\r\n" + //
                         "}, {\r\n" + //
                         "    $set: {\r\n" + //
-                        "        password: \"" + user.getPassword() + "\",\r\n" + //
+                        "        password: \"" + hashedPassword + "\",\r\n" + //
                         "        name: \"" + user.getName() + "\",\r\n" + //
                         "        surname: \"" + user.getSurname() + "\"\r\n" + //
                         "    }\r\n" + //
@@ -136,9 +137,14 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
                        "    }\r\n" + //
                        "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
-        System.out.println(result.get(0).toJson());
-        // If it does not throw an exception, it means that the query has been executed successfully
-        return true;
+        System.out.println(result.get(0).getLong("result"));
+        if(result.get(0).getLong("result") == 0)
+            // It does not exist a user with this username
+            return false;
+        else
+            // The user has been banned
+            // If it does not throw an exception, it means that the query has been executed successfully
+            return true;
     };
 
     public boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
@@ -150,9 +156,15 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
                        "    }\r\n" + //
                        "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
-        System.out.println(result.get(0).toJson());
+        System.out.println(result.get(0).getLong("result"));
         // If it does not throw an exception, it means that the query has been executed successfully
-        return true;
+        if(result.get(0).getLong("result") == 0)
+            // It does not exist a user with this username
+            return false;
+        else
+            // The user has been unbanned
+            // If it does not throw an exception, it means that the query has been executed successfully
+            return true;
     };
 
     public boolean cancelUserMongoDB(String registeredUsername) throws MongoException, IllegalArgumentException, IllegalStateException {
@@ -166,6 +178,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     }
 
     public boolean addPost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
+        String image_string = (postDTO.getImage() == null) ? "" : "\"" + postDTO.getImage() + "\"";
         String query = "db.User.updateOne({\r\n" + //
                        "    _id: " + user.editedGetId() + "\r\n" + //
                        "}, {\r\n" + //
@@ -173,7 +186,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
                        "        posts: {\r\n" + //
                        "            idPost: " + postDTO.editedGetId() + ",\r\n" + //
                        "            name: \"" + postDTO.getRecipeName() + "\",\r\n" + //
-                       "            image: \"" + postDTO.getImage() + "\"\r\n" + //
+                                   image_string + //
                        "        }\r\n" + //
                        "    }\r\n" + //
                        "})"; //

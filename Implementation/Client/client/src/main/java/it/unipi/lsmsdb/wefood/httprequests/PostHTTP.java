@@ -14,6 +14,7 @@ import it.unipi.lsmsdb.wefood.model.Post;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class PostHTTP{
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -27,7 +28,7 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/uploadPost", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -43,7 +44,7 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/modifyPost", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -59,7 +60,7 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/deletePost", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Boolean.class);
             // Unauthorized (401) or other errors
@@ -75,7 +76,7 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/browseMostRecentTopRatedPosts", requestBody);
-            if(result.statusCode() == 200){
+            if(result.statusCode() == 200 && !result.body().isEmpty()){
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<PostDTO>>(){});}
             // Unauthorized (401) or other errors
@@ -91,7 +92,7 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/browseMostRecentTopRatedPostsByIngredients", requestBody);
-            if(result.statusCode() == 200){
+            if(result.statusCode() == 200 && !result.body().isEmpty()){
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<PostDTO>>(){});}
             // Unauthorized (401) or other errors
@@ -107,7 +108,7 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/browseMostRecentPostsByCalories", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<PostDTO>>(){});
             // Unauthorized (401) or other errors
@@ -123,10 +124,10 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/findPostByPostDTO", requestBody);
-            if(result.statusCode() == 200){
+            if(result.statusCode() == 200 && !result.body().isEmpty()){
                 // HTTP 200 OK
-
-                return objectMapper.readValue(result.body(), Post.class);}
+                return objectMapper.readValue(result.body(), Post.class);
+            }
             // Unauthorized (401) or other errors
             return null;
         }
@@ -139,7 +140,7 @@ public class PostHTTP{
     public Post findPostById(String request){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/findPostById", request);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Post.class);
             // Unauthorized (401) or other errors
@@ -154,7 +155,7 @@ public class PostHTTP{
     public List<PostDTO> findPostsByRecipeName(String request){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/findPostsByRecipeName", request);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<PostDTO>>(){});
             // Unauthorized (401) or other errors
@@ -169,7 +170,7 @@ public class PostHTTP{
     public Map<String, Double> interactionsAnalysis(){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/interactionsAnalysis", "");
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<Map<String, Double>>(){});
             // Unauthorized (401) or other errors
@@ -184,7 +185,7 @@ public class PostHTTP{
     public Map<String, Double> userInteractionsAnalysis(String request){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/userInteractionsAnalysis", request);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<Map<String, Double>>(){});
             // Unauthorized (401) or other errors
@@ -199,7 +200,7 @@ public class PostHTTP{
     public Double caloriesAnalysis(String request){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/caloriesAnalysis", request);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Double.class);
             // Unauthorized (401) or other errors
@@ -214,7 +215,7 @@ public class PostHTTP{
     public Double averageTotalCaloriesByUser(String request){
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/averageTotalCaloriesByUser", request);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), Double.class);
             // Unauthorized (401) or other errors
@@ -230,9 +231,12 @@ public class PostHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("post/findRecipeByIngredients", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty()) {
                 // HTTP 200 OK
-                return objectMapper.readValue(result.body(), new TypeReference<List<RecipeDTO>>(){});
+                System.out.println(result.body());
+                return objectMapper.readValue(result.body(), new TypeReference<List<RecipeDTO>>() {
+                });
+            }
             // Unauthorized (401) or other errors
             return null;
         }

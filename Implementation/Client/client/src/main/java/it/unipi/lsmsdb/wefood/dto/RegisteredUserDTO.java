@@ -1,12 +1,15 @@
 package it.unipi.lsmsdb.wefood.dto;
 
 
-public class RegisteredUserDTO { 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class RegisteredUserDTO {
 
     private String _id;
     private String username;
 
-    public RegisteredUserDTO(String _id, String username) {
+    public RegisteredUserDTO(@JsonProperty("id") String _id,
+                             @JsonProperty("username") String username) {
         this._id = _id;
         this.username = username;
     }

@@ -3,14 +3,18 @@ package it.unipi.lsmsdb.wefood.actors;
 import java.util.List;
 import java.util.Scanner;
 
+import it.unipi.lsmsdb.wefood.apidto.PostRequestDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
+import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
+import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;
 import it.unipi.lsmsdb.wefood.httprequests.CommentHTTP;
 import it.unipi.lsmsdb.wefood.httprequests.IngredientHTTP;
 import it.unipi.lsmsdb.wefood.httprequests.PostHTTP;
 import it.unipi.lsmsdb.wefood.httprequests.RegisteredUserHTTP;
 import it.unipi.lsmsdb.wefood.httprequests.StarRankingHTTP;
 import it.unipi.lsmsdb.wefood.model.Ingredient;
+import it.unipi.lsmsdb.wefood.model.Post;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.utility.Cleaner;
 import it.unipi.lsmsdb.wefood.utility.Printer;
@@ -46,7 +50,7 @@ public class RegisteredUserACTOR {
 
     public static void commentPost(PostDTO postDTO) {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -61,7 +65,7 @@ public class RegisteredUserACTOR {
 
     public static void updateComment(PostDTO postDTO) {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -76,7 +80,7 @@ public class RegisteredUserACTOR {
 
     public static void deleteComment(PostDTO postDTO) {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -91,7 +95,7 @@ public class RegisteredUserACTOR {
 
     public static void votePost(PostDTO postDTO) {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -106,7 +110,7 @@ public class RegisteredUserACTOR {
 
     public static void deleteVote(PostDTO postDTO) {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
         //Assumiamo che l'utente inserisca il suo voto correttamente
@@ -119,62 +123,19 @@ public class RegisteredUserACTOR {
         }
     }
 
-    private static void findIngredientByName () {
-        if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+    public static void mostPopularCombinationOfIngredients(){
+        List<String> ingredients_found = ingredientHTTP.mostPopularCombinationOfIngredients(Reader.readIngredient());
+        if(ingredients_found == null || ingredients_found.isEmpty()){
+            System.out.println("No ingredients found");
             return;
         }
-
-        System.out.println("Insert ingredient name: ");
-        String name = scanner.nextLine();
-
-        Ingredient ingredient = ingredientHTTP.findIngredientByName(name);
-        if(ingredient != null)
-            Printer.printIngredient(ingredient);
-        else
-            System.out.println("Error while finding ingredient");
-    }
-
-    /*
-    private static void getAllIngredients () {
-        if(info == null) {
-            System.out.println("You must be logged to perform this action!");
-            return;
-        }
-
-        for(Ingredient ingredient : ingredientHTTP.getAllIngredients())
-            Printer.printIngredient(ingredient);
-    }
-    */
-
-    private static void findIngredientsUsedWithIngredient () {
-        if(info == null) {
-            System.out.println("You must be logged to perform this action!");
-            return;
-        }
-
-        List<String> ingredients = ingredientHTTP.findIngredientsUsedWithIngredient(Reader.readIngredientAndLimitRequestDTO());
-        for(String ingredient : ingredients)
-            System.out.println(ingredient);
-    }
-
-    private static void mostPopularCombinationOfIngredients () {
-        if(info == null) {
-            System.out.println("You must be logged to perform this action!");
-            return;
-        }
-
-        System.out.println("Insert ingredient name: ");
-        String ingredientName = scanner.nextLine();
-
-        List<String> ingredients = ingredientHTTP.mostPopularCombinationOfIngredients(ingredientName);
-        for(String ingredient : ingredients)
+        for(String ingredient : ingredients_found)
             System.out.println(ingredient);
     }
 
     private static void findNewIngredientsBasedOnFriendsUsage () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -185,7 +146,7 @@ public class RegisteredUserACTOR {
 
     private static void findMostUsedIngredientsByUser () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -196,7 +157,7 @@ public class RegisteredUserACTOR {
 
     private static void findMostLeastUsedIngredients () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -215,7 +176,7 @@ public class RegisteredUserACTOR {
 
     private static void uploadPost () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -228,13 +189,14 @@ public class RegisteredUserACTOR {
         }
     }
 
-    private static void modifyPost () {
+    public static void modifyPost (PostDTO postDTO, Post post) {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
-
-        boolean state = postHTTP.modifyPost(Reader.readPost(info));
+        System.out.println("Insert new description: ");
+        post.setDescription(scanner.nextLine());
+        boolean state = postHTTP.modifyPost(new PostRequestDTO(post, postDTO, info));
 
         if(state) {
             System.out.println("Post modified successfully!");
@@ -243,13 +205,13 @@ public class RegisteredUserACTOR {
         }
     }
 
-    private static void deletePost () {
+    public static void deletePost (PostDTO postDTO, Post post) {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
-        boolean state = postHTTP.deletePost(Reader.readPost(info));
+        boolean state = postHTTP.deletePost(new PostRequestDTO(post, postDTO, info));
 
         if(state) {
             System.out.println("Post deleted successfully!");
@@ -260,7 +222,7 @@ public class RegisteredUserACTOR {
 
     private static void browseMostRecentTopRatedPosts () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -277,7 +239,7 @@ public class RegisteredUserACTOR {
 
     private static void browseMostRecentTopRatedPostsByIngredients () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -295,7 +257,7 @@ public class RegisteredUserACTOR {
 
     private static void browseMostRecentPostsByCalories () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -313,7 +275,7 @@ public class RegisteredUserACTOR {
 
     private static void findPostsByRecipeName () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
         
@@ -327,35 +289,58 @@ public class RegisteredUserACTOR {
 
     private static void averageTotalCaloriesByUser () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
-        double avg = postHTTP.averageTotalCaloriesByUser(info.getUsername());
-        System.out.println(avg);
+        Double avg = postHTTP.averageTotalCaloriesByUser(info.getUsername());
+        if(avg == null){
+            System.out.println("No user found or no posts published by the user");
+            return;
+        }
+        System.out.println("User average total calories per post: " + avg);
     }
 
     private static void findRecipeByIngredients () {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
+        List<RecipeDTO> recipeDTOs = null;
+        Cleaner.cleanTempFolder();
+        recipeDTOs = postHTTP.findRecipeByIngredients(Reader.readListOfIngredientNames());
 
-        // GIUSE QUI PERCHE' NON C'E' NULLA?????
-        //filtro ingredienti
+        if(recipeDTOs == null){
+            System.out.println("No Recipes found");
+            return;
+        }
+        Printer.printListOfRecipeDTO(recipeDTOs);
     }
 
     private static void modifyPersonalInformation() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
-        boolean state = registeredUserHTTP.modifyPersonalInformation(info);
+        System.out.println("Insert new name: ");
+        String name = scanner.nextLine();
+        System.out.println("Insert new surname: ");
+        String surname = scanner.nextLine();
+        System.out.println("Insert new password: ");
+        String password = scanner.nextLine();
+        System.out.println("Confirm password: ");
+        if(!password.equals(scanner.nextLine())){
+            System.out.println("Passwords do not match");
+            return;
+        }
+        boolean state = registeredUserHTTP.modifyPersonalInformation(new RegisteredUser(info.getId(), info.getUsername(), password, name, surname));
 
         if(state) {
             System.out.println("Informations modified successfully!");
+            info.setName(name);
+            info.setSurname(surname);
         } else {
             System.out.println("Error while modifying your informations!");
         }
@@ -363,7 +348,7 @@ public class RegisteredUserACTOR {
 
     private static void deleteUser() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -378,7 +363,7 @@ public class RegisteredUserACTOR {
 
     private static void followUser() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -393,7 +378,7 @@ public class RegisteredUserACTOR {
 
     private static void unfollowUser() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
@@ -408,77 +393,122 @@ public class RegisteredUserACTOR {
 
     private static void findFriends() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
         List<RegisteredUserDTO> friends = registeredUserHTTP.findFriends(new RegisteredUserDTO(info.getId(), info.getUsername()));
 
         for(RegisteredUserDTO friend : friends)
-            System.out.println(friend);
+            Printer.printRegisteredUserDTO(friend);
     }
 
     private static void findFollowers() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
         List<RegisteredUserDTO> followers = registeredUserHTTP.findFollowers(new RegisteredUserDTO(info.getId(), info.getUsername()));
 
         for(RegisteredUserDTO follower : followers)
-            System.out.println(follower);
+            Printer.printRegisteredUserDTO(follower);
     }
 
     private static void findFollowed() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
-        List<RegisteredUserDTO> followeds = registeredUserHTTP.findFollowed(new RegisteredUserDTO(info.getId(), info.getUsername()));
+        List<RegisteredUserDTO> followedList = registeredUserHTTP.findFollowed(new RegisteredUserDTO(info.getId(), info.getUsername()));
 
-        for(RegisteredUserDTO followed : followeds)
-            System.out.println(followed);
+        for(RegisteredUserDTO followed : followedList)
+            Printer.printRegisteredUserDTO(followed);
     }
 
     private static void findUsersToFollowBasedOnUserFriends() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
-        List<RegisteredUserDTO> suggestions = registeredUserHTTP.
-                findUsersToFollowBasedOnUserFriends(new RegisteredUserDTO(info.getId(), info.getUsername()));
+        List<RegisteredUserDTO> suggestions = registeredUserHTTP.findUsersToFollowBasedOnUserFriends(new RegisteredUserDTO(info.getId(), info.getUsername()));
 
         for(RegisteredUserDTO suggestion : suggestions)
-            System.out.println(suggestion);
+            Printer.printRegisteredUserDTO(suggestion);
     }
 
     private static void findMostFollowedUsers() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
         List<RegisteredUserDTO> suggestions = registeredUserHTTP.findMostFollowedUsers();
 
         for(RegisteredUserDTO suggestion : suggestions)
-            System.out.println(suggestion);
+            Printer.printRegisteredUserDTO(suggestion);
     }
 
     private static void findUsersByIngredientUsage() {
         if(info == null) {
-            System.out.println("You must be logged to perform this action!");
+            System.out.println("You must be logged in as user to perform this action!");
             return;
         }
 
-        List<RegisteredUserDTO> suggestions = registeredUserHTTP.
-                findUsersByIngredientUsage(info.getUsername()); //corretto?
+        List<RegisteredUserDTO> suggestions = registeredUserHTTP.findUsersByIngredientUsage(Reader.readIngredient());
 
         for(RegisteredUserDTO suggestion : suggestions)
-            System.out.println(suggestion);
+            Printer.printRegisteredUserDTO(suggestion);
     }
+
+    private static void caloriesAnalysis(){
+        if(info == null){
+            System.out.println("You must be logged in as user to perform this action!");
+            return;
+        }
+        System.out.println("Insert recipe name: ");
+        String recipeName = scanner.nextLine();
+        Double result = postHTTP.caloriesAnalysis(recipeName);
+        if(result == null){
+            System.out.println("No recipe found");
+            return;
+        }
+        System.out.println("User average total calories per post: " + result);
+    }
+
+    private static void findRegisteredUserPageByUsername(){
+        if(info == null){
+            System.out.println("You must be logged in as user to perform this action!");
+            return;
+        }
+        System.out.println("Insert username: ");
+        String username = scanner.nextLine();
+        Cleaner.cleanTempFolder();
+        RegisteredUserPageDTO result = registeredUserHTTP.findRegisteredUserPageByUsername(username);
+        if(result == null){
+            System.out.println("No user found");
+            return;
+        }
+        Printer.printRegisteredUserPageDTO(result, false);
+    }
+
+    private static void findRegisteredUserPersonalPage(){
+        if(info == null){
+            System.out.println("You must be logged in as user to perform this action!");
+            return;
+        }
+
+        Cleaner.cleanTempFolder();
+        RegisteredUserPageDTO result = registeredUserHTTP.findRegisteredUserPageByUsername(info.getUsername());
+        if(result == null){
+            System.out.println("No posts found");
+            return;
+        }
+        Printer.printRegisteredUserPageDTO(result, true);
+    }
+
 
     public static void executeUserShell() {
         boolean exit = false;
@@ -490,12 +520,6 @@ public class RegisteredUserACTOR {
                     info = null;
                     System.out.println("Logged out");
                     exit = true;
-                    break;
-                case "findIngredientByName":
-                    findIngredientByName();
-                    break;
-                case "findIngredientsUsedWithIngredient":
-                    findIngredientsUsedWithIngredient();
                     break;
                 case "findNewIngredientsBasedOnFriendsUsage":
                     findNewIngredientsBasedOnFriendsUsage();
@@ -515,16 +539,18 @@ public class RegisteredUserACTOR {
                 case "findMostLeastUsedIngredient":
                     findMostLeastUsedIngredients();
                     break;
+                case "mostPopularCombinationOfIngredients":
+                    mostPopularCombinationOfIngredients();
+                    break;
+                case "findRegisteredUserPageByUsername":
+                    findRegisteredUserPageByUsername();
+                    break;
+                case "findRegisteredUserPersonalPage":
+                    findRegisteredUserPersonalPage();
+                    break;
                 case "uploadPost":
                     uploadPost();
                     break;
-                case "modifyPost":
-                    modifyPost();
-                    break;
-                case "deletePost":
-                    deletePost();
-                    break;
-                //aggiungere le operazioni possibili solo all'interno del post
                 case "browseMostRecentTopRatedPosts":
                     browseMostRecentTopRatedPosts();
                     break;
@@ -546,7 +572,7 @@ public class RegisteredUserACTOR {
                 case "modifyPersonalInformation":
                     modifyPersonalInformation();
                     break;
-                case "deleteUser":
+                case "deleteUser":                                  // CHECK
                     deleteUser();
                     break;
                 case "followUser":
@@ -564,6 +590,12 @@ public class RegisteredUserACTOR {
                 case "findFollowed":
                     findFollowed();
                     break;
+                case "caloriesAnalysis":
+                    caloriesAnalysis();
+                    break;
+                case "help":
+                    printAvailableCommands();
+                    break;
                 case "exit":
                     exit = true;
                     UnregisteredUserACTOR.unsetAppIsRunning();
@@ -573,5 +605,35 @@ public class RegisteredUserACTOR {
                     break;
             }
         }
+    }
+
+    private static void printAvailableCommands() {
+        System.out.println("Available commands:");
+        System.out.println("-> logout");
+        System.out.println("-> findNewIngredientsBasedOnFriendsUsage");
+        System.out.println("-> findUsersToFollowBasedOnUserFriends");
+        System.out.println("-> findMostFollowedUsers");
+        System.out.println("-> findUsersByIngredientUsage");
+        System.out.println("-> findMostUsedIngredientByUser");
+        System.out.println("-> findMostLeastUsedIngredient");
+        System.out.println("-> mostPopularCombinationOfIngredients");
+        System.out.println("-> uploadPost");
+        System.out.println("-> modifyPost");
+        System.out.println("-> deletePost");
+        System.out.println("-> browseMostRecentTopRatedPosts");
+        System.out.println("-> browseMostRecentTopRatedPostByIngredients");
+        System.out.println("-> browseMostRecentPostsByCalories");
+        System.out.println("-> findPostByRecipeName");
+        System.out.println("-> averageTotalCaloriesByUser");
+        System.out.println("-> findRecipeByIngredients");
+        System.out.println("-> modifyPersonalInformation");
+        System.out.println("-> deleteUser");
+        System.out.println("-> followUser");
+        System.out.println("-> unfollowUser");
+        System.out.println("-> findFriends");
+        System.out.println("-> findFollowers");
+        System.out.println("-> findFollowed");
+        System.out.println("-> help");
+        System.out.println("-> exit");
     }
 }   

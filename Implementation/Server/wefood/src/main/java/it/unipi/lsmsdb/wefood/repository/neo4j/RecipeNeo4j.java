@@ -19,7 +19,6 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
                        "})";
 
         List<Record> results = BaseNeo4j.executeQuery(query);
-        System.out.println(results.get(0));
 
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;        
@@ -29,7 +28,6 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
         String query = "MATCH (r:Recipe {_id: \"" + recipeDTO.getId() + "\"})\r\n" + //
                        "DETACH DELETE r";
         List<Record> results = BaseNeo4j.executeQuery(query);
-        System.out.println(results.get(0));
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;        
     }
@@ -49,7 +47,8 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
     public List<RecipeDTO> findRecipeByIngredients(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         String query = "MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)\r\n" + //
                        "WHERE i.name IN " + ingredientNamesToString(ingredientNames) + "\r\n" + //
-                       "RETURN r";
+                       "RETURN r \r\n" + //
+                       "LIMIT 10";
         List<Record> results = BaseNeo4j.executeQuery(query);
         if (results.isEmpty()) {
             return null;
@@ -68,7 +67,6 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
             String query = "MATCH (r:Recipe {_id: \"" + recipeDTO.getId() + "\"}), (i:Ingredient {name: \"" + ingredientName + "\"})\r\n" + //
                            "CREATE (r)-[:CONTAINS]->(i)";
             List<Record> results = BaseNeo4j.executeQuery(query);
-            System.out.println(results.get(0));
         }
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;        

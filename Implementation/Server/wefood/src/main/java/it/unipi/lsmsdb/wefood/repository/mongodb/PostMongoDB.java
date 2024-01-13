@@ -23,7 +23,7 @@ import it.unipi.lsmsdb.wefood.repository.interfaces.PostMongoDBInterface;
 public class PostMongoDB implements PostMongoDBInterface{
 
     public String uploadPost(Post post, RegisteredUser user) throws MongoException, IllegalStateException, IllegalArgumentException {
-
+        String image_string = (post.getRecipe().getImage() == null) ? "" : "image: \"" + post.getRecipe().getImage() + "\",";
         String query = "db.Post.insertOne({" + //
                             "idUser: " + user.editedGetId() + "," + //
                             "username: \"" + user.getUsername() + "\"," + //
@@ -31,7 +31,7 @@ public class PostMongoDB implements PostMongoDBInterface{
                             "timestamp: " + post.getTimestamp().getTime() + "," + //
                             "recipe: {" + //
                                 "name: \"" + post.getRecipe().getName() + "\"," + //
-                                "image: \"" + post.getRecipe().getImage() +"\"," + //
+                                image_string + //
                                 "steps: " + post.getRecipe().stepsGetString() + "," + //
                                 "totalCalories: " + post.getRecipe().getTotalCalories() + "," + //
                                 "ingredients: " + post.getRecipe().ingredientsGetString() +  //
@@ -299,7 +299,7 @@ public class PostMongoDB implements PostMongoDBInterface{
         List<Document> result = BaseMongoDB.executeQuery(query);
         
         Map<String, Double> interactions = new HashMap<String, Double>();
-
+        System.out.println(result);
         for(Document analytics_doc : result){
             if(analytics_doc.getBoolean("hasImage")){
                 interactions.put("IMAGEavgOfAvgStarRanking", Double.parseDouble(analytics_doc.get("avgOfAvgStarRanking").toString()));

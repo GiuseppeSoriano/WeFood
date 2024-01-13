@@ -4,6 +4,7 @@ package it.unipi.lsmsdb.wefood;
 import it.unipi.lsmsdb.wefood.actors.UnregisteredUserACTOR;
 import it.unipi.lsmsdb.wefood.httprequests.IngredientHTTP;
 import it.unipi.lsmsdb.wefood.model.Ingredient;
+import it.unipi.lsmsdb.wefood.utility.Reader;
 
 import java.util.List;
 
@@ -16,7 +17,8 @@ public class Main {
     }
     public static void main(String[] args) {
         ingredients = ingredientHTTP.getAllIngredients();
-        System.out.println(ingredients.size());
+        Reader.getAllIngredientsFromDatabase();
+        // System.out.println(ingredients.size());
         UnregisteredUserACTOR.executeUnregisteredUserShell();
 
     }

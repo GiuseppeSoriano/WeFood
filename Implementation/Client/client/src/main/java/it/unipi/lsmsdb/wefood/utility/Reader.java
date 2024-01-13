@@ -1,5 +1,6 @@
 package it.unipi.lsmsdb.wefood.utility;
 
+import java.io.File;
 import java.util.Scanner;
 
 import it.unipi.lsmsdb.wefood.Main;
@@ -40,6 +41,8 @@ public class Reader {
     // ------------ Needed for real-time ingredient suggestion ---------------
     private static List<Ingredient> ingredients = new ArrayList<>();
     private static List<String> ingredients_inserted = new ArrayList<>();
+    private static Map<String, Double> recipe_ingredients = new HashMap<String, Double>();
+
     private static volatile boolean running = true;
     private static StringBuilder currentInput = new StringBuilder();
     private static boolean singleIngredient = false;
@@ -50,9 +53,6 @@ public class Reader {
         ingredients = Main.getIngredients();
     }
 
-    public static List<Ingredient> getAllIngredients(){
-        return ingredients;
-    }
 
     public static LoginRequestDTO readLoginRequestDTO(){
         System.out.println("Insert username: ");
@@ -72,17 +72,15 @@ public class Reader {
         return new Ingredient(name, calories);
     }
 
-    public static IngredientAndLimitRequestDTO readIngredientAndLimitRequestDTO(){
+    public static String readIngredient(){
 
         // Real-time ingredient suggestion
         ingredients_inserted.clear();
+        recipe_ingredients.clear();
         singleIngredient = true;
         readIngredients();
-        String name = ingredients_inserted.get(0);
-        System.out.println("Insert limit: ");
-        int limit = scanner.nextInt();
 
-        return new IngredientAndLimitRequestDTO(name, limit);
+        return ingredients_inserted.get(0);
     }
 
     public static PostTopRatedRequestDTO readPostTopRatedRequestDTO(){
@@ -130,11 +128,11 @@ public class Reader {
         String description = scanner.nextLine();
         System.out.println("Type the name of the recipe: ");
         String name = scanner.nextLine();
- 
+
+        recipe_ingredients.clear();
         Double calories, totalCalories, quantity;
         calories = 0.0;
         totalCalories = 0.0;
-        Map<String, Double> recipe_ingredients = new HashMap<String, Double>();
 
         // Real-time ingredient suggestion
         // Ingredients and quantities
@@ -142,6 +140,8 @@ public class Reader {
         do{
             ingredients_inserted.clear();
             readIngredients();
+            if(ingredients_inserted.isEmpty())
+                break;
             for(Ingredient ingredient : ingredients){
                 if(ingredient.getName().equals(ingredients_inserted.get(0))){
                     calories = ingredient.getCalories();
@@ -170,9 +170,11 @@ public class Reader {
         String answer = scanner.nextLine();
         String image = null;
         if(answer.equals("y")){
-            System.out.println("Add the image to the folder RecipesImages/" + user.getUsername() + "/ and then type here the name of the image (with the extension): ");
+            ClassLoader classLoader = Reader.class.getClassLoader();
+            File resourcesDirectory = new File(classLoader.getResource("").getFile());
+            System.out.println("Add the image to the folder " + resourcesDirectory.getAbsolutePath() + "\\" + "RecipesImages\\" + user.getUsername() + "\\ and then type here the name of the image (with the extension): ");
             answer = scanner.nextLine();
-            image  = ImageConverter.fromImagePathToString(answer);
+            image  = ImageConverter.fromImagePathToString(user.getUsername() + "/" + answer);
         }
 
         Post post = new Post(user.getUsername(), 
@@ -180,7 +182,6 @@ public class Reader {
                              new Date(),
                              new Recipe(name, image, steps, recipe_ingredients, totalCalories));
         return new PostRequestDTO(post, null, user);
-
     }
 
     public static RegisteredUserRequestDTO readUser(RegisteredUser user) {
@@ -195,6 +196,7 @@ public class Reader {
         
         // Real-time ingredient suggestion
         ingredients_inserted.clear();
+        recipe_ingredients.clear();
         singleIngredient = false;
         readIngredients();
         
@@ -210,17 +212,21 @@ public class Reader {
         
         // Real-time ingredient suggestion
         ingredients_inserted.clear();
+        recipe_ingredients.clear();
         singleIngredient = false;
         readIngredients();
     
         return ingredients_inserted;
     }
 
+
     // -----------------------------------------------------------------------
     // ------------------ Real-time ingredient suggestion --------------------
     // -----------------------------------------------------------------------
     
     private static void readIngredients(){
+
+        running = true;
 
         SwingUtilities.invokeLater(() -> {
 
@@ -272,14 +278,28 @@ public class Reader {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+
                 }
             }
-            System.exit(0); 
+
+            // Close the frame
+            SwingUtilities.invokeLater(() -> {
+                Frame[] frames = JFrame.getFrames();
+                for (Frame frame : frames) {
+                    frame.dispose();
+                }
+            });
+
         });
 
         suggestionThread.start();
         while (running) {
+            try{
+                Thread.sleep(500);
+            }
+            catch (InterruptedException e) {
+
+            }
             // Wait
         }
         suggestionThread.interrupt();
@@ -313,7 +333,7 @@ public class Reader {
         public void keyTyped(KeyEvent e) {
             char c = e.getKeyChar();
 
-            if (("x".equalsIgnoreCase(textField.getText())) && (!singleIngredient)) {
+            if (("x".equalsIgnoreCase(textField.getText())) && (!ingredients_inserted.isEmpty() || !recipe_ingredients.isEmpty())) {
                 // The user has typed 'x', exit
                 running = false;
             } else if (c == KeyEvent.VK_ENTER) {
@@ -321,14 +341,17 @@ public class Reader {
                 String currentInputStr = currentInput.toString().toLowerCase();
                 List<String> suggestions = getSuggestions(currentInputStr);
 
-                if (suggestions.contains(currentInputStr)) {
-                    // Current input matches a suggestion, return the result to the terminal
-                    ingredients_inserted.add(currentInputStr);
-                    System.out.println("Ingredient [" + ingredients_inserted.size() + "]: " + currentInputStr);
-                    currentInput.setLength(0);
-                    suggestionArea.setText(""); // Clear the suggestion area
-                    if(singleIngredient)
-                        running = false;
+                for(String suggestion : suggestions) {
+                    if (suggestion.toLowerCase().equals(currentInputStr)) {
+                        // Current input matches a suggestion, return the result to the terminal
+                        ingredients_inserted.add(suggestion);
+                        System.out.println("Ingredient [" + ingredients_inserted.size() + "]: " + suggestion);
+                        currentInput.setLength(0);
+                        suggestionArea.setText(""); // Clear the suggestion area
+                        if (singleIngredient)
+                            running = false;
+                        break;
+                    }
                 }
             } else if (c == KeyEvent.VK_BACK_SPACE) {
                 // The user has pressed Backspace, remove the last character from the current input

@@ -2,9 +2,12 @@ package it.unipi.lsmsdb.wefood.controller;
 
 import it.unipi.lsmsdb.wefood.apidto.LoginRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.RegisteredUserRequestDTO;
+import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
+import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;
 import it.unipi.lsmsdb.wefood.model.Admin;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
+import it.unipi.lsmsdb.wefood.service.RecipeImageService;
 import it.unipi.lsmsdb.wefood.service.RegisteredUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +22,22 @@ import java.util.List;
 @RequestMapping("/registereduser")
 public class RegisteredUserController {
     private final RegisteredUserService registeredUserService;
+    private final RecipeImageService recipeImageService;
     public RegisteredUserController(){
         this.registeredUserService = new RegisteredUserService();
+        this.recipeImageService = new RecipeImageService();
     }
     @PostMapping("/login")
     public ResponseEntity<RegisteredUser> login(@RequestBody LoginRequestDTO request){
         RegisteredUser user = registeredUserService.login(request.getUsername(), request.getPassword());
         return user != null ? ResponseEntity.ok(user) : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @PostMapping("/findRegisteredUserPageByUsername")
+    public ResponseEntity<RegisteredUserPageDTO> findRegisteredUserPageByUsername(@RequestBody String request){
+        RegisteredUserPageDTO result = registeredUserService.findRegisteredUserPageByUsername(request);
+        result.setPosts(recipeImageService.postDTOconverter(result.getPosts()));
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/modifyPersonalInformation")

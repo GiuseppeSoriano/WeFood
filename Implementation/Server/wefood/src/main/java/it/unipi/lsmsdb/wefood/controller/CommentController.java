@@ -30,7 +30,7 @@ public class CommentController {
 
     @PostMapping("/delete")
     public ResponseEntity<Boolean> deleteComment(@RequestBody CommentRequestDTO request) {
-        return ResponseEntity.ok(commentService.updateComment(request.getUser(), request.getComment(), request.getPostDTO()));
+        return ResponseEntity.ok(commentService.deleteComment(request.getUser(), request.getComment(), request.getPostDTO()));
     }
     
 }

@@ -16,7 +16,7 @@ public class UnregisteredUserHTTP{
         try{
             String requestBody = objectMapper.writeValueAsString(request);
             HttpResponse<String> result = baseHttpRequest.sendRequest("unregistereduser/register", requestBody);
-            if(result.statusCode() == 200)
+            if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), RegisteredUser.class);
             // Unauthorized (401) or other errors

@@ -37,7 +37,7 @@ public class CommentService {
 
     public boolean updateComment(RegisteredUser user, Comment comment, PostDTO postDTO) {
         try{
-            return CommentDAO.commentPost(user, comment, postDTO);
+            return CommentDAO.updateComment(user, comment, postDTO);
         }
         catch(MongoException e){
             System.out.println("MongoException in Comment.updateComment: " + e.getMessage());
@@ -59,7 +59,7 @@ public class CommentService {
 
     public boolean deleteComment(RegisteredUser user, Comment comment, PostDTO postDTO) {
         try{
-            return CommentDAO.commentPost(user, comment, postDTO);
+            return CommentDAO.deleteComment(user, comment, postDTO);
         }
         catch(MongoException e){
             System.out.println("MongoException in Comment.deleteComment: " + e.getMessage());
