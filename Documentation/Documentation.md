@@ -1698,16 +1698,16 @@ db.User.createIndex( { "username": 1 }, { unique: true } )
 ## 7.2. Neo4j
 The deployment of Neo4j was more straightforward compared to the previous setup. This ease was attributed to the deployment on a single machine, whereas setting up a cluster on multiple machines with replicas would have required the enterprise edition of Neo4j.
 
---- 
+---
 
-### 7.2.1. Indexes
+### 7.2.1. Indexes (TO BE UPDATED)
+Here there aren't much information stored if compared again with MongoDB. However an index that could be useful to consider is the one relative to the name of the ingedients. Could be also considered an index on the names on the Recipes because they are the most present nodes in the graphDB and so they could bring enormous benefits.
 
 An index on the ingredient name in the Ingredient nodes is also a key component in helping the user browsing accross posts specifying different subset of ingredients. We expect that this operations, along with the previously described, will be very frequent and so should be optimized to provide a better experience for the user.
 
-
 ## 7.3. Consistency, Availability and Partition Tolerance
 
-In accordance with the predefined non-functional requirements, our primary objective is to ensure the Availability and Partition tolerance of the system, allowing for a certain degree of relaxation in consistency constraints. This strategic approach is tailored to the specific characteristics of the application at hand, which happens to be a social network with users as the central actors in the system. Our design is intentionally aligned with the Availability and Partition tolerance intersection of the CAP theorem, placing a high value on achieving eventual consistency.
+In accordance with the predefined non-functional requirements, our primary objective is to ensure the Availability and Partition tolerance of the system, allowing for a certain degree of relaxation in consistency constraints. This strategic approach is tailored to the specific characteristics of the application at hand, which happens to be a social network with users as the main actors in the system. Our design is intentionally aligned with the Availability and Partition tolerance intersection of the CAP theorem, placing a high value on achieving eventual consistency.
 
 The CAP theorem, also known as Brewer's theorem, highlights the inherent trade-offs that exist among three key attributes in a distributed system: Consistency, Availability, and Partition tolerance.
 
@@ -1721,14 +1721,83 @@ The CAP theorem asserts that it is impossible for a distributed system to simult
 
 Within the unique context of a social network, our emphasis revolves around the necessity to consistently present data to users, even if it may not be the most current information available. For example, consider the scenario where a user experiences a delay in accessing the latest posts from their friends. While this initial delay might elicit a sense of disappointment, we acknowledge that this is a transient issue. The system is intentionally architected to eventually deliver the updated content to the user, mitigating any inconvenience and ensuring a seamless user experience over time.
 
-%da vedere se tenere
-## 7.4. Inter-Database Consistency
-Using two different databases implemented redundancy of data, so for this reason any fail in insertion/up-date/deletion of data can cause inconsistencies between these to DBs, for this reason, in case of exceptions during write operations on one of the databases causes a rollback.
-If the operation succeeds on MongoDB, a success response is sent to the user, and the graph db becomes eventually consistent: if an exception occurs after this phase, a rollback operation starts bringing back the DBs in a state of consistency.
-Check write operations in the Replicas!
-Explain how the rollback is implemented and that neo4j is waited to be consistent before sending the response to the user...
+According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.
 
-//questo è stato spiegato all'interno del server
+## 7.4. Inter-Database Consistency
+Besides of the consistency that must me granted inside a sigle database (i.e. the intra-database consistency), a more delicate problem that must be considered is the consistency between the different databases.
+
+
+Considering the most delicate situation where the consistency must me granted, is when a user upload a new post.
+Inside MongoDB when a post is uploaded two operations must be performed, in the following order:
+
+a post is inserted inside the Post collection
+If it fails nothing must be done because the post was not uploaded.
+The post is added to the posts array of the user that uploaded it.
+If it fails, the post is deleted from the Post collection.
+
+Inside neo4j:
+
+a new node related to the recipe is created.
+If it fails nothing must be undone, but the databases are not consistent
+after this:
+RecipeDAO.createRecipeIngredientsRelationship(recipeDTO, ingredients);
+// This method call is at the same level of the
+// previous one because if the previous one throws
+// an exception, or the following one does, the
+// first catches blocks will be executed and when
+// RecipeDAO.deleteRecipe(recipeDTO) is called, it
+// in addition of deleting the recipe, it will also
+// delete the relationships created by the previous
+// method call if they have been created (DETACH DELETE r
+// inside the implementation of deleteRecipe) 
+IngredientDAO.createIngredientIngredientRelationship(ingredients);
+// The following method call is at the same level of the
+// previous ones because if the previous one does not throw
+// an exception, but the following one does, the previous
+// method call does not have to be rolled back because
+// it is not expected a delete method call to be executed
+// for the creation of IngredientIngredientRelationships (see documentation)
+RegisteredUserDAO.createUserUsedIngredient(new RegisteredUserDTO(user.getId(), user.getUsername()), ingredients);
+return true;
+catch(Neo4jException e){
+System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
+RecipeDAO.deleteRecipe(recipeDTO);
+// deleteUserUsedIngredient does not have to be called because
+// the method call createUserUsedIngredient is the last one to be
+// executed and if it throws an exception, so it's not necessary 
+// to execute the rollback                
+return false;
+}
+
+public boolean uploadPost(Post post, RegisteredUser user) {
+    String id = uploadPostMongoDB(post, user);
+    if(id == null)
+        return false;
+    PostDTO postDTO = new PostDTO(id, post.getRecipe().getImage(), post.getRecipe().getName());
+    if(uploadPostNeo4j(user, postDTO, post))
+        return true;
+    else{
+        if(deletePostMongoDB(postDTO, user)){
+            // Databases are consistent again
+        }
+        else 
+            System.err.println("Databases are not synchronized, Post " + id + " has not been added only in MongoDB");
+        return false;
+    }
+}
+
+
+The main idea that can be generilized from this insights is that...
+coherently with the discussion of the CAP theorem, the consistency is not the most important thing that must be granted inside our application. Our idea of managing the the consistency in this way is consistent, because if for example neo4j is not able to handle requests due to some crash, the user can continue to use the application utilizing the features that are not related to neo4j, that are mostly reltated to suggestions and nothing really important. In this way the accessibility of the application is guaranteed and the social network is also able to continue to work. 
+Partition tolerance
+The system continues to operate despite an arbitrary number of messages being dropped (or delayed) by the network between nodes.
+Is not about partition tolerant. Anyway is also tolerant to the partition of the mongodb replicas, because the user can continue to use the application even if the mongodb replicas two out of tree are down because one replicas can be up. Unfortunately when all the mongodb replicas are down and the neo4j is up, the user can not use the application because the user can not login nor doing the other things as the main functionalities are handled by the documentDB. Anyway a situation like this one is really difficutl to appear in a real scenario because it really unlikely that all the mongodb replicas are down.
+
+
+
+
+Explain how the rollback is implemented and that neo4j is waited to be consistent before sending the response to the user. If it is not consistent this is not a problem.
+
 
 
 
@@ -1841,6 +1910,9 @@ private static final String MONGODB_DATABASE = "WeFood";
     private static final String READ_PREFERENCE = "nearest";
     private static final String mongoString = String.format("mongodb://%s/%s/?w=%s&wtimeout=%s&readPreference=%s", MONGODB_HOST, MONGODB_DATABASE, WRITE_CONCERN, WTIMEOUT, READ_PREFERENCE);
 
+
+
+Here in the server try to describe also the Driver that we have implemented.
 
 ### 8.1.2. Client
 
