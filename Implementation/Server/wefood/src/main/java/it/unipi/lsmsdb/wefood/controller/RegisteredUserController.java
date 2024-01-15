@@ -11,10 +11,7 @@ import it.unipi.lsmsdb.wefood.service.RecipeImageService;
 import it.unipi.lsmsdb.wefood.service.RegisteredUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,6 +24,7 @@ public class RegisteredUserController {
         this.registeredUserService = new RegisteredUserService();
         this.recipeImageService = new RecipeImageService();
     }
+
     @PostMapping("/login")
     public ResponseEntity<RegisteredUser> login(@RequestBody LoginRequestDTO request){
         RegisteredUser user = registeredUserService.login(request.getUsername(), request.getPassword());

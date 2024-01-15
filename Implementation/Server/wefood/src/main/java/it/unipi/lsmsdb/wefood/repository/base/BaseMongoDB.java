@@ -5,11 +5,13 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
 import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.Document;
 
 import org.bson.conversions.Bson;
@@ -225,49 +227,62 @@ public abstract class BaseMongoDB {
     }
 
     private static Bson handleGroupOperation(JSONObject groupJson) throws IllegalArgumentException {
-
         List<BsonField> fieldAccumulators = new ArrayList<>();
-        for (String key : groupJson.keySet()) {
-            if (!"_id".equals(key) || !groupJson.isNull(key)) {
-                fieldAccumulators.add(new BsonField(key, new Document(groupJson.getJSONObject(key).toMap())));
-            }
-        }
-
-        return Aggregates.group(groupJson.isNull("_id") ? null : groupJson.get("_id"), fieldAccumulators.toArray(new BsonField[0]));
-    }
-/*
-    private static Bson handleGroupOperation(JSONObject groupJson) throws IllegalArgumentException {
-        List<BsonField> fieldAccumulators = new ArrayList<>();
-
-        // Gestione del campo "_id"
-        Object idField = groupJson.get("_id");
-        Bson id;
-        if (idField instanceof JSONObject) {
-            // Se "_id" è un JSONObject, convertilo in Document
-            id = new Document(((JSONObject) idField).toMap());
-        } else if (idField instanceof String) {
-            // Se "_id" è una stringa, crea un Bson che rappresenti il riferimento al campo
-            id = new Document(idField.toString(), 1);
-        } else {
-            // Gestisci altri casi o lancia un'eccezione
-            throw new IllegalArgumentException("Il campo '_id' deve essere un JSONObject o una stringa.");
-        }
-
-        // Gestione degli altri campi
         for (String key : groupJson.keySet()) {
             if (!"_id".equals(key)) {
-                Object value = groupJson.get(key);
-                if (value instanceof JSONObject) {
-                    fieldAccumulators.add(new BsonField(key, new Document(((JSONObject) value).toMap())));
-                } else {
-                    // Gestisci altri casi o aggiungi logica per altri tipi di valori
-                }
+                JSONObject accumulatorObject = groupJson.getJSONObject(key);
+                fieldAccumulators.add(new BsonField(key, convertToBsonValue(accumulatorObject)));
             }
         }
 
-        return Aggregates.group(id, fieldAccumulators.toArray(new BsonField[0]));
+        return Aggregates.group(groupJson.isNull("_id") ? null : groupJson.get("_id"), fieldAccumulators);
     }
-*/
+
+    private static Bson convertToBsonValue(JSONObject json) {
+        Document doc = new Document();
+        for (String key : json.keySet()) {
+            Object value = json.get(key);
+            if (value instanceof JSONObject) {
+                doc.append(key, convertToDocument((JSONObject) value));
+            } else if (value instanceof JSONArray) {
+                doc.append(key, convertToArray((JSONArray) value));
+            } else {
+                doc.append(key, value);
+            }
+        }
+        return new Document(doc).toBsonDocument();
+    }
+
+
+    private static Document convertToDocument(JSONObject json) {
+        Document doc = new Document();
+        for (String key : json.keySet()) {
+            Object value = json.get(key);
+            if (value instanceof JSONObject) {
+                doc.append(key, convertToDocument((JSONObject) value));
+            } else if (value instanceof JSONArray) {
+                doc.append(key, convertToArray((JSONArray) value));
+            } else {
+                doc.append(key, value);
+            }
+        }
+        return doc;
+    }
+
+    private static List<Object> convertToArray(JSONArray array) {
+        List<Object> list = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            Object value = array.get(i);
+            if (value instanceof JSONObject) {
+                list.add(convertToDocument((JSONObject) value));
+            } else if (value instanceof JSONArray) {
+                list.add(convertToArray((JSONArray) value));
+            } else {
+                list.add(value);
+            }
+        }
+        return list;
+    }
 
     // INSERT
 
@@ -485,7 +500,7 @@ public abstract class BaseMongoDB {
             String mongosh_string = QueryType.FIND.getQuery();
 
 
-            String query = "db.Post.aggregate([" + //
+            String query = "[" + //
                     "{" + //
                         "$project: {" + //
                             "_id: 1," + //
@@ -543,19 +558,71 @@ public abstract class BaseMongoDB {
                     "avgOfAvgStarRanking: 1" + //
                     "}" + //
                     "}" + //
-                    "])";
+                    "]";
 
-            System.out.println("Query: " + query);
-            
-            List<Document> result =executeQuery(query);
+            // List<Document> result =executeQuery(query);
 
-            System.out.println();
-            System.out.println("Result: ");
-            for(Document doc : result){
-                System.out.println(doc.get("avgStarRanking").toString());
-//                System.out.println(doc.toJson());
+            query = "[" + //
+            "{" + //
+                    "$match: {" + //
+                    "$or: [" + //
+                    "{\"comments.username\": \"" + "cody_cisneros_28" + "\"}," + //
+                    "{\"starRankings.username\": \"" + "cody_cisneros_28" + "\"}" + //
+                    "]" + //
+                    "}" + //
+                    "}," + //
+                    "{" + //
+                    "$project: {" + //
+                    "filteredComments: {" + //
+                    "$filter: {" + //
+                    "input: \"$comments\"," + //
+                    "as: \"comment\"," + //
+                    "cond: {$eq: [\"$$comment.username\", \"" + "cody_cisneros_28" + "\"]}" + //
+                    "}" + //
+                    "}," + //
+                    "filteredStarRankings: {" + //
+                    "$filter: {" + //
+                    "input: \"$starRankings\"," + //
+                    "as: \"starRanking\"," + //
+                    "cond: {$eq: [\"$$starRanking.username\", \"" + "cody_cisneros_28" + "\"]}" + //
+                    "}" + //
+                    "}" + //
+                    "}" + //
+                    "}," + //
+                    "{" + //
+                    "$group: {" + //
+                    "_id: null," + //
+                    "avgOfStarRankings: {" + //
+                    "$avg: {$sum: \"$filteredStarRankings.vote\"}" + //
+                    "}," + //
+                    "numberOfStarRankings: {" + //
+                    "$sum: {$size: \"$filteredStarRankings\"}" + //
+                    "}," + //
+                    "numberOfComments: {" + //
+                    "$sum: {$size: \"$filteredComments\"}" + //
+                    "}" + //
+                    "}" + //
+                    "}," + //
+                    "{" + //
+                    "$project: {" + //
+                    "_id: 0," + //
+                    "numberOfComments: 1," + //
+                    "numberOfStarRankings: 1," + //
+                    "avgOfStarRankings: 1" + //
+                    "}" + //
+                    "}" + //
+                    "]";
+
+
+            List<Bson> bsonList = translateAggregations(query);
+            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection("Post");
+            MongoCursor<Document> cursor = collection.aggregate(bsonList).iterator();
+            while (cursor.hasNext()) {
+                Document document = cursor.next();
+                System.out.println(document.toJson());
             }
-            
+            System.out.println(query);
+
         } finally {
            closeMongoClient(); // Ensure client is closed
         }
