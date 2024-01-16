@@ -366,6 +366,9 @@ This relationship allows to quickly retrieve the Ingredients that have been used
 This last relationship allows to retrieve the Ingredients that are contained in a Recipe. 
 
 
+Aggiungere grafico graphdb aggiungere image in recipe e sistemare tutto con aggiunta di nuova ridondanza
+
+
 ## 4.3. Redundancies
 The proposed database models have redundancies, denoted as `[REDUNDANCY]`. This means that the information they contain can be obtained through alternative means, often involving more intricate operations than a straightforward retrieval of the redundant value. These redundancies were cautiously introduced to enhance the system's reading performance and subsequently reduce response times. However, to maintain *data consistency*, writing operations are necessary to keep the redundancies updated. 
 While reading operations are more frequent for the redundancies, the writing operations are generally less frequent. This approach is deemed more convenient for optimizing overall system performance. Redundancies also allow to avoid the need for joins, particularly when dealing with inter-database connections. A detailed explanation of the reasons justifying the introduction of the redundancies is provided in Table \ref{tab:redundancies}.
@@ -1020,7 +1023,7 @@ Creation operations are:
 6. `Create a new following relationship`:
 ```javascript
     MATCH (u1:User {username: String}), (u2:User {username: String})
-    CREATE (u1)-[:FOLLOWS]->(u2)
+    MERGE (u1)-[:FOLLOWS]->(u2)
 ```
 
 7. `Create a new Recipe-Ingredient relationship`:
@@ -1162,6 +1165,7 @@ Reading operations are:
     MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)
     WHERE i.name IN [String, ...]
     RETURN r
+    LIMIT 10
 ```
 
 
@@ -1323,9 +1327,9 @@ Deletions not allowed:
 ```javascript
     MATCH (u:User {username: String})-[r:USED]->(i:Ingredient {name: String})
     SET r.times = r.times - 1
-    IF r.times = 0 THEN
-        DELETE r
-    END IF
+    WITH r
+    WHERE r.times = 0
+    DELETE r
 ```
 
 
@@ -1372,6 +1376,7 @@ In this section, more relevant queries are presented, categorized into two sub-s
     WHERE (u2)-[:FOLLOWS]->(u1)
     AND NOT (u1)-[:FOLLOWS]->(u3)
     RETURN u3
+    LIMIT 10
 ```
 
 4. `Suggest most popular combination of ingredients`:
@@ -1706,24 +1711,11 @@ Here there aren't much information stored if compared again with MongoDB. Howeve
 An index on the ingredient name in the Ingredient nodes is also a key component in helping the user browsing accross posts specifying different subset of ingredients. We expect that this operations, along with the previously described, will be very frequent and so should be optimized to provide a better experience for the user.
 
 ## 7.3. Consistency, Availability and Partition Tolerance
+The ones of the title are the three main properties that a distributed system can have. However, it is impossible to have all of them at the same time as the CAP theorem states. In accordance with the predefined non-functional requirements, hence, the primary objective is to ensure the Availability and Partition tolerance of the system, allowing for a certain degree of relaxation in consistency constraints. This strategic approach allows to the main actors of the system, the users, to continue to use the application even if some information they see are not completely updated. These in a practical scenario means to not see for example the latest post that a friend uploaded. Eventually however is granted to the user that he will be able to see the latest post of his friend. This is the main idea behind the design of the system. Hence the design is intentionally aligned with the Availability and Partition tolerance intersection of the CAP theorem, placing a high value on achieving eventual consistency. In the next paragraph the consistency management of the system will be discussed in detailed investingating in particular on the consistency between databases.
 
-In accordance with the predefined non-functional requirements, our primary objective is to ensure the Availability and Partition tolerance of the system, allowing for a certain degree of relaxation in consistency constraints. This strategic approach is tailored to the specific characteristics of the application at hand, which happens to be a social network with users as the main actors in the system. Our design is intentionally aligned with the Availability and Partition tolerance intersection of the CAP theorem, placing a high value on achieving eventual consistency.
-
-The CAP theorem, also known as Brewer's theorem, highlights the inherent trade-offs that exist among three key attributes in a distributed system: Consistency, Availability, and Partition tolerance.
-
-Consistency (C): This aspect ensures that all nodes in a distributed system have a consistent view of the data. In other words, if a piece of data is updated, all subsequent accesses to that data should reflect the latest version. Consistency ensures that all nodes in the system agree on the current state of the data.
-
-Availability (A): Availability implies that every request to the distributed system receives a response, without any guarantee regarding the consistency of the data. In other words, even if some nodes in the system fail or are unreachable, the system should still be able to respond to requests.
-
-Partition tolerance (P): Partition tolerance deals with the system's ability to function even when communication between nodes is unreliable or may be completely lost. Partitions refer to the inability of some nodes to communicate with others due to network failures or delays.
-
-The CAP theorem asserts that it is impossible for a distributed system to simultaneously provide all three guarantees—Consistency, Availability, and Partition tolerance. In any distributed system, when faced with a network partition (P), a choice must be made between maintaining Consistency (C) or providing Availability (A). This means that during a network partition, a system must decide whether to continue operating (Availability) with potentially inconsistent data or to halt operations until consistency can be ensured.
-
-Within the unique context of a social network, our emphasis revolves around the necessity to consistently present data to users, even if it may not be the most current information available. For example, consider the scenario where a user experiences a delay in accessing the latest posts from their friends. While this initial delay might elicit a sense of disappointment, we acknowledge that this is a transient issue. The system is intentionally architected to eventually deliver the updated content to the user, mitigating any inconvenience and ensuring a seamless user experience over time.
-
-According to the non functional requirements expressed before, we should guarantee Availability and Partition tolerance, while consistency constraints can be relaxed. Indeed the application that we are designing is a social network, where the users are the main actors. We orient the design to the AP intersection of the CAP theorem ensuring eventual consistency. Indeed is important to always show some data to the user, even if it is not updated. For example, if a user is not able to see the latest posts of his friends, he will be a little disappointed but at the end it won't be the such a big problem because eventually it will be able to see them.
 
 ## 7.4. Inter-Database Consistency
+
 Besides of the consistency that must me granted inside a sigle database (i.e. the intra-database consistency), a more delicate problem that must be considered is the consistency between the different databases.
 
 
@@ -1799,8 +1791,22 @@ Is not about partition tolerant. Anyway is also tolerant to the partition of the
 Explain how the rollback is implemented and that neo4j is waited to be consistent before sending the response to the user. If it is not consistent this is not a problem.
 
 
+In the service package we find all the classes which, in some cases, also handle the consistency in the two databases and inside the single database. In general four cases of consistency management can be found:
+User creation consistency:
+    If a user is created in MongoDB, we try the creation in Neo4j. If it fails in Neo4j, we display server-side that the databases are not synchronized.
+Ingredient creation consistency:
+    The same as described in the case of the user.
+Post consistency:
+    During the creation of a post, first of all we try the creation in MongoDB in the Post collection. After this we update the redunducies in the User collection. If the latter fails, an inconsistency in MongoDB is displayed server-side (we know the updated version of the database can be found in the Post collection).
+    After all this steps, we have to create nodes and the relations in Neo4j. This are the Recipe node, the ingredient-ingredient relations, the user-ingredient relation and the recipe-ingredient relation. We try as the first step, to create the node. If this fails, we handle the case of the failed operation in Neo4j (described at the end). If this goes through, we start the creation of the relations. If one of this creations fails, we try to delete the recipe node and we display that Neo4j remains consistent but with a failed operation. If the ingredient-ingredient operation fails, the deletion of the recipe-ingredient relation is not handled separately. In fact the deletion of the recipe node is done in a way so that also all the relations are delete (DETACH DELETE). If the creation of user-ingredient fails, the ingredient-ingredient relations are not deleted, because utilized just for statistical purposes, and the user will never directly see that his informations are not precise. But this is not a problem since the most important thing is to show to the user some "good" informations that makes him stay active in the social network. If the creation in Neo4j of all the previous described steps fails, we try a rollback in MongoDB. We try to remove the post from the User collection. If the operation fails, we display that the databases are not consistent. Otherwise, we try to delete the Post also in the Post collection. If the operation fails, we display that MongoDB is not consistent and that the databases are not synchronized. Otherwise we only display that the operations was not completed successfuly (databases in this case are synchronized and consistent). 
+
+    During the deletion of a post, we start from deleting informations from MongoDB, in particular from the User collection. If it fails, we display that the operation failed, otherwise we try also the deletion in the Post collection. If it fails we display the inconsistency in MongoDB and we display that the operation failed. If the operation is completed, we try the deletion in Neo4j, where we try to delete the recipe and all the relations to ingredients. If this operation fails, we display that the databases are not synchronized and the operation fails. Otherwise we try to delete the relation user-ingredient. If it fails, we display an inconsistency in Neo4j and the fact that the databases are not synchronized and the operation fails. Otherwise the operation is completed.
+
+    There are several techniques to handle the inconsistency (eventual consistency) wich can remain from the steps described before while still giving the opportunity to use the social network, such as inserting a trigger at the start of Neo4j which verifies that the graph is consistent with all the informations stored in the MongoDB collections. To handle inconsistencies in MongoDB, we could try with a series of actions (routine) to run every x hours/days etc.., that restore the consistency. In general, handling the eventual consistency depends on the type of service that you want to provide to the users. For instance, we could offer a limited set of functinalities in Neo4j, like how instagram functionalities some time are blocked, or start a maintenance period where all the consistencies are restored.
 
 
+aggiungere link githyb e rendere pubblico il repository
++ inserire credenziali utente e admin in manuale utente
 
 \newpage
 

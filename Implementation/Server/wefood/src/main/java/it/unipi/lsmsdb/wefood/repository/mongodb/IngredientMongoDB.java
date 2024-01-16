@@ -29,7 +29,7 @@ public class IngredientMongoDB implements IngredientMongoDBInterface {
     public Ingredient findIngredientByName(String name) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.Ingredient.find({" + //
                             "name: \"" + name + "\"," + //
-                       "})"; 
+                       "}, {_id: 0})";
         
         List<Document> result = BaseMongoDB.executeQuery(query);
         if(result.isEmpty()) {
@@ -42,7 +42,7 @@ public class IngredientMongoDB implements IngredientMongoDBInterface {
     };
 
     public List<Ingredient> getAllIngredients() throws MongoException, IllegalArgumentException, IllegalStateException {
-        String query = "db.Ingredient.find({})";
+        String query = "db.Ingredient.find({}, {_id:0})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
         List<Ingredient> ingredients = new ArrayList<Ingredient>();

@@ -5,7 +5,6 @@ import it.unipi.lsmsdb.wefood.apidto.PostByIngredientsRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.PostRequestDTO;
 import it.unipi.lsmsdb.wefood.apidto.PostTopRatedRequestDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
-import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
 import it.unipi.lsmsdb.wefood.model.Post;
 import it.unipi.lsmsdb.wefood.service.PostService;
 import it.unipi.lsmsdb.wefood.service.RecipeImageService;
@@ -35,7 +34,6 @@ public class PostController {
     public ResponseEntity<Boolean> uploadPost(@RequestBody PostRequestDTO request){
         // IMAGE
         Post post = request.getPost();
-        // GESTIRE IMMAGINE NULL SE USER NON LA CARICA NEL POST!
         post.getRecipe().setImage(recipeImageService.storePostImage(post));
         return ResponseEntity.ok(postService.uploadPost(post, request.getUser()));
     }
@@ -60,7 +58,6 @@ public class PostController {
     @PostMapping("/browseMostRecentTopRatedPosts")
     public ResponseEntity<List<PostDTO>> browseMostRecentTopRatedPosts(@RequestBody PostTopRatedRequestDTO request){
         List<PostDTO> postDTOList = recipeImageService.postDTOconverter(postService.browseMostRecentTopRatedPosts(request.getHours(), request.getLimit()));
-        System.out.println("SIZE: " + postDTOList.size());
         return ResponseEntity.ok(postDTOList);
     }
 
@@ -115,7 +112,8 @@ public class PostController {
     }
 
     @PostMapping("/findRecipeByIngredients")
-    public ResponseEntity<List<RecipeDTO>> findRecipeByIngredients(@RequestBody List<String> request){
-        return ResponseEntity.ok(postService.findRecipeByIngredients(request));
+    public ResponseEntity<List<PostDTO>> findRecipeByIngredients(@RequestBody List<String> request){
+        List<PostDTO> postDTOList = recipeImageService.postDTOconverter(postService.findRecipeByIngredients(request));
+        return ResponseEntity.ok(postDTOList);
     }
 }

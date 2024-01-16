@@ -13,7 +13,6 @@ import it.unipi.lsmsdb.wefood.dao.PostDAO;
 import it.unipi.lsmsdb.wefood.dao.RecipeDAO;
 import it.unipi.lsmsdb.wefood.dao.RegisteredUserDAO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
-import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.model.Post;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
@@ -122,16 +121,15 @@ public class PostService {
     }
 
     private boolean uploadPostNeo4j(RegisteredUser user, PostDTO postDTO, Post post){
-        RecipeDTO recipeDTO = new RecipeDTO(postDTO.getRecipeName(), postDTO.getImage());
         List<String> ingredients = new ArrayList<String>();
         for (Map.Entry<String, Double> entry : post.getRecipe().getIngredients().entrySet()) {
             ingredients.add(entry.getKey());
         }
         boolean created = false;
         try{
-            created = RecipeDAO.createRecipe(recipeDTO);
+            created = RecipeDAO.createRecipe(postDTO);
             try{
-                RecipeDAO.createRecipeIngredientsRelationship(recipeDTO, ingredients);
+                RecipeDAO.createRecipeIngredientsRelationship(postDTO, ingredients);
                 // This method call is at the same level of the
                 // previous one because if the previous one throws
                 // an exception, or the following one does, the
@@ -153,7 +151,7 @@ public class PostService {
             }
             catch(Neo4jException e){
                 System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-                RecipeDAO.deleteRecipe(recipeDTO);
+                RecipeDAO.deleteRecipe(postDTO);
                 // deleteUserUsedIngredient does not have to be called because
                 // the method call createUserUsedIngredient is the last one to be
                 // executed and if it throws an exception, so it's not necessary 
@@ -162,30 +160,30 @@ public class PostService {
             }
             catch(IllegalStateException e){
                 System.out.println("IllegalStateException in uploadPostNeo4j: " + e.getMessage());
-                RecipeDAO.deleteRecipe(recipeDTO);
+                RecipeDAO.deleteRecipe(postDTO);
                 return false;
             }
             catch(Exception e){
                 System.out.println("Exception in uploadPostNeo4j: " + e.getMessage());
-                RecipeDAO.deleteRecipe(recipeDTO);
+                RecipeDAO.deleteRecipe(postDTO);
                 return false;
             }
         }
         catch(Neo4jException e){
             if(created)
-                System.err.println("Neo4j is inconsistent, Recipe " + recipeDTO.getName() + " has not been inserted in Ingredients");
+                System.err.println("Neo4j is inconsistent, Recipe " + postDTO.getId() + " has not been inserted in Ingredients");
             System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
             return false;
         }
         catch(IllegalStateException e){
             if(created)
-                System.err.println("Neo4j is inconsistent, Recipe " + recipeDTO.getName() + " has not been inserted in Ingredients");
+                System.err.println("Neo4j is inconsistent, Recipe " + postDTO.getId() + " has not been inserted in Ingredients");
             System.out.println("IllegalStateException in uploadPostNeo4j: " + e.getMessage());
             return false;
         }
         catch(Exception e){
             if(created)
-                System.err.println("Neo4j is inconsistent, Recipe " + recipeDTO.getName() + " has not been inserted in Ingredients");
+                System.err.println("Neo4j is inconsistent, Recipe " + postDTO.getId() + " has not been inserted in Ingredients");
             System.out.println("Exception in uploadPostNeo4j: " + e.getMessage());
             return false;
         }
@@ -231,31 +229,30 @@ public class PostService {
     }
 
     private boolean deletePostNeo4j(RegisteredUser user, PostDTO postDTO, Post post){
-        RecipeDTO recipeDTO = new RecipeDTO(postDTO.getRecipeName(), postDTO.getImage());
         List<String> ingredients = new ArrayList<String>();
         for (Map.Entry<String, Double> entry : post.getRecipe().getIngredients().entrySet()) {
             ingredients.add(entry.getKey());
         }
         
         try{
-            RecipeDAO.deleteRecipe(recipeDTO);
+            RecipeDAO.deleteRecipe(postDTO);
             try{
                 RegisteredUserDAO.deleteUserUsedIngredient(new RegisteredUserDTO(user.getId(), user.getUsername()), ingredients);
                 return true;
             }
             catch(Neo4jException e){
                 System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + recipeDTO.getName() + " have not been deleted");
+                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + postDTO.getId() + " have not been deleted");
                 return false;
             }
             catch(IllegalStateException e){
                 System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + recipeDTO.getName() + " have not been deleted");
+                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + postDTO.getId() + " have not been deleted");
                 return false;
             }
             catch(Exception e){
                 System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + recipeDTO.getName() + " have not been deleted");
+                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + postDTO.getId() + " have not been deleted");
                 return false;
             }
         }
@@ -518,7 +515,7 @@ public class PostService {
         }
     }
 
-    public List<RecipeDTO> findRecipeByIngredients(List<String> ingredientNames) {
+    public List<PostDTO> findRecipeByIngredients(List<String> ingredientNames) {
         try{
             return RecipeDAO.findRecipeByIngredients(ingredientNames);
         }

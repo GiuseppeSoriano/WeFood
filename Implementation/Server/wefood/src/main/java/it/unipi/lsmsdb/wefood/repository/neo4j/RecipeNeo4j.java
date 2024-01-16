@@ -1,6 +1,6 @@
 package it.unipi.lsmsdb.wefood.repository.neo4j;
 
-import it.unipi.lsmsdb.wefood.dto.RecipeDTO;
+import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.exceptions.Neo4jException;
 
@@ -8,14 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 import it.unipi.lsmsdb.wefood.repository.base.BaseNeo4j;
 import it.unipi.lsmsdb.wefood.repository.interfaces.RecipeNeo4jInterface;
+import org.neo4j.driver.types.Node;
 
 public class RecipeNeo4j implements RecipeNeo4jInterface {
 
-    public boolean createRecipe(RecipeDTO recipeDTO) throws IllegalStateException, Neo4jException {
+    public boolean createRecipe(PostDTO postDTO) throws IllegalStateException, Neo4jException {
+
+        String image_string = (postDTO.getImage() == null) ? "" : ",\r\n image: \"" + postDTO.getImage() + "\"";
 
         String query = "CREATE (r:Recipe {\r\n" + //
-                       "    _id: \"" + recipeDTO.getId() + "\",\r\n" + //
-                       "    name: \"" + recipeDTO.getName() + "\"\r\n" + //
+                       "    _id: \"" + postDTO.getId() + "\",\r\n" + //
+                       "    name: \"" + postDTO.getRecipeName() + "\"" + //
+                       image_string +
                        "})";
 
         List<Record> results = BaseNeo4j.executeQuery(query);
@@ -24,8 +28,8 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
         return true;        
     }
     
-    public boolean deleteRecipe(RecipeDTO recipeDTO) throws IllegalStateException, Neo4jException  {
-        String query = "MATCH (r:Recipe {_id: \"" + recipeDTO.getId() + "\"})\r\n" + //
+    public boolean deleteRecipe(PostDTO postDTO) throws IllegalStateException, Neo4jException  {
+        String query = "MATCH (r:Recipe {_id: \"" + postDTO.getId() + "\"})\r\n" + //
                        "DETACH DELETE r";
         List<Record> results = BaseNeo4j.executeQuery(query);
         // If it does not throw an exception, it means that the query has been executed successfully
@@ -44,7 +48,7 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
         return str;
     }
 
-    public List<RecipeDTO> findRecipeByIngredients(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
+    public List<PostDTO> findRecipeByIngredients(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         String query = "MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)\r\n" + //
                        "WHERE i.name IN " + ingredientNamesToString(ingredientNames) + "\r\n" + //
                        "RETURN r \r\n" + //
@@ -53,18 +57,22 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
         if (results.isEmpty()) {
             return null;
         } else {
-            List<RecipeDTO> recipes = new ArrayList<RecipeDTO>();
+            List<PostDTO> recipes = new ArrayList<PostDTO>();
             for(Record recipe_record: results){
-                recipes.add(new RecipeDTO(recipe_record.get("r").get("_id").asString(), recipe_record.get("r").get("name").asString()));
+                Node recipeNode = recipe_record.get("r").asNode();
+                // Ottieni il campo image se esiste, altrimenti imposta un valore di default
+                String image = recipeNode.containsKey("image") ? recipeNode.get("image").asString() : "DEFAULT";
+                PostDTO recipe_to_insert = new PostDTO(recipe_record.get("r").get("_id").asString(), image, recipe_record.get("r").get("name").asString());
+                recipes.add(recipe_to_insert);
             }
             return recipes;
         }
     }
 
-    public boolean createRecipeIngredientsRelationship(RecipeDTO recipeDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
+    public boolean createRecipeIngredientsRelationship(PostDTO postDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         
         for(String ingredientName: ingredientNames){
-            String query = "MATCH (r:Recipe {_id: \"" + recipeDTO.getId() + "\"}), (i:Ingredient {name: \"" + ingredientName + "\"})\r\n" + //
+            String query = "MATCH (r:Recipe {_id: \"" + postDTO.getId() + "\"}), (i:Ingredient {name: \"" + ingredientName + "\"})\r\n" + //
                            "CREATE (r)-[:CONTAINS]->(i)";
             List<Record> results = BaseNeo4j.executeQuery(query);
         }

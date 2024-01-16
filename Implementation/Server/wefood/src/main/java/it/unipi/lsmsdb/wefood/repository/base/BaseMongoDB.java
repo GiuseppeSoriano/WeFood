@@ -1,14 +1,11 @@
 package it.unipi.lsmsdb.wefood.repository.base;
 
 import com.mongodb.MongoException;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
+import com.mongodb.client.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 
 import org.bson.BsonString;
 import org.bson.BsonValue;
@@ -145,23 +142,28 @@ public abstract class BaseMongoDB {
     // - IllegalArgumentException: In document.parse, if the query isn't a propper json file
     // - IllegalStateException: Thrown if MongoCollection or MongoClient aren't able to perform operations
 
-    private static List<Document> find(String collectionName, String find, String sort, String limit) 
+    private static List<Document> find(String collectionName, String find, String project, String sort, String limit)
             throws MongoException, IllegalArgumentException, IllegalStateException {
 
         Document query_find = Document.parse(find);
-        Document query_sort = (sort==null) ? Document.parse("{}") : Document.parse(sort);   // If sort is null, default value is passed
-        long query_limit = (limit==null) ? 0 : Long.parseLong(limit);                           // If limit is null, default value is passed
+        Document query_project = (project==null) ? null : Document.parse(project);                  // If project is null, null is passed
+        Document query_sort = (sort==null) ? Document.parse("{}") : Document.parse(sort);      // If sort is null, default value is passed
+        long query_limit = (limit==null) ? 0 : Long.parseLong(limit);                               // If limit is null, default value is passed
 
-        return execute_find(collectionName, query_find, query_sort, query_limit);
+        return execute_find(collectionName, query_find, query_project, query_sort, query_limit);
     }
 
-    private static List<Document> execute_find(String collectionName, Document query_find, Document query_sort, long query_limit) 
+    private static List<Document> execute_find(String collectionName, Document query_find, Document query_project, Document query_sort, long query_limit)
             throws MongoException, IllegalArgumentException, IllegalStateException {
 
         List<Document> documents = new ArrayList<>(); 
 
         MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-        MongoCursor<Document> cursor = collection.find(query_find).sort(query_sort).limit((int) query_limit).iterator();
+        FindIterable<Document> findIterable = collection.find(query_find).sort(query_sort).limit((int) query_limit);
+        if (query_project != null) {
+            findIterable = findIterable.projection(query_project);
+        }
+        MongoCursor<Document> cursor = findIterable.iterator();
         while (cursor.hasNext()) {
             Document document = cursor.next();
             documents.add(document);
@@ -226,58 +228,93 @@ public abstract class BaseMongoDB {
         return bsonList;
     }
 
+    /**
+     * Handles the "$group" stage of a MongoDB aggregation pipeline.
+     *
+     * @param groupJson JSONObject representing the group operation in the aggregation pipeline.
+     * @return Bson representation of the group stage.
+     */
     private static Bson handleGroupOperation(JSONObject groupJson) throws IllegalArgumentException {
         List<BsonField> fieldAccumulators = new ArrayList<>();
         for (String key : groupJson.keySet()) {
             if (!"_id".equals(key)) {
+                // Retrieves the accumulator operation for each field in the group stage.
                 JSONObject accumulatorObject = groupJson.getJSONObject(key);
+                // Converts the JSON object to a BsonValue and creates a BsonField, then adds it to the list.
                 fieldAccumulators.add(new BsonField(key, convertToBsonValue(accumulatorObject)));
             }
         }
-
+        // Creates and returns the group stage Bson object using the _id field and the list of accumulators.
         return Aggregates.group(groupJson.isNull("_id") ? null : groupJson.get("_id"), fieldAccumulators);
     }
 
+    /**
+     * Converts a JSONObject to a BsonValue.
+     *
+     * @param json JSONObject to be converted.
+     * @return BsonValue representation of the JSONObject.
+     */
     private static Bson convertToBsonValue(JSONObject json) {
         Document doc = new Document();
         for (String key : json.keySet()) {
             Object value = json.get(key);
             if (value instanceof JSONObject) {
+                // Recursively converts nested JSONObjects to Documents.
                 doc.append(key, convertToDocument((JSONObject) value));
             } else if (value instanceof JSONArray) {
+                // Converts JSONArray to a List of objects.
                 doc.append(key, convertToArray((JSONArray) value));
             } else {
+                // Directly adds the value if it's not a JSONObject or JSONArray.
                 doc.append(key, value);
             }
         }
+        // Converts the Document to a BsonDocument.
         return new Document(doc).toBsonDocument();
     }
 
-
+    /**
+     * Converts a JSONObject to a Document.
+     *
+     * @param json JSONObject to be converted.
+     * @return Document representation of the JSONObject.
+     */
     private static Document convertToDocument(JSONObject json) {
         Document doc = new Document();
         for (String key : json.keySet()) {
             Object value = json.get(key);
             if (value instanceof JSONObject) {
+                // Recursively converts nested JSONObjects to Documents.
                 doc.append(key, convertToDocument((JSONObject) value));
             } else if (value instanceof JSONArray) {
+                // Converts JSONArray to a List of objects.
                 doc.append(key, convertToArray((JSONArray) value));
             } else {
+                // Directly adds the value if it's not a JSONObject or JSONArray.
                 doc.append(key, value);
             }
         }
         return doc;
     }
 
+    /**
+     * Converts a JSONArray to a List of objects.
+     *
+     * @param array JSONArray to be converted.
+     * @return List of objects representing the JSONArray.
+     */
     private static List<Object> convertToArray(JSONArray array) {
         List<Object> list = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             Object value = array.get(i);
             if (value instanceof JSONObject) {
+                // Recursively converts nested JSONObjects to Documents.
                 list.add(convertToDocument((JSONObject) value));
             } else if (value instanceof JSONArray) {
+                // Recursively converts nested JSONArrays to Lists.
                 list.add(convertToArray((JSONArray) value));
             } else {
+                // Adds the value directly if it's not a JSONObject or JSONArray.
                 list.add(value);
             }
         }
@@ -455,13 +492,28 @@ public abstract class BaseMongoDB {
 
         switch (operation) {
             case "find": // find
+                String findDoc = operationDoc;
+                String projectDoc = null;
+                // Regex for extracting the project from operationDoc
+                String[] operationDocParts = operationDoc.split("},\\s*\\{");
+
+                if(operationDocParts.length > 1){
+                    // We do have the project inside the operationDoc
+                    findDoc = operationDocParts[0] + "}";
+                    projectDoc = "{" + operationDocParts[1];
+                }
+                System.out.println("findDoc: "+ findDoc);
+                System.out.println("projectDoc: "+ projectDoc);
 
                 // Regex for extracting the document inside sort
                 String sortDoc = extractPattern(mongosh_string, "sort\\((.+?)\\)");
                 // Regex for extracting the document inside limit
                 String limitDoc = extractPattern(mongosh_string, "limit\\((\\d+)\\)");
 
-                return find(collectionName, operationDoc, sortDoc, limitDoc);
+                System.out.println("sortDoc: " + sortDoc);
+                System.out.println("limitDoc: " + limitDoc);
+
+                return find(collectionName, findDoc, projectDoc, sortDoc, limitDoc);
         
             case "aggregate": // aggregate
 
@@ -497,131 +549,13 @@ public abstract class BaseMongoDB {
     public static void main(String[] args) {
         try {
             openMongoClient(); // Ensure client is created
-            String mongosh_string = QueryType.FIND.getQuery();
+            String query = "db.User.find({username: \"cody_cisneros_28\"}, {username:1, posts:1})";
 
+            List<Document> provas = executeQuery(query);
 
-            String query = "[" + //
-                    "{" + //
-                        "$project: {" + //
-                            "_id: 1," + //
-                    "hasImage: {" + //
-                    "$cond: {" + //
-                    "if: {" + //
-                    "$eq: [{ $type: \"$recipe.image\" }, \"missing\"]" + //
-                    "}," + //
-                    "then: false," + //
-                    "else: true" + //
-                    "}" + //
-                    "}," + //
-                    "comments: {" + //
-                    "$size: {" + //
-                    "$ifNull: [\"$comments\", []]" + //
-                    "}" + //
-                    "}," + //
-                    "starRankings: {" + //
-                    "$size: {" + //
-                    "$ifNull: [\"$starRankings\", []]" + //
-                    "}" + //
-                    "}," + //
-                    "avgStarRanking: {" + //
-                    "$ifNull: [\"$avgStarRanking\", 0]" + //
-                    "}" + //
-                    "}" + //
-                    "}," + //
-                    "{" + //
-                    "$group: {" + //
-                    "_id: \"$hasImage\"," + //
-                    "numberOfPosts: {" + //
-                    "$sum: 1" + //
-                    "}," + //
-                    "totalComments: {" + //
-                    "$sum: \"$comments\"" + //
-                    "}," + //
-                    "totalStarRankings: {" + //
-                    "$sum: \"$starRankings\"" + //
-                    "}," + //
-                    "avgOfAvgStarRanking: {" + //
-                    "$avg: \"$avgStarRanking\"" + //
-                    "}" + //
-                    "}" + //
-                    "}," + //
-                    "{" + //
-                    "$project: {" + //
-                    "_id: 0," + //
-                    "hasImage: \"$_id\"," + //
-                    "ratioOfComments: {" + //
-                    "$divide: [\"$totalComments\", \"$numberOfPosts\"]" + //
-                    "}," + //
-                    "ratioOfStarRankings: {" + //
-                    "$divide: [\"$totalStarRankings\", \"$numberOfPosts\"]" + //
-                    "}," + //
-                    "avgOfAvgStarRanking: 1" + //
-                    "}" + //
-                    "}" + //
-                    "]";
-
-            // List<Document> result =executeQuery(query);
-
-            query = "[" + //
-            "{" + //
-                    "$match: {" + //
-                    "$or: [" + //
-                    "{\"comments.username\": \"" + "cody_cisneros_28" + "\"}," + //
-                    "{\"starRankings.username\": \"" + "cody_cisneros_28" + "\"}" + //
-                    "]" + //
-                    "}" + //
-                    "}," + //
-                    "{" + //
-                    "$project: {" + //
-                    "filteredComments: {" + //
-                    "$filter: {" + //
-                    "input: \"$comments\"," + //
-                    "as: \"comment\"," + //
-                    "cond: {$eq: [\"$$comment.username\", \"" + "cody_cisneros_28" + "\"]}" + //
-                    "}" + //
-                    "}," + //
-                    "filteredStarRankings: {" + //
-                    "$filter: {" + //
-                    "input: \"$starRankings\"," + //
-                    "as: \"starRanking\"," + //
-                    "cond: {$eq: [\"$$starRanking.username\", \"" + "cody_cisneros_28" + "\"]}" + //
-                    "}" + //
-                    "}" + //
-                    "}" + //
-                    "}," + //
-                    "{" + //
-                    "$group: {" + //
-                    "_id: null," + //
-                    "avgOfStarRankings: {" + //
-                    "$avg: {$sum: \"$filteredStarRankings.vote\"}" + //
-                    "}," + //
-                    "numberOfStarRankings: {" + //
-                    "$sum: {$size: \"$filteredStarRankings\"}" + //
-                    "}," + //
-                    "numberOfComments: {" + //
-                    "$sum: {$size: \"$filteredComments\"}" + //
-                    "}" + //
-                    "}" + //
-                    "}," + //
-                    "{" + //
-                    "$project: {" + //
-                    "_id: 0," + //
-                    "numberOfComments: 1," + //
-                    "numberOfStarRankings: 1," + //
-                    "avgOfStarRankings: 1" + //
-                    "}" + //
-                    "}" + //
-                    "]";
-
-
-            List<Bson> bsonList = translateAggregations(query);
-            MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection("Post");
-            MongoCursor<Document> cursor = collection.aggregate(bsonList).iterator();
-            while (cursor.hasNext()) {
-                Document document = cursor.next();
-                System.out.println(document.toJson());
+            for(Document prova: provas){
+                System.out.println(prova.toJson());
             }
-            System.out.println(query);
 
         } finally {
            closeMongoClient(); // Ensure client is closed

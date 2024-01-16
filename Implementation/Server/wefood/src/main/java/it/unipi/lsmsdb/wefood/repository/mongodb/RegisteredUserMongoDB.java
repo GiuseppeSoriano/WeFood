@@ -18,7 +18,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     
     public RegisteredUser login(String username, String password) throws MongoException, IllegalArgumentException, IllegalStateException {
 
-        String query = "db.User.find({username: \"" + username + "\"})";
+        String query = "db.User.find({username: \"" + username + "\"}, {posts:0})";
         List<Document> result = BaseMongoDB.executeQuery(query);
         if(result.isEmpty()){
             // It does not exist a user with this username
@@ -49,7 +49,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     };
 
     public RegisteredUserPageDTO findRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
-        String query = "db.User.find({username: \"" + username + "\"})";
+        String query = "db.User.find({username: \"" + username + "\"}, {username:1, posts:1})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
 

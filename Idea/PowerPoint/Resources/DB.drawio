@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-12-22T13:31:12.994Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0" etag="RA72cSFsFG0fs5C_NkEn" version="22.1.11" type="device">
+<mxfile host="app.diagrams.net" modified="2024-01-16T09:15:50.200Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0" etag="kVMTxgFy3B6ryOfoakWv" version="22.1.18" type="device">
   <diagram name="Pagina-1" id="rsW22kZGa7a1XgGhSe4M">
     <mxGraphModel dx="1621" dy="589" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2336" math="0" shadow="0">
       <root>
@@ -34,7 +34,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="wRAqU7v_r-dAU_szXsJu-9" value=":CONTAINS" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;rotation=-45;" parent="1" vertex="1">
-          <mxGeometry x="810" y="870" width="90" height="30" as="geometry" />
+          <mxGeometry x="806" y="873" width="90" height="30" as="geometry" />
         </mxCell>
         <mxCell id="wRAqU7v_r-dAU_szXsJu-11" value="" style="curved=1;endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -51,7 +51,7 @@
           <mxGeometry x="777" y="1113" width="100" height="30" as="geometry" />
         </mxCell>
         <mxCell id="wRAqU7v_r-dAU_szXsJu-13" value="- times" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="797" y="1135" width="60" height="30" as="geometry" />
+          <mxGeometry x="797" y="1133" width="60" height="30" as="geometry" />
         </mxCell>
         <mxCell id="wRAqU7v_r-dAU_szXsJu-14" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" parent="1" source="wRAqU7v_r-dAU_szXsJu-1" target="wRAqU7v_r-dAU_szXsJu-2" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -60,21 +60,18 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="wRAqU7v_r-dAU_szXsJu-15" value=":USED" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;rotation=0;" parent="1" vertex="1">
-          <mxGeometry x="600" y="890" width="60" height="30" as="geometry" />
+          <mxGeometry x="612" y="901" width="60" height="30" as="geometry" />
         </mxCell>
         <mxCell id="wRAqU7v_r-dAU_szXsJu-16" value="- _id&lt;br&gt;- username" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="540" y="843" width="80" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="wRAqU7v_r-dAU_szXsJu-17" value="- _id&lt;br&gt;- name" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="939" y="842" width="60" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="wRAqU7v_r-dAU_szXsJu-18" value="Nel caso in cui si volesse memorizzare la quantità complessiva utilizzata di un certo ingrediente &lt;br&gt;basta inserire un nuovo attributo nella relazione :USED. In questo modo si darebbe la possibilità&lt;br&gt;all&#39;utente di visualizzare il quantitativo usato di un certo ingrediente dall&#39;atto dell&#39;iscrizione sul sito" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="60" y="1160" width="540" height="60" as="geometry" />
+        <mxCell id="wRAqU7v_r-dAU_szXsJu-17" value="- _id&lt;br&gt;- name&lt;br&gt;-&amp;nbsp;image" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="939" y="839" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="wRAqU7v_r-dAU_szXsJu-20" value="- times" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="609" y="910" width="60" height="30" as="geometry" />
+          <mxGeometry x="621" y="921" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="Hr-0PPlU5-VSAdq0ENDs-1" value="- _id&lt;br&gt;- name" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="Hr-0PPlU5-VSAdq0ENDs-1" value="- _id&lt;br&gt;- name" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="684" y="1014" width="60" height="40" as="geometry" />
         </mxCell>
       </root>

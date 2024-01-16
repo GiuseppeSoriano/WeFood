@@ -80,7 +80,7 @@ public class PostMongoDB implements PostMongoDBInterface{
                                 "timestamp: {" + //
                                 "$gte: " + timestamp +  //
                             "}" + //
-                        "}).sort({" + //
+                        "}, {\"recipe.name\":1, \"recipe.image\":1}).sort({" + //
                             "avgStarRanking:-1" + //
                         "}).limit(" + limit + ")";
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -120,7 +120,7 @@ public class PostMongoDB implements PostMongoDBInterface{
                             "\"recipe.ingredients.name\": {" + //
                                 "$all: " + ingredientNamesToString(ingredientNames) + //
                             "}" + //
-                       "}).sort({" + //
+                       "}, {\"recipe.name\":1, \"recipe.image\":1}).sort({" + //
                             "avgStarRanking: -1" + //
                        "}).limit(" + limit + ")";
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -149,7 +149,7 @@ public class PostMongoDB implements PostMongoDBInterface{
                                 "$gte: " + minCalories + "," + //
                                 "$lte: " + maxCalories + //
                             "}" + //
-                       "}).sort({" + //
+                       "}, {\"recipe.name\":1, \"recipe.image\":1}).sort({" + //
                             "timestamp: -1" + //
                        "}).limit(" + limit + ")";
 
@@ -171,7 +171,7 @@ public class PostMongoDB implements PostMongoDBInterface{
         // I'm sure that _id exists, so the result will contain one and only one document
         String query = "db.Post.find({" + //
                             "_id: " + _id + //
-                       "})";
+                       "}, {_id:0, idUser:0, \"starRankings.idUser\":0, \"comments.idUser\":0})";
         Document result = BaseMongoDB.executeQuery(query).get(0);
 
         Document recipe_doc = (Document) result.get("recipe");
@@ -219,7 +219,7 @@ public class PostMongoDB implements PostMongoDBInterface{
     }
 
     public List<PostDTO> findPostsByRecipeName(String recipeName) {
-        String query = "db.Post.find( { \"recipe.name\": { $regex: \"" + recipeName + "\", $options: \"i\" } } ).limit(10)";
+        String query = "db.Post.find( { \"recipe.name\": { $regex: \"" + recipeName + "\", $options: \"i\" } }, {\"recipe.name\":1, \"recipe.image\":1} ).limit(10)";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
         List<PostDTO> posts = new ArrayList<PostDTO>();
