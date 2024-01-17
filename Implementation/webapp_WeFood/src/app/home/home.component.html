@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>La mia App di Ricette</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">WeFood</div>
+            <div class="menu">
+                <button id="loginButton" (click) = "openPopup()">Login</button>
+                <button id="signupButton">Registrati</button>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <section class="feed">
+            <!-- Qui andrebbero i post delle ricette -->
+        </section>
+    </main>
+    <footer>
+        <!-- Informazioni sul footer -->
+    </footer>
+</body>
+</html>
+
+<!-- home.component.html -->
+<app-logging-popup *ngIf="showLoginPopup" (close)="closePopup()" (closePopup)="closePopup()"></app-logging-popup>
+
