@@ -239,8 +239,8 @@ The structure of the User collection is as follows.
     surname: String, # Not Applicable for Admin
     posts: [{   
                 idPost: ObjectId('...'),
-                name: String, [REDUNDANCY]
-                image: String [REDUNDANCY]
+                name: String, [REDUNDANCY(1)]
+                image: String [REDUNDANCY(2)]
     }, ...] # Not Applicable for Admin 
 }
 ```
@@ -259,14 +259,14 @@ The structure of the Post collection is a little bit more complex because it man
 {
     _id: ObjectId('...'),
     idUser: ObjectId('...'),
-    username: String, [REDUNDANCY]
+    username: String, [REDUNDANCY(3)]
     description: String,
     timestamp: Long,
     recipe: {
                 name: String,
                 image: String,
                 steps: [String, ...],
-                totalCalories: Double, [REDUNDANCY]
+                totalCalories: Double, [REDUNDANCY(4)]
                 ingredients: [{
                                 name: String,
                                 quantity: Double 
@@ -274,13 +274,13 @@ The structure of the Post collection is a little bit more complex because it man
     },
     starRankings: [{
                         idUser: ObjectId('...'),
-                        username: String, [REDUNDANCY]
+                        username: String, [REDUNDANCY(5)]
                         vote: Double
     }, ...],
-    avgStarRanking: Double, [REDUNDANCY]
+    avgStarRanking: Double, [REDUNDANCY(6)]
     comments: [{
                 idUser: ObjectId('...'),
-                username: String, [REDUNDANCY]
+                username: String, [REDUNDANCY(7)]
                 text: String,
                 timestamp: Long
     }, ...]
@@ -301,7 +301,16 @@ The last collection is the Ingredient collection, that is used to store the info
 ```
 
 ## 4.2. Graph DB
-The entities that are managed by the graph DB are just: User (Registered User), Recipe, Ingredient.
+The entities that are managed by the graph DB are just: User (Registered User), Recipe and Ingredient.
+
+In the following two sections, a comprehensive analysis of the nodes and relationships within the Graph DB schema, as illustrated in Figure \ref{fig:graphDB}, will be presented.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.65\textwidth]{Resources/"graphDB.jpg"}
+    \caption{Graph DB schema.}
+    \label{fig:graphDB}
+\end{figure}
 
 ### 4.2.1. Nodes
 The nodes designed for storing the information inside the graph DB are three, one for each entity.
@@ -311,24 +320,26 @@ The User node is used to store the information about the Registered Users. Each 
 ```javascript
 (User):
     - _id: String 
-    - username: String [REDUNDANCY]
+    - username: String [REDUNDANCY(8)]
 ```
 
 
-The Recipe node is used to store the information about the Recipes. Each node contains the `_id` of the Post that contains the Recipe, that is stored in the Post collection of the document DB and the `name` of the Recipe.
+The Recipe node is used to store the information about the Recipes. Each node contains the `_id` of the Post that contains the Recipe, which is stored withing the Post collection of the document DB. Additionally, it includes the Recipe's `name` along with its corresponding `image`.
 
 ```javascript
 (Recipe):
     - _id: String
-    - name: String [REDUNDANCY]
+    - name: String [REDUNDANCY(9)]
+    - image: String [REDUNDANCY(10)]
 ```
+
 
 The Ingredient node is used to store the information about the Ingredients. Each node contains the `_id` of the Ingredient that is stored in the Ingredient collection of the document DB and the `name` of the Ingredient.
 
 ```javascript
 (Ingredient):
     - _id: String
-    - name: String [REDUNDANCY]
+    - name: String [REDUNDANCY(11)]
 ```
 
 ### 4.2.2. Relationships
@@ -344,7 +355,7 @@ This relationship allows Users to follow other Users. Two Users become friends w
 
 ```javascript
 (User)-[:USED]->(Ingredient)
-       (times: int) [REDUNDANCY]
+       (times: int) [REDUNDANCY(12)]
 ```
 
 This relationship, instead, allows to quickly retrieve the Ingredients that have been used by the Users in their Recipes. The `times` attribute, in addition to being used for counting the number of times that an Ingredient has been used by a User, is used to keep track of the fact that the relationship with the Ingredient still can exist in other Recipes after the deletion of a Recipe by a User. Only when `times` becomes 0 the relationship can be deleted.
@@ -352,7 +363,7 @@ This relationship, instead, allows to quickly retrieve the Ingredients that have
 
 ```javascript
 (Ingredient)-[:USED_WITH]->(Ingredient)
-             (times: int) [REDUNDANCY]
+             (times: int) [REDUNDANCY(13)]
             [BIDIRECTIONAL]
 ```
 
@@ -366,11 +377,8 @@ This relationship allows to quickly retrieve the Ingredients that have been used
 This last relationship allows to retrieve the Ingredients that are contained in a Recipe. 
 
 
-Aggiungere grafico graphdb aggiungere image in recipe e sistemare tutto con aggiunta di nuova ridondanza
-
-
 ## 4.3. Redundancies
-The proposed database models have redundancies, denoted as `[REDUNDANCY]`. This means that the information they contain can be obtained through alternative means, often involving more intricate operations than a straightforward retrieval of the redundant value. These redundancies were cautiously introduced to enhance the system's reading performance and subsequently reduce response times. However, to maintain *data consistency*, writing operations are necessary to keep the redundancies updated. 
+The proposed database models have redundancies, denoted as `[REDUNDANCY(n)]`. This means that the information they contain can be obtained through alternative means, often involving more intricate operations than a straightforward retrieval of the redundant value. These redundancies were cautiously introduced to enhance the system's reading performance and subsequently reduce response times. However, to maintain *data consistency*, writing operations are necessary to keep the redundancies updated. 
 While reading operations are more frequent for the redundancies, the writing operations are generally less frequent. This approach is deemed more convenient for optimizing overall system performance. Redundancies also allow to avoid the need for joins, particularly when dealing with inter-database connections. A detailed explanation of the reasons justifying the introduction of the redundancies is provided in Table \ref{tab:redundancies}.
 
 \begin{xltabular}{\textwidth}{X}
@@ -393,13 +401,13 @@ While reading operations are more frequent for the redundancies, the writing ope
     \textbf{Reason}: To avoid joins and to avoid computing the total calories of a Recipe every time a Post is shown. \\
     \textbf{Original/Raw Value}: It is possible to compute the total calories of a Recipe by summing the calories of the Ingredients contained in the Recipe In particular the precise formula is the following: $\sum_i \left( quantity_i\cdot\frac{calories100g_i}{100} \right)$ where $quantity_i$ is the quantity of the $i$-th Ingredient contained in the Recipe and $calories100g_i$ is the amount of calories contained in 100 grams of the $i$-th Ingredient that can be retrieved from the \texttt{Ingredient} collection. \\
     \midrule
-    \textbf{(5) \texttt{DocumentDB:Post:avgStarRanking}} \\
-    \textbf{Reason}: To avoid computing the average star ranking of a Post every time is shown. \\
-    \textbf{Original/Raw Value}: It is possible to compute the average star ranking of a Post by averaging the values contained in \texttt{DocumentDB:Post:starRankings:vote} \\
-    \midrule
-    \textbf{(6) \texttt{DocumentDB:Post:starRankings:username}} \\
+    \textbf{(5) \texttt{DocumentDB:Post:starRankings:username}} \\
     \textbf{Reason}: To avoid joins. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
+    \midrule
+    \textbf{(6) \texttt{DocumentDB:Post:avgStarRanking}} \\
+    \textbf{Reason}: To avoid computing the average star ranking of a Post every time is shown. \\
+    \textbf{Original/Raw Value}: It is possible to compute the average star ranking of a Post by averaging the values contained in \texttt{DocumentDB:Post:starRankings:vote} \\
     \midrule
     \textbf{(7) \texttt{DocumentDB:Post:comments:username}} \\
     \textbf{Reason}: To avoid joins. \\
@@ -413,15 +421,19 @@ While reading operations are more frequent for the redundancies, the writing ope
     \textbf{Reason}: To avoid joins with the DocumentDB. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:name} \\
     \midrule
-    \textbf{(10) \texttt{GraphDB:(Ingredient):name}} \\
+    \textbf{(10) \texttt{GraphDB:(Recipe):image}} \\
+    \textbf{Reason}: To avoid joins with the DocumentDB. \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:image} \\
+    \midrule
+    \textbf{(11) \texttt{GraphDB:(Ingredient):name}} \\
     \textbf{Reason}: To avoid joins with the DocumentDB. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:Ingredient:name} \\
     \midrule
-    \textbf{(11) \texttt{GraphDB:(User)-[:USED]->(Ingredient):times}} \\
+    \textbf{(12) \texttt{GraphDB:(User)-[:USED]->(Ingredient):times}} \\
     \textbf{Reason}: To avoid computing the total number of times that a User used an Ingredient. \\
     \textbf{Original/Raw Value}: It is possible to compute the total number of times that a User used an Ingredient by counting the number of times that the User used that Ingredient in his/her Recipes (information that can be retrieved from the DocumentDB). \\
     \midrule
-    \textbf{(12) \texttt{GraphDB:(Ingredient)-[:USED\_WITH]->(Ingredient):times}} \\
+    \textbf{(13) \texttt{GraphDB:(Ingredient)-[:USED\_WITH]->(Ingredient):times}} \\
     \textbf{Reason}: To avoid computing the number of times that an Ingredient is used with another one. \\
     \textbf{Original/Raw Value}: It is possible to compute the number of times that an Ingredient is used with another one by counting the number of times that all the Users used these two Ingredients together in their Recipes (information that can be retrieved from the DocumentDB). \\
     \bottomrule
@@ -888,14 +900,14 @@ After completing the preceding steps, the datasets have been appropriately clean
 
 However, specific procedures are needed to populate the two types of databases.
 
-### 5.4.1. DocumentDB
+### 5.4.1. Document DB
 It's true that all the necessary files for populating the documentDB have been generated, but there are some points that may need further clarifications. 
 
 - Firstly, in cases where a field is null or empty (e.g. a Post with no associated image, comment, or star ranking), within the context of a NoSQL database, there is no necessity for these fields to be assigned the null value to reduce unnecessary memory usage. Consequently, if there is missing information in a field, that field will simply be absent from the structure.
 
 - Secondly, the `_id` fields are not yet incorporated into the aforementioned structures, while conversely, the old *ids* from the datasets still persist. This is due to the intention to utilize the `_id` values provided by MongoDB (i.e. the documentDB employed in the implementation). To preserve the connection between documents and facilitate the substitution, a straightforward yet effective procedure was implemented. Documents were imported into their respective MongoDB collections, and subsequently, a *JSON export* was performed, leading to the insertion of MongoDB's `_id` within all the documents. Utilizing the old *ids*, the linkage between documents was established, and a substitution was executed by assigning the new MongoDB `_id` whenever the old *id* was encountered. Subsequently, all collections were re-imported. In this way, the linkage was now based on the MongoDB `_id`, and no problems were encountered at all.
 
-### 5.4.2. GraphDB
+### 5.4.2. Graph DB
 Populating Neo4j (i.e. the adopted graphDB) proved to be a bit more challenging. Unlike MongoDB, the import process from JSON is not as straightforward. Moreover, the structure defined earlier was specific to the MongoDB collections. To address this, Python scripts were developed. 
 After establishing a connection with the Neo4j DBMS using the Neo4j driver for Python, these scripts initiate the creation of all the nodes before establishing the relationships between them. This process relies on both *Cypher* queries and the information found in the JSON documents to construct the entire graph database from scratch.
 
@@ -1008,7 +1020,8 @@ Creation operations are:
 ```javascript
     CREATE (r:Recipe {
         _id: String,
-        name: String
+        name: String,
+        image: String
     })
 ```
 
@@ -1072,13 +1085,17 @@ Reading operations are:
 
 2. `Get all the Ingredients`:
 ```javascript
-    db.Ingredient.find()
+    db.Ingredient.find({}, {
+        _id: 0
+    })
 ```
 
 3. `Find Ingredient by name`:
 ```javascript
     db.Ingredient.find({
         name: String
+    }, {
+        _id: 0
     })
 ```
 
@@ -1088,6 +1105,9 @@ Reading operations are:
         timestamp: {
             $gte: Long
         }
+    }, {
+        "recipe.name": 1, 
+        "recipe.image": 1
     }).sort({
         avgStarRanking: -1
     }).limit(limit)
@@ -1102,6 +1122,9 @@ Reading operations are:
         "recipe.ingredients.name": {
             $all: [String, ...]
         }
+    }, {
+        "recipe.name": 1,
+        "recipe.image": 1
     }).sort({
         avgStarRanking: -1
     }).limit(limit)
@@ -1117,25 +1140,36 @@ Reading operations are:
             $gte: minCalories,
             $lte: maxCalories
         }
+    }, {
+        "recipe.name": 1, 
+        "recipe.image": 1
     }).sort({
         timestamp: -1
     }).limit(limit)
 ```
 
-7. `Find Post by Recipe name`:
+7. `Find Posts by Recipe name`:
 ```javascript
     db.Post.find({
         "recipe.name": {
             $regex: String,
             $options: "i"
         }
-    })
+    }, {
+        "recipe.name": 1, 
+        "recipe.image": 1
+    }).limit(10)
 ```
 
 8. `Find Post by _id`:
 ```javascript
     db.Post.find({
         _id: ObjectId("..."),
+    }, {
+        _id: 0, 
+        idUser: 0, 
+        "starRankings.idUser": 0, 
+        "comments.idUser": 0
     })
 ```
 

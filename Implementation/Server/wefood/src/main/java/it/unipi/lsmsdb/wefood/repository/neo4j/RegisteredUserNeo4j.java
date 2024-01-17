@@ -12,6 +12,14 @@ import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserNeo4jInterface
     //correggere le etichette con le nuove info
 public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
 
+    public boolean deleteRegisteredUser(RegisteredUserDTO registeredUserDTO) throws IllegalStateException, Neo4jException {
+        String query = "MATCH (u:User {username: '" + registeredUserDTO.getUsername() + "'})\r\n" + //
+                       "DETACH DELETE u";
+        List<Record> results = BaseNeo4j.executeQuery(query);
+        // If it does not throw an exception, it means that the query has been executed successfully
+        return true;
+    }
+
     public boolean createUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         for(String ingredientName: ingredientNames){
             String query = "MATCH (u:User {username: '" + registeredUserDTO.getUsername() + "'}), (i:Ingredient {name: '" + ingredientName + "'})\r\n" + //

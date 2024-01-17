@@ -2,6 +2,7 @@ package it.unipi.lsmsdb.wefood.repository.interfaces;
 
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.model.StarRanking;
+import it.unipi.lsmsdb.wefood.model.Post;
 
 import com.mongodb.MongoException;
 

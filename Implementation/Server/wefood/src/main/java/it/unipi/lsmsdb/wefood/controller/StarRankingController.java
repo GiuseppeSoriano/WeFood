@@ -19,11 +19,11 @@ public class StarRankingController {
 
     @PostMapping("/create")
     public ResponseEntity<Boolean> votePost(@RequestBody StarRankingRequestDTO request) {
-        return ResponseEntity.ok(starRankingService.votePost(request.getUser(), request.getStarRanking(), request.getPostDTO()));
+        return ResponseEntity.ok(starRankingService.votePost(request.getUser(), request.getStarRanking(), request.getPostDTO(), request.getPost()));
     }
 
     @PostMapping("/delete")
     public ResponseEntity<Boolean> deleteVote(@RequestBody StarRankingRequestDTO request) {
-        return ResponseEntity.ok(starRankingService.deleteVote(request.getUser(), request.getStarRanking(), request.getPostDTO()));
+        return ResponseEntity.ok(starRankingService.deleteVote(request.getUser(), request.getStarRanking(), request.getPostDTO(), request.getPost()));
     }
 }

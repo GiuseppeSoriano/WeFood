@@ -14,20 +14,9 @@ public class AdminService {
         try{
             return AdminDAO.loginAdmin(username, password);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in AdminService.loginAdmin: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in AdminService.loginAdmin: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in AdminService.loginAdmin: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in AdminService.loginAdmin: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in AdminDAO.loginAdmin: " + e.getMessage());
             return null;
         }
     }

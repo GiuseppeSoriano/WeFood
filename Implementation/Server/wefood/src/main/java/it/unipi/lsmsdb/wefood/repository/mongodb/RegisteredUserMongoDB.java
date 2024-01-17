@@ -95,12 +95,12 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         return true;
     };
 
-    public boolean deleteUser(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public boolean deleteUser(String _id) throws MongoException, IllegalArgumentException, IllegalStateException {
         // We have to unset the following fields: password, name, surname and posts,
         // and then we have to set the field deleted to true
 
         String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.editedGetId() + "\r\n" + //
+                       "    _id: " + _id + "\r\n" + //
                        "}, {\r\n" + //
                        "    $set: {\r\n" + //
                        "        deleted: true\r\n" + //
@@ -110,7 +110,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         List<Document> result = BaseMongoDB.executeQuery(query);
 
         query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.editedGetId() + "\r\n" + //
+                       "    _id: " + _id + "\r\n" + //
                        "}, {\r\n" + //
                        "    $unset: {\r\n" + //
                        "        password: \"\",\r\n" + //

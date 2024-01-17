@@ -20,7 +20,7 @@ public interface RegisteredUserMongoDBInterface {
 
     boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException;
 
-    boolean deleteUser(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException;
+    boolean deleteUser(String _id) throws MongoException, IllegalArgumentException, IllegalStateException;
 
     boolean banUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException;
     boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException;

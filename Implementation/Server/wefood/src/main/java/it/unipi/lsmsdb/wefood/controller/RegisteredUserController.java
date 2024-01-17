@@ -34,6 +34,10 @@ public class RegisteredUserController {
     @PostMapping("/findRegisteredUserPageByUsername")
     public ResponseEntity<RegisteredUserPageDTO> findRegisteredUserPageByUsername(@RequestBody String request){
         RegisteredUserPageDTO result = registeredUserService.findRegisteredUserPageByUsername(request);
+        if (result == null) {
+            // Return a 404 error if no user is found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
         result.setPosts(recipeImageService.postDTOconverter(result.getPosts()));
         return ResponseEntity.ok(result);
     }
@@ -44,7 +48,7 @@ public class RegisteredUserController {
     }
 
     @PostMapping("/deleteUser")
-    public ResponseEntity<Boolean> deleteUser(@RequestBody RegisteredUser request){
+    public ResponseEntity<Boolean> deleteUser(@RequestBody RegisteredUserPageDTO request){
         return ResponseEntity.ok(registeredUserService.deleteUser(request));
     }
 

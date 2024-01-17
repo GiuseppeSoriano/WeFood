@@ -15,128 +15,65 @@ import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 @Service
 public class StarRankingService {
     
-    public boolean votePost(RegisteredUser user, StarRanking starRanking, PostDTO postDTO) {
-        boolean created = false;
+    public boolean votePost(RegisteredUser user, StarRanking starRanking, PostDTO postDTO, Post post) {
+
         try{
-            Post post = PostDAO.findPostByPostDTO(postDTO); // to update redundancies
-            created = StarRankingDAO.votePost(user, starRanking, postDTO);
+            StarRankingDAO.votePost(user, starRanking, postDTO);
             try{
+                Double sum_votes = starRanking.getVote();
                 // Computing the new average star ranking
-                Double oldAvgStarRanking = post.getAvgStarRanking();
-                Double oldNumStarRanking = (double) post.getStarRankings().size();
-                Double newAvgStarRanking = starRanking.getVote();
-                if(oldNumStarRanking > 0.0)
-                    newAvgStarRanking = (oldAvgStarRanking * oldNumStarRanking + starRanking.getVote()) / (oldNumStarRanking + 1);
+                for(StarRanking oldStarRanking: post.getStarRankings()){
+                    sum_votes += oldStarRanking.getVote();
+                }
+                Double newAvgStarRanking = sum_votes / (post.getStarRankings().size() + 1);
+
                 StarRankingDAO.updateAvgStarRanking(postDTO, newAvgStarRanking);
                 return true;
             }
-            catch(MongoException e){
-                System.out.println("MongoException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.deleteVote(starRanking, postDTO);
-                return false;
-            }
-            catch(IllegalArgumentException e){
-                System.out.println("IllegalArgumentException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.deleteVote(starRanking, postDTO);
-                return false;
-            }
-            catch(IllegalStateException e){
-                System.out.println("IllegalStateException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.deleteVote(starRanking, postDTO);
-                return false;
-            }
+            // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
             catch(Exception e){
-                System.out.println("Exception in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.deleteVote(starRanking, postDTO);
+                System.out.println("Exception in StarRankingDAO.updateAvgStarRanking: " + e.getMessage());
+                System.err.println("MongoDB is not consistent, vote has been added in MongoDB but average star ranking has not been updated in MongoDB");
                 return false;
             }
         }
-        catch(MongoException e){
-            if(created)
-                System.err.println("MongoDB is not consistent, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
-            System.out.println("MongoException in StarRanking.votePost: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalArgumentException e){
-            if(created)
-                System.err.println("MongoDB is not consistent, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
-            System.out.println("IllegalArgumentException in StarRanking.votePost: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            if(created)
-                System.err.println("MongoDB is not consistent, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
-            System.out.println("IllegalStateException in StarRanking.votePost: " + e.getMessage());
-            return false;
-        }
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
         catch(Exception e){
-            if(created)
-                System.err.println("MongoDB is not consistent, vote has been created in MongoDB but average star ranking has not been computed in MongoDB");
-            System.out.println("Exception in StarRanking.votePost: " + e.getMessage());
+            System.out.println("Exception in StarRankingDAO.votePost: " + e.getMessage());
             return false;
         }
     }
 
-    public boolean deleteVote(RegisteredUser user, StarRanking starRanking, PostDTO postDTO) {
-        boolean deleted = false;
+    public boolean deleteVote(RegisteredUser user, StarRanking starRanking, PostDTO postDTO, Post post) {
+
         try{
-            Post post = PostDAO.findPostByPostDTO(postDTO); // to update redundancies
-            deleted = StarRankingDAO.deleteVote(starRanking, postDTO);
-            // Compute the new average star ranking
+            StarRankingDAO.deleteVote(starRanking, postDTO);
             try{
-                Double oldAvgStarRanking = post.getAvgStarRanking();
-                Double oldNumStarRanking = (double) post.getStarRankings().size();
-                if(oldNumStarRanking == 1.0)
-                    StarRankingDAO.unsetStarRankings(postDTO);    
-                else{
-                    Double newAvgStarRanking = (oldAvgStarRanking * oldNumStarRanking - starRanking.getVote()) / (oldNumStarRanking - 1);
-                    StarRankingDAO.updateAvgStarRanking(postDTO, newAvgStarRanking);
-                }           
-                return true;         
+                if(post.getStarRankings().size() == 1){
+                    StarRankingDAO.unsetStarRankings(postDTO);
+                    return true;
+                }
+
+                Double sum_votes = -starRanking.getVote();
+                // Computing the new average star ranking
+                for(StarRanking oldStarRanking: post.getStarRankings()){
+                    sum_votes += oldStarRanking.getVote();
+                }
+                Double newAvgStarRanking = sum_votes / (post.getStarRankings().size() - 1);
+
+                StarRankingDAO.updateAvgStarRanking(postDTO, newAvgStarRanking);
+                return true;
             }
-            catch(MongoException e){
-                System.out.println("MongoException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.votePost(user, starRanking, postDTO);
-                return false;
-            }
-            catch(IllegalArgumentException e){
-                System.out.println("IllegalArgumentException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.votePost(user, starRanking, postDTO);
-                return false;
-            }
-            catch(IllegalStateException e){
-                System.out.println("IllegalStateException in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.votePost(user, starRanking, postDTO);
-                return false;
-            }
+            // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
             catch(Exception e){
-                System.out.println("Exception in StarRanking.votePost: " + e.getMessage());
-                StarRankingDAO.votePost(user, starRanking, postDTO);
+                System.err.println("Exception in StarRankingDAO.unsetStarRankings OR StarRankingDAO.updateAvgStarRanking: " + e.getMessage());
+                System.err.println("MongoDB is not consistent, vote has been deleted in MongoDB but average star ranking has not been updated in MongoDB");
                 return false;
             }
         }
-        catch(MongoException e){
-            if(deleted)
-                System.err.println("Databases are not synchronized, vote has been deleted in MongoDB but average star ranking has not been computed in MongoDB");
-            System.out.println("MongoException in StarRanking.votePost: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalArgumentException e){
-            if(deleted)
-                System.err.println("Databases are not synchronized, vote has been deleted in MongoDB but average star ranking has not been computed in MongoDB");
-            System.out.println("IllegalArgumentException in StarRanking.votePost: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            if(deleted)
-                System.err.println("Databases are not synchronized, vote has been deleted in MongoDB but average star ranking has not been computed in MongoDB");
-            System.out.println("IllegalStateException in StarRanking.votePost: " + e.getMessage());
-            return false;
-        }
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
         catch(Exception e){
-            if(deleted)
-                System.err.println("Databases are not synchronized, vote has been deleted in MongoDB but average star ranking has not been computed in MongoDB");
-            System.out.println("Exception in StarRanking.votePost: " + e.getMessage());
+            System.err.println("Exception in StarRankingDAO.deleteVote: " + e.getMessage());
             return false;
         }
     }

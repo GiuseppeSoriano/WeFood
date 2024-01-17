@@ -7,6 +7,7 @@ import org.neo4j.driver.exceptions.Neo4jException;
 
 public interface RegisteredUserNeo4jInterface {
 
+    boolean deleteRegisteredUser(RegisteredUserDTO registeredUserDTO) throws IllegalStateException, Neo4jException;
     boolean createUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException;
     boolean deleteUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException;
 
@@ -21,4 +22,5 @@ public interface RegisteredUserNeo4jInterface {
     List<RegisteredUserDTO> findMostFollowedUsers() throws IllegalStateException, Neo4jException; //valid also for showing them
 
     List<RegisteredUserDTO> findUsersByIngredientUsage(String ingredientName) throws IllegalStateException, Neo4jException;
+
 }

@@ -17,20 +17,9 @@ public class CommentService {
         try{
             return CommentDAO.commentPost(user, comment, postDTO);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in Comment.commentPost: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in Comment.commentPost: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in Comment.commentPost: " + e.getMessage());
-            return false;
-        }
-        catch(Exception e){
-            System.out.println("Exception in Comment.commentPost: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in CommentDAO.commentPost: " + e.getMessage());
             return false;
         }
     }
@@ -39,20 +28,9 @@ public class CommentService {
         try{
             return CommentDAO.updateComment(user, comment, postDTO);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in Comment.updateComment: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in Comment.updateComment: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in Comment.updateComment: " + e.getMessage());
-            return false;
-        }
-        catch(Exception e){
-            System.out.println("Exception in Comment.updateComment: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in CommentDAO.updateComment: " + e.getMessage());
             return false;
         }
     }
@@ -61,20 +39,9 @@ public class CommentService {
         try{
             return CommentDAO.deleteComment(user, comment, postDTO);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in Comment.deleteComment: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in Comment.deleteComment: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in Comment.deleteComment: " + e.getMessage());
-            return false;
-        }
-        catch(Exception e){
-            System.out.println("Exception in Comment.deleteComment: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in CommentDAO.deleteComment: " + e.getMessage());
             return false;
         }
     }

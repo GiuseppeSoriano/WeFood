@@ -116,4 +116,5 @@ public class PostController {
         List<PostDTO> postDTOList = recipeImageService.postDTOconverter(postService.findRecipeByIngredients(request));
         return ResponseEntity.ok(postDTOList);
     }
+
 }

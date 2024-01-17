@@ -27,96 +27,17 @@ public class PostService {
                 RegisteredUserDAO.addPost(user, postDTO);
                 return id;
             }
-            catch(MongoException e){
-                PostDAO.deletePost(postDTO);
-                System.out.println("MongoException in IngredientService.createIngredient: " + e.getMessage());
-                return null;
-            }
-            catch(IllegalArgumentException e){
-                PostDAO.deletePost(postDTO);
-                System.out.println("IllegalArgumentException in IngredientService.createIngredient: " + e.getMessage());
-                return null;
-            }
-            catch(IllegalStateException e){
-                PostDAO.deletePost(postDTO);
-                System.out.println("IllegalStateException in IngredientService.createIngredient: " + e.getMessage());
-                return null;
-            }
+            // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
             catch(Exception e){
-                PostDAO.deletePost(postDTO);
-                System.out.println("Exception in IngredientService.createIngredient: " + e.getMessage());
+                System.err.println("Exception in RegisteredUserDAO.addPost: " + e.getMessage());
+                System.err.println("MongoDB is inconsistent. Redundancy in User collection has to be updated. Post:_id: " + id);
                 return null;
             }
         }
-        catch(MongoException e){
-            if(id != "")
-                System.err.println("MongoDB is inconsistent, Post " + id + " has not been inserted in User posts");
-            System.out.println("MongoException in IngredientService.createIngredient: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalArgumentException e){
-            if(id != "")
-                System.err.println("MongoDB is inconsistent, Post " + id + " has not been inserted in User posts");
-            System.out.println("IllegalArgumentException in IngredientService.createIngredient: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            if(id != "")
-                System.err.println("MongoDB is inconsistent, Post " + id + " has not been inserted in User posts");
-            System.out.println("IllegalStateException in IngredientService.createIngredient: " + e.getMessage());
-            return null;
-        }
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
         catch(Exception e){
-            if(id != "")
-                System.err.println("MongoDB is inconsistent, Post " + id + " has not been inserted in User posts");
-            System.out.println("Exception in IngredientService.createIngredient: " + e.getMessage());
+            System.err.println("Exception in PostDAO.uploadPost: " + e.getMessage());
             return null;
-        }
-    }
-
-    private boolean deletePostMongoDB(PostDTO postDTO, RegisteredUser user){
-        try{
-            RegisteredUserDAO.removePost(user, postDTO);
-            try{
-                PostDAO.deletePost(postDTO);
-                return true;
-            }
-            catch(MongoException e){
-                System.err.println("MongoDB is inconsistent, Post " + postDTO.getId() + " has been removed from User posts but not from Posts");
-                System.out.println("MongoException in IngredientService.createIngredient: " + e.getMessage());
-                return false;
-            }
-            catch(IllegalArgumentException e){
-                System.err.println("MongoDB is inconsistent, Post " + postDTO.getId() + " has been removed from User posts but not from Posts");
-                System.out.println("IllegalArgumentException in IngredientService.createIngredient: " + e.getMessage());
-                return false;
-            }
-            catch(IllegalStateException e){
-                System.err.println("MongoDB is inconsistent, Post " + postDTO.getId() + " has been removed from User posts but not from Posts");
-                System.out.println("IllegalStateException in IngredientService.createIngredient: " + e.getMessage());
-                return false;
-            }
-            catch(Exception e){
-                System.err.println("MongoDB is inconsistent, Post " + postDTO.getId() + " has been removed from User posts but not from Posts");
-                System.out.println("Exception in IngredientService.createIngredient: " + e.getMessage());
-                return false;
-            }
-        }
-        catch(MongoException e){
-            System.out.println("MongoException in IngredientService.createIngredient: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in IngredientService.createIngredient: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in IngredientService.createIngredient: " + e.getMessage());
-            return false;
-        }
-        catch(Exception e){
-            System.out.println("Exception in IngredientService.createIngredient: " + e.getMessage());
-            return false;
         }
     }
 
@@ -125,105 +46,75 @@ public class PostService {
         for (Map.Entry<String, Double> entry : post.getRecipe().getIngredients().entrySet()) {
             ingredients.add(entry.getKey());
         }
-        boolean created = false;
+
         try{
-            created = RecipeDAO.createRecipe(postDTO);
+            RecipeDAO.createRecipe(postDTO);
             try{
                 RecipeDAO.createRecipeIngredientsRelationship(postDTO, ingredients);
-                // This method call is at the same level of the
-                // previous one because if the previous one throws
-                // an exception, or the following one does, the
-                // first catches blocks will be executed and when
-                // RecipeDAO.deleteRecipe(recipeDTO) is called, it
-                // in addition of deleting the recipe, it will also
-                // delete the relationships created by the previous
-                // method call if they have been created (DETACH DELETE r
-                // inside the implementation of deleteRecipe)
                 IngredientDAO.createIngredientIngredientRelationship(ingredients);
-                // The following method call is at the same level of the
-                // previous ones because if the previous one does not throw
-                // an exception, but the following one does, the previous
-                // method call does not have to be rolled back because
-                // it is not expected a delete method call to be executed
-                // for the creation of IngredientIngredientRelationships (see documentation)
                 RegisteredUserDAO.createUserUsedIngredient(new RegisteredUserDTO(user.getId(), user.getUsername()), ingredients);
                 return true;
             }
-            catch(Neo4jException e){
-                System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-                RecipeDAO.deleteRecipe(postDTO);
-                // deleteUserUsedIngredient does not have to be called because
-                // the method call createUserUsedIngredient is the last one to be
-                // executed and if it throws an exception, so it's not necessary 
-                // to execute the rollback                
-                return false;
-            }
-            catch(IllegalStateException e){
-                System.out.println("IllegalStateException in uploadPostNeo4j: " + e.getMessage());
-                RecipeDAO.deleteRecipe(postDTO);
-                return false;
-            }
+            // Other types of exceptions can be handled if necessary: Neo4jException, IllegalStateException
             catch(Exception e){
-                System.out.println("Exception in uploadPostNeo4j: " + e.getMessage());
-                RecipeDAO.deleteRecipe(postDTO);
+                System.err.println("Exception in uploadPostNeo4j: " + e.getMessage());
+                System.err.println("Neo4j is inconsistent, Relationships of Recipe " + postDTO.getId() + " are inconsistent");
                 return false;
             }
         }
-        catch(Neo4jException e){
-            if(created)
-                System.err.println("Neo4j is inconsistent, Recipe " + postDTO.getId() + " has not been inserted in Ingredients");
-            System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            if(created)
-                System.err.println("Neo4j is inconsistent, Recipe " + postDTO.getId() + " has not been inserted in Ingredients");
-            System.out.println("IllegalStateException in uploadPostNeo4j: " + e.getMessage());
-            return false;
-        }
+        // Other types of exceptions can be handled if necessary: Neo4jException, IllegalStateException
         catch(Exception e){
-            if(created)
-                System.err.println("Neo4j is inconsistent, Recipe " + postDTO.getId() + " has not been inserted in Ingredients");
-            System.out.println("Exception in uploadPostNeo4j: " + e.getMessage());
+            System.err.println("Exception in uploadPostNeo4j: " + e.getMessage());
+            System.err.println("Recipe " + postDTO.getId() + " has not been inserted in Neo4j. Databases are not synchronized");
             return false;
         }
     }
 
     public boolean uploadPost(Post post, RegisteredUser user) {
+
+        // We need to upload the Post on MongoDB
         String id = uploadPostMongoDB(post, user);
         if(id == null)
+            // Post not uploaded on MongoDB
             return false;
-        PostDTO postDTO = new PostDTO(id, post.getRecipe().getImage(), post.getRecipe().getName());
-        if(uploadPostNeo4j(user, postDTO, post))
-            return true;
-        else{
-            if(deletePostMongoDB(postDTO, user)){
-                // Databases are consistent again
-            }
-            else 
-                System.err.println("Databases are not synchronized, Post " + id + " has not been added only in MongoDB");
-            return false;
-        }
+
+        // We need to upload the Post on Neo4j (by launching a Thread)
+        Thread neo4jThread = new Thread(() -> {
+            PostDTO postDTO = new PostDTO(id, post.getRecipe().getImage(), post.getRecipe().getName());
+            uploadPostNeo4j(user, postDTO, post);
+        });
+        neo4jThread.start();
+
+        return true;
     }
 
     public boolean modifyPost(Post post, PostDTO postDTO) {
         try{
             return PostDAO.modifyPost(post, postDTO);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in modifyPost: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in modifyPost: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in modifyPost: " + e.getMessage());
-            return false;
-        }
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
         catch(Exception e){
-            System.out.println("Exception in modifyPost: " + e.getMessage());
+            System.err.println("Exception in PostDAO.modifyPost: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean deletePostMongoDB(PostDTO postDTO, RegisteredUser user){
+        try{
+            PostDAO.deletePost(postDTO);
+            try{
+                return RegisteredUserDAO.removePost(user, postDTO);
+            }
+            // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+            catch(Exception e){
+                System.err.println("MongoDB is inconsistent, Post " + postDTO.getId() + " has been removed from Post collection but not from User collection");
+                System.err.println("Exception in RegisteredUserDAO.removePost: " + e.getMessage());
+                return false;
+            }
+        }
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e){
+            System.err.println("Exception in PostDAO.deletePost: " + e.getMessage());
             return false;
         }
     }
@@ -240,65 +131,75 @@ public class PostService {
                 RegisteredUserDAO.deleteUserUsedIngredient(new RegisteredUserDTO(user.getId(), user.getUsername()), ingredients);
                 return true;
             }
-            catch(Neo4jException e){
-                System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + postDTO.getId() + " have not been deleted");
-                return false;
-            }
-            catch(IllegalStateException e){
-                System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-                System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + postDTO.getId() + " have not been deleted");
-                return false;
-            }
+            // Other types of exceptions can be handled if necessary: Neo4jException, IllegalStateException
             catch(Exception e){
-                System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
+                System.out.println("Exception in RegisteredUserDAO.deleteUserUsedIngredient: " + e.getMessage());
                 System.err.println("Neo4j is inconsistent, UserUsedIngredient relationships of recipe " + postDTO.getId() + " have not been deleted");
                 return false;
             }
         }
-        catch(Neo4jException e){
-            System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-            return false;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in uploadPostNeo4j: " + e.getMessage());
-            return false;
-        }
+        // Other types of exceptions can be handled if necessary: Neo4jException, IllegalStateException
         catch(Exception e){
-            System.out.println("Exception in uploadPostNeo4j: " + e.getMessage());
+            System.err.println("Exception in RecipeDAO.deleteRecipe: " + e.getMessage());
+            System.err.println("Recipe " + postDTO.getId() + " has not been deleted in Neo4j. Databases are not synchronized");
             return false;
         }
     }
 
     public boolean deletePost(Post post, PostDTO postDTO, RegisteredUser user) {
+
+        // We need to delete the Post on MongoDB
         if(!deletePostMongoDB(postDTO, user))
+            // Post not deleted on MongoDB
             return false;
-        if(deletePostNeo4j(user, postDTO, post))
-            return true;
-        else{
-            System.err.println("Databases are not synchronized, Recipe " + postDTO.getId() + " has not been deleted in Neo4j");
-            return false;
+
+        // We need to delete the Post on Neo4j (by launching a Thread)
+        Thread neo4jThread = new Thread(() -> {
+            deletePostNeo4j(user, postDTO, post);
+        });
+        neo4jThread.start();
+
+        return true;
+    }
+
+
+    public boolean deleteAllUserPosts(List<PostDTO> postDTOs){
+
+        for(PostDTO postDTO: postDTOs){
+            try{
+                // We need to delete the Post on MongoDB
+                PostDAO.deletePost(postDTO);
+
+                // We need to delete the Post on Neo4j (by launching a Thread)
+                Thread neo4jThread = new Thread(() -> {
+                    try{
+                        RecipeDAO.deleteRecipe(postDTO);
+                    }
+                    // Other types of exceptions can be handled if necessary: Neo4jException, IllegalStateException
+                    catch(Exception e){
+                        System.err.println("Exception in RecipeDAO.deleteRecipe: " + e.getMessage());
+                        System.err.println("Recipe " + postDTO.getId() + " has not been deleted in Neo4j. Databases are not synchronized");
+                    }
+                });
+                neo4jThread.start();
+            }
+            // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+            catch(Exception e){
+                System.err.println("Exception in PostDAO.deletePost: " + e.getMessage());
+                return false;
+            }
         }
+
+        return true;
     }
 
     public List<PostDTO> browseMostRecentTopRatedPosts(long hours, int limit) {
         try{
             return PostDAO.browseMostRecentTopRatedPosts(hours, limit);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in browseMostRecentTopRatedPosts: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in browseMostRecentTopRatedPosts: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in browseMostRecentTopRatedPosts: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in browseMostRecentTopRatedPosts: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.browseMostRecentTopRatedPosts: " + e.getMessage());
             return null;
         }
     }
@@ -307,64 +208,31 @@ public class PostService {
         try{
             return PostDAO.browseMostRecentTopRatedPostsByIngredients(ingredientNames, hours, limit);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in browseMostRecentTopRatedPostsByIngredients: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.browseMostRecentTopRatedPostsByIngredients: " + e.getMessage());
             return null;
         }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in browseMostRecentTopRatedPostsByIngredients: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in browseMostRecentTopRatedPostsByIngredients: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in browseMostRecentTopRatedPostsByIngredients: " + e.getMessage());
-            return null;
-        }        
     }
 
     public List<PostDTO> browseMostRecentPostsByCalories(Double minCalories, Double maxCalories, long hours, int limit) {
         try{
             return PostDAO.browseMostRecentPostsByCalories(minCalories, maxCalories, hours, limit);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in browseMostRecentPostsByCalories: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.browseMostRecentPostsByCalories: " + e.getMessage());
             return null;
         }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in browseMostRecentPostsByCalories: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in browseMostRecentPostsByCalories: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in browseMostRecentPostsByCalories: " + e.getMessage());
-            return null;
-        } 
     }
 
     public Post findPostByPostDTO(PostDTO postDTO) {
         try{
             return PostDAO.findPostByPostDTO(postDTO);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in findPostByPostDTO: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in findPostByPostDTO: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in findPostByPostDTO: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in findPostByPostDTO: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.findPostByPostDTO: " + e.getMessage());
             return null;
         }
     }
@@ -373,42 +241,20 @@ public class PostService {
         try{
             return PostDAO.findPostById(_id);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in findPostById: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.findPostById: " + e.getMessage());
             return null;
         }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in findPostById: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in findPostById: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in findPostById: " + e.getMessage());
-            return null;
-        }    
     }
 
     public List<PostDTO> findPostsByRecipeName(String recipeName) {
         try{
             return PostDAO.findPostsByRecipeName(recipeName);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in findPostsByRecipeName: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in findPostsByRecipeName: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in findPostsByRecipeName: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in findPostsByRecipeName: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.findPostsByRecipeName: " + e.getMessage());
             return null;
         }
     }
@@ -422,20 +268,9 @@ public class PostService {
         try{
             return PostDAO.interactionsAnalysis();
         }
-        catch(MongoException e){
-            System.out.println("MongoException in interactionsAnalysis: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in interactionsAnalysis: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in interactionsAnalysis: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in interactionsAnalysis: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.interactionsAnalysis: " + e.getMessage());
             return null;
         }
     }
@@ -448,20 +283,9 @@ public class PostService {
         try{
             return PostDAO.userInteractionsAnalysis(username);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in userInteractionsAnalysis: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in userInteractionsAnalysis: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in userInteractionsAnalysis: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in userInteractionsAnalysis: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.userInteractionsAnalysis: " + e.getMessage());
             return null;
         }
     }
@@ -474,20 +298,9 @@ public class PostService {
         try{
             return PostDAO.caloriesAnalysis(recipeName);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in caloriesAnalysis: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in caloriesAnalysis: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in caloriesAnalysis: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in caloriesAnalysis: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.caloriesAnalysis: " + e.getMessage());
             return null;
         }
     }
@@ -497,20 +310,9 @@ public class PostService {
         try{
             return PostDAO.averageTotalCaloriesByUser(username);
         }
-        catch(MongoException e){
-            System.out.println("MongoException in averageTotalCaloriesByUser: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalArgumentException e){
-            System.out.println("IllegalArgumentException in averageTotalCaloriesByUser: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in averageTotalCaloriesByUser: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in averageTotalCaloriesByUser: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.averageTotalCaloriesByUser: " + e.getMessage());
             return null;
         }
     }
@@ -519,16 +321,9 @@ public class PostService {
         try{
             return RecipeDAO.findRecipeByIngredients(ingredientNames);
         }
-        catch(Neo4jException e){
-            System.out.println("Neo4jException in findRecipeByIngredients: " + e.getMessage());
-            return null;
-        }
-        catch(IllegalStateException e){
-            System.out.println("IllegalStateException in findRecipeByIngredients: " + e.getMessage());
-            return null;
-        }
-        catch(Exception e){
-            System.out.println("Exception in findRecipeByIngredients: " + e.getMessage());
+        // Other types of exceptions can be handled if necessary: Neo4jException, IllegalStateException
+        catch(Exception e) {
+            System.err.println("Exception in PostDAO.findRecipeByIngredients: " + e.getMessage());
             return null;
         }
     }
