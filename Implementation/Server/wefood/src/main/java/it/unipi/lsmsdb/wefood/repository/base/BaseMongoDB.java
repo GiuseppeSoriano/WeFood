@@ -3,9 +3,7 @@ package it.unipi.lsmsdb.wefood.repository.base;
 import com.mongodb.MongoException;
 import com.mongodb.client.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.bson.BsonString;
 import org.bson.BsonValue;
@@ -347,7 +345,7 @@ public abstract class BaseMongoDB {
 
     // UPDATE
 
-    private static List<Document> updateOne(String collectionName, String query) 
+/*    private static List<Document> updateOne(String collectionName, String query)
             throws MongoException, IllegalArgumentException, IllegalStateException{
         // Possible operations: $set, $unset, $push, $pull
 
@@ -432,7 +430,139 @@ public abstract class BaseMongoDB {
         }
 
         return new Document[]{Document.parse(result[0]), Document.parse(result[1])};
+    } */
+    private static List<Document> updateOne(String collectionName, String query)
+            throws MongoException, IllegalArgumentException, IllegalStateException{
+        // Possible operations: $set, $unset, $push, $pull
+
+        Document filter = null;
+        Bson updateOperation = new Document();
+        List<Bson> updateOperations = new ArrayList<>();
+        List<Document> documents = new ArrayList<>();
+
+
+        Map<String, Document> tmp = extractFilterAndUpdate(query);
+        filter = tmp.get("filter");
+
+        for(String op : tmp.keySet()){
+            Document update = tmp.get(op);
+            if (op.equals("$set")) {
+                for (String key : update.keySet()) {
+                    updateOperations.add(Updates.set(key, update.get(key)));
+                }
+            }
+            else if (op.equals("$unset")) {
+                for (String key : update.keySet()) {
+                    updateOperations.add(Updates.unset(key));
+                }
+            }
+            else if (op.equals("$push")) {
+                for (String key : update.keySet()) {
+                    Document value = update.get(key, Document.class);
+                    updateOperations.add(Updates.push(key, value));
+                }
+            }
+            else if (op.equals("$pull")) {
+                for (String key : update.keySet()) {
+                    Document value = update.get(key, Document.class);
+                    updateOperations.add(Updates.pull(key, value));
+                }
+            }
+        }
+
+        if (!updateOperations.isEmpty()) {
+            updateOperation = Updates.combine(updateOperations);
+        }
+
+        MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
+        UpdateResult result = collection.updateOne(filter, updateOperation);
+
+        // Converti l'ID del documento in un oggetto Document
+        documents.add(new Document("result", result.getMatchedCount()));
+
+        return documents;
     }
+    private static Map<String, Document> extractFilterAndUpdate(String query) {
+        StringBuilder filterBuilder = new StringBuilder();
+        StringBuilder updateBuilder = new StringBuilder();
+        int braceCount = 0;
+        int start = -1;
+
+        for (int i = 0; i < query.length(); i++) {
+            if (query.charAt(i) == '{') {
+                braceCount++;
+                if (start == -1) {
+                    start = i; // Inizio della sottostringa
+                }
+            } else if (query.charAt(i) == '}') {
+                braceCount--;
+                if (braceCount == 0) {
+                    // Fine della sottostringa
+                    String substring = query.substring(start, i + 1);
+                    start = -1; // Reimposta l'inizio per la prossima sottostringa
+                    if (filterBuilder.isEmpty()) {
+                        filterBuilder.append(substring);
+                    } else {
+                        updateBuilder.append(substring);
+                    }
+                }
+            }
+        }
+
+        Map<String, Document> result = new HashMap<>();
+        result.put("filter", Document.parse(filterBuilder.toString()));
+        Map<String, Document> updateMap = extractKeyValuePairs(updateBuilder.toString());
+        result.putAll(updateMap);
+        // result.put("update", Document.parse(updateBuilder.toString()));
+
+        return result;
+    }
+    // {$unset: {"comments": "" }, $set: {"author": {name: "Name", surname:"Surname"} }}
+    public static Map<String, Document> extractKeyValuePairs(String jsonString) {
+        Map<String, Document> resultMap = new HashMap<>();
+        int i = 0;
+        while (i < jsonString.length()) {
+            int dollarIndex = jsonString.indexOf('$', i);
+            if (dollarIndex == -1) {
+                break; // Nessun altro simbolo $ trovato
+            }
+
+            int colonIndex = jsonString.indexOf(':', dollarIndex);
+            if (colonIndex == -1) {
+                break; // Nessun carattere : trovato dopo il simbolo $
+            }
+
+            String key = jsonString.substring(dollarIndex, colonIndex).trim();
+
+            int startBrace = jsonString.indexOf('{', colonIndex);
+            if (startBrace == -1) {
+                break; // Nessuna parentesi graffa aperta dopo il simbolo :
+            }
+
+            int braceCount = 1;
+            int endBrace = startBrace + 1;
+            while (endBrace < jsonString.length() && braceCount > 0) {
+                if (jsonString.charAt(endBrace) == '{') {
+                    braceCount++;
+                } else if (jsonString.charAt(endBrace) == '}') {
+                    braceCount--;
+                }
+                endBrace++;
+            }
+
+            if (braceCount != 0) {
+                break; // Parentesi graffe non bilanciate
+            }
+
+            String value = jsonString.substring(startBrace, endBrace);
+            resultMap.put(key, Document.parse(value));
+
+            i = endBrace;
+        }
+
+        return resultMap;
+    }
+
 
     // DELETE
 
@@ -526,7 +656,7 @@ public abstract class BaseMongoDB {
             case "updateOne": // updateOne
                 
                 return updateOne(collectionName, operationDoc);
-                            
+
             case "deleteOne": // deleteOne
 
                 return deleteOne(collectionName, operationDoc);
@@ -549,12 +679,14 @@ public abstract class BaseMongoDB {
     public static void main(String[] args) {
         try {
             openMongoClient(); // Ensure client is created
-            String query = "db.User.find({username: \"cody_cisneros_28\"}, {username:1, posts:1})";
+            String mongosh_string = "db.Ingredient.updateOne({ \"name\": \"Pippo\" }," +
+                                        "{$set: {\"comments\": \"MY COMMENTS\" }," +
+                                        " $unset: {\"author\": \"\" }}" +
+                                    ")";
 
-            List<Document> provas = executeQuery(query);
-
-            for(Document prova: provas){
-                System.out.println(prova.toJson());
+            List<Document> result = executeQuery(mongosh_string);
+            for(Document doc : result){
+                System.out.println(doc.toJson());
             }
 
         } finally {

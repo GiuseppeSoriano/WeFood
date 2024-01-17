@@ -14,10 +14,10 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
 
     public boolean createRecipe(PostDTO postDTO) throws IllegalStateException, Neo4jException {
 
-        String image_string = (postDTO.getImage() == null) ? "" : ",\r\n image: \"" + postDTO.getImage() + "\"";
+        String image_string = (postDTO.getImage() == null) ? "" : ", image: \"" + postDTO.getImage() + "\"";
 
-        String query = "CREATE (r:Recipe {\r\n" + //
-                       "    _id: \"" + postDTO.getId() + "\",\r\n" + //
+        String query = "CREATE (r:Recipe {" + //
+                       "    _id: \"" + postDTO.getId() + "\"," + //
                        "    name: \"" + postDTO.getRecipeName() + "\"" + //
                        image_string +
                        "})";

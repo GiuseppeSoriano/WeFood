@@ -79,14 +79,14 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
     public boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
         String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
-        String  query = "db.User.updateOne({\r\n" + //
-                        "    _id: " + user.editedGetId() + "\r\n" + //
-                        "}, {\r\n" + //
-                        "    $set: {\r\n" + //
-                        "        password: \"" + hashedPassword + "\",\r\n" + //
-                        "        name: \"" + user.getName() + "\",\r\n" + //
-                        "        surname: \"" + user.getSurname() + "\"\r\n" + //
-                        "    }\r\n" + //
+        String  query = "db.User.updateOne({" + //
+                        "    _id: " + user.editedGetId() +  //
+                        "}, {" + //
+                        "    $set: {" + //
+                        "        password: \"" + hashedPassword + "\"," + //
+                        "        name: \"" + user.getName() + "\"," + //
+                        "        surname: \"" + user.getSurname() + "\"" + //
+                        "    }" + //
                         "})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -99,42 +99,34 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         // We have to unset the following fields: password, name, surname and posts,
         // and then we have to set the field deleted to true
 
-        String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + _id + "\r\n" + //
-                       "}, {\r\n" + //
-                       "    $set: {\r\n" + //
-                       "        deleted: true\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.User.updateOne({" + //
+                       "    _id: " + _id + //
+                       "}, {" + //
+                       "    $unset: {" + //
+                       "        password: \"\"," + //
+                       "        name: \"\"," + //
+                       "        surname: \"\"," + //
+                       "        posts: \"\"" + //
+                       "    }," + //
+                       "    $set: {" + //
+                       "        deleted: true" + //
+                       "    }" + //
                        "})";
-        
+
         List<Document> result = BaseMongoDB.executeQuery(query);
-
-        query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + _id + "\r\n" + //
-                       "}, {\r\n" + //
-                       "    $unset: {\r\n" + //
-                       "        password: \"\",\r\n" + //
-                       "        name: \"\",\r\n" + //
-                       "        surname: \"\",\r\n" + //
-                       "        posts: \"\"\r\n" + //
-                       "    }\r\n" + //
-                       "})";
-
-        result = BaseMongoDB.executeQuery(query);
 
         System.out.println(result.get(0).toJson());
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;
-
     };
 
     public boolean banUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
-        String query = "db.User.updateOne({\r\n" + //
-                       "    username: \"" + username + "\"\r\n" + //
-                       "}, {\r\n" + //
-                       "    $set: {\r\n" + //
-                       "        deleted: true\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.User.updateOne({" + //
+                       "    username: \"" + username + "\"" + //
+                       "}, {" + //
+                       "    $set: {" + //
+                       "        deleted: true" + //
+                       "    }" + //
                        "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
         System.out.println(result.get(0).getLong("result"));
@@ -148,12 +140,12 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     };
 
     public boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
-        String query = "db.User.updateOne({\r\n" + //
-                       "    username: \"" + username + "\"\r\n" + //
-                       "}, {\r\n" + //
-                       "    $unset: {\r\n" + //
-                       "        deleted: \"\"\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.User.updateOne({" + //
+                       "    username: \"" + username + "\"" + //
+                       "}, {" + //
+                       "    $unset: {" + //
+                       "        deleted: \"\"" + //
+                       "    }" + //
                        "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
         System.out.println(result.get(0).getLong("result"));
@@ -168,8 +160,8 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     };
 
     public boolean cancelUserMongoDB(String registeredUsername) throws MongoException, IllegalArgumentException, IllegalStateException {
-        String query = "db.User.deleteOne({\r\n" + //
-                       "    username: \"" + registeredUsername + "\"\r\n" + //
+        String query = "db.User.deleteOne({" + //
+                       "    username: \"" + registeredUsername + "\"" + //
                        "})";
         List<Document> result = BaseMongoDB.executeQuery(query);
         System.out.println(result.get(0).toJson());
@@ -178,17 +170,17 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     }
 
     public boolean addPost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
-        String image_string = (postDTO.getImage() == null) ? "" : "\"" + postDTO.getImage() + "\"";
-        String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.editedGetId() + "\r\n" + //
-                       "}, {\r\n" + //
-                       "    $push: {\r\n" + //
-                       "        posts: {\r\n" + //
-                       "            idPost: " + postDTO.editedGetId() + ",\r\n" + //
-                       "            name: \"" + postDTO.getRecipeName() + "\",\r\n" + //
+        String image_string = (postDTO.getImage() == null) ? "" : ", image: \"" + postDTO.getImage() + "\"";
+        String query = "db.User.updateOne({" + //
+                       "    _id: " + user.editedGetId() + //
+                       "}, {" + //
+                       "    $push: {" + //
+                       "        posts: {" + //
+                       "            idPost: " + postDTO.editedGetId() + "," + //
+                       "            name: \"" + postDTO.getRecipeName() + "\"" + //
                                    image_string + //
-                       "        }\r\n" + //
-                       "    }\r\n" + //
+                       "        }" + //
+                       "    }" + //
                        "})"; //
 
         List<Document> result = BaseMongoDB.executeQuery(query);
@@ -198,14 +190,14 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     }
 
     public boolean removePost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
-        String query = "db.User.updateOne({\r\n" + //
-                       "    _id: " + user.editedGetId() + "\r\n" + //
-                       "}, {\r\n" + //
-                       "    $pull: {\r\n" + //
-                       "        posts: {\r\n" + //
-                       "            idPost: " + postDTO.editedGetId() + "\r\n" + //
-                       "        }\r\n" + //
-                       "    }\r\n" + //
+        String query = "db.User.updateOne({" + //
+                       "    _id: " + user.editedGetId() + //
+                       "}, {" + //
+                       "    $pull: {" + //
+                       "        posts: {" + //
+                       "            idPost: " + postDTO.editedGetId() +  //
+                       "        }" + //
+                       "    }" + //
                        "})"; //
 
         List<Document> result = BaseMongoDB.executeQuery(query);

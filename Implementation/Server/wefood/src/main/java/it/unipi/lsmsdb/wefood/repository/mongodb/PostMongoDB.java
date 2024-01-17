@@ -30,7 +30,7 @@ public class PostMongoDB implements PostMongoDBInterface{
                             "description: \"" + post.getDescription() + "\"," + //
                             "timestamp: " + post.getTimestamp().getTime() + "," + //
                             "recipe: {" + //
-                                "name: \"" + post.getRecipe().getName() + "\"," + //
+                                "name: \"" + post.getRecipe().getName() + "\", " + //
                                 image_string + //
                                 "steps: " + post.getRecipe().stepsGetString() + "," + //
                                 "totalCalories: " + post.getRecipe().getTotalCalories() + "," + //
