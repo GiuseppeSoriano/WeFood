@@ -11,4 +11,4 @@ Data/DatasetStructure/0Raw_Datasets/*.csv
 Data/DatasetStructure/0Raw_Datasets/*.pkl
 Implementation/Examples/
 collections_database/*.json
-vm/
+vm/data
