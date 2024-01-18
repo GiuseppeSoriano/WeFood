@@ -1739,7 +1739,65 @@ The deployment of Neo4j was more straightforward compared to the previous setup.
 
 ---
 
+| Index | `Total DB hits` | `ms`        |
+|-------|-----------------|-------------|
+| No    | 3826            | 74          |
+| Yes   | 5               | 5           |
+
+
+Ingredient:name
+TEXT INDEX
+
+Find ingredient By name
+
+```
+CREATE TEXT INDEX ingredient_index FOR (i:Ingredient) ON (i.name);
+```
+
+
+
+| Index | `Total DB hits` | `ms`        |
+|-------|-----------------|-------------|
+| No    | 462651          | 202         |   
+| Yes   | 6               | 14          |
+
+
+```
+CREATE TEXT INDEX recipe_index FOR (r:Recipe) ON (r._id);
+```
+
+
+Recipe:_id fase creazione e cancellazione agevolate
+TEXT INDEX
+
+Find Recipe by _id
+
+
+
+| Index | `Total DB hits` | `ms`        |
+|-------|-----------------|-------------|
+| No    | 55808           | 65          |
+| Yes   | 5               | 12          |
+
+
+
+```
+CREATE TEXT INDEX user_index FOR (u:User) ON (u.username);
+```
+
+User:username
+TEXT INDEX
+
+Find User by username
+
+
+
+
+
+
 ### 7.2.1. Indexes (TO BE UPDATED)
+
+
 Here there aren't much information stored if compared again with MongoDB. However an index that could be useful to consider is the one relative to the name of the ingedients. Could be also considered an index on the names on the Recipes because they are the most present nodes in the graphDB and so they could bring enormous benefits.
 
 An index on the ingredient name in the Ingredient nodes is also a key component in helping the user browsing accross posts specifying different subset of ingredients. We expect that this operations, along with the previously described, will be very frequent and so should be optimized to provide a better experience for the user.
@@ -1890,6 +1948,11 @@ Post consistency:
 Last but not least, controller package and the apidto package manage all the comunication with the client and provide a possibility for the client to interact with all the classes described before.
 
 
+GIUSE SCRIVI QUI: DETTAGLI DEGNI DI NOTA - DRIVER MONGODB
+
+
+
+
 
 More details on the classes and their attributes are as follows.
 
@@ -1975,6 +2038,8 @@ Addressing the challenge of eventual consistency, as previously discussed during
 Furthermore, to expand the feature set of our social network, it is necessary to introduce additional functionalities. To do so, optimizing our parser to handle these new queries will be fundamental to achieve a more versatile and feature-rich social networking platform.
 
 In conclusion, the future trajectory of our application involves not only ensuring security through HTTPS implementation but also overcoming licensing barriers to explore multiple replicas in Neo4j. Additionally, addressing issues related to eventual consistency and expanding the functional scope with new queries in MongoDB are pivotal steps in ensuring the sustained growth and improvement of our social network.
+
+
 
 ---
 
