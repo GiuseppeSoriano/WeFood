@@ -14,9 +14,14 @@
         </nav>
     </header>
     <main>
-        <section class="feed">
-            <!-- Qui andrebbero i post delle ricette -->
-        </section>
+        <div class="grid-container">
+            <!-- <div class="grid-row"> -->
+                <div class="grid-col" *ngFor="let item of list_of_posts">
+                    <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
+                    <div class="label">{{ item.recipeName }}</div>
+                <!-- </div> -->
+            </div>
+        </div>        
     </main>
     <footer>
         <!-- Informazioni sul footer -->

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
+import { NavigationExtras, Router } from '@angular/router';
 
 @Component({
   selector: 'app-logging-popup',
@@ -10,12 +11,11 @@ export class LoggingPopupComponent implements OnInit {
 
   username: string = "";
   password: string = "";
-  user: any;
   adminLogin: boolean = false;
 
   @Output() closePopup: EventEmitter<void> = new EventEmitter();
   
-  constructor(private userService: RegisteredUserService) { }
+  constructor(private userService: RegisteredUserService, private router:Router) { }
 
   ngOnInit(): void {
   }
@@ -27,7 +27,14 @@ export class LoggingPopupComponent implements OnInit {
   onLogin() {
     this.userService.login(this.username, this.password).subscribe(
       data => {
-        this.user = data;
+        this.closePopup.emit();
+        // go to registered user feed
+        const navigationExtras: NavigationExtras = {
+          state: {
+            User: data,
+          }
+        };
+        this.router.navigate(['/registered-user-feed'], navigationExtras);
       },
       error => {
         if (error.status === 401) {

@@ -159,21 +159,6 @@ public class UnregisteredUserACTOR {
                 case "browseMostRecentTopRatedPosts":
                     browseMostRecentTopRatedPosts();
                     break;
-                case "browseMostRecentTopRatedPostsByIngredients":
-                    browseMostRecentTopRatedPostsByIngredients();
-                    break;
-                case "browseMostRecentPostsByCalories":
-                    browseMostRecentPostsByCalories();
-                    break;
-                case "findPostsByRecipeName":
-                    findPostsByRecipeName();
-                    break;
-                case "findRecipeByIngredients":
-                    findRecipeByIngredients();
-                    break;
-                case "mostPopularCombinationOfIngredients":
-                    mostPopularCombinationOfIngredients();
-                    break;
                 case "help":
                     printAvailableCommands();
                     break;
