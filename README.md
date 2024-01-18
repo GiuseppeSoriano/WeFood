@@ -31,12 +31,6 @@ In the following the structure of the repository:
 
     This structured approach in Slides not only offers a glimpse into the project's evolution but also provides an engaging way to understand the transition from original ideas to final implementations
 
--   Idea: Here PowerPoint slides prepared to present initial idea and the final discussion can be found.
-
--   collections_database: Here it can be found other python scripts used to process files cleaned in Data to produce the three files that are going to be used to fill databases: posts_database.json, ingredients_database.json and user_database_hashed.json.
-
--   vm: Here scripts to generate entities and relationships in neo4j can be found.
-
 ### Additional Resources
 Data in DatasetStructure and vm can be downloaded from [Google Drive](https://drive.google.com/drive/folders/0AFJxQDWAEcpQUk9PVA) (access the Google Drive link using your official university-provided account). Please ensure to download these to fully understand the data processing carried out.
 
