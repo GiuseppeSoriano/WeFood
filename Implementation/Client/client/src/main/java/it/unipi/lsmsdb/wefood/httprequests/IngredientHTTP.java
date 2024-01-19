@@ -13,63 +13,13 @@ import java.util.List;
 public class IngredientHTTP{
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final BaseHttpRequest baseHttpRequest = new BaseHttpRequest();
-    
-    // DA ELIMINARE? ABBIAMO GLI INGREDIENTI IN LOCALE
-    public Ingredient findIngredientByName(String request) {
-        try{
-            HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientByName", request);
-            if(result.statusCode() == 200 && !result.body().isEmpty())
-                // HTTP 200 OK
-                return objectMapper.readValue(result.body(), Ingredient.class);
-            // errors
-            return null;
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            return null;
-        }
-    }
 
-    
     public List<Ingredient> getAllIngredients() {
         try{
             HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/getAllIngredients", "");
             if(result.statusCode() == 200 && !result.body().isEmpty())
                 // HTTP 200 OK
                 return objectMapper.readValue(result.body(), new TypeReference<List<Ingredient>>(){});
-            // errors
-            return null;
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    // DA ELIMINARE?
-    public List<String> findIngredientsUsedWithIngredient(IngredientAndLimitRequestDTO request) {
-        try{
-            String requestBody = objectMapper.writeValueAsString(request);
-            HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientsUsedWithIngredientCustomLimit", requestBody);
-            if(result.statusCode() == 200 && !result.body().isEmpty())
-                // HTTP 200 OK
-                return objectMapper.readValue(result.body(), new TypeReference<List<String>>(){});
-            // errors
-            return null;
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    // DA ELIMINARE?
-    public List<String> findIngredientsUsedWithIngredient(String request) {
-        try{
-            HttpResponse<String> result = baseHttpRequest.sendRequest("ingredient/findIngredientsUsedWithIngredient", request);
-            if(result.statusCode() == 200 && !result.body().isEmpty())
-                // HTTP 200 OK
-                return objectMapper.readValue(result.body(), new TypeReference<List<String>>(){});
             // errors
             return null;
         }

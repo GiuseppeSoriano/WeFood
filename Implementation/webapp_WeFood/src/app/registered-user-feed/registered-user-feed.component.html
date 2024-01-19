@@ -3,29 +3,31 @@
 
 <body>
   <header>
-    <div class="search-bar">
-      <input type="text" [(ngModel)]="recipeName" placeholder="Inserisci il nome della ricetta">
-      <!-- <button (click)="searchRecipes()">Cerca</button> -->
-    </div>
-    <div class="ingredient-section">
-      <input type="text" [(ngModel)]="ingredientName" placeholder="Inserisci l'ingrediente">
-      <!-- <button (click)="addIngredient()">Aggiungi</button> -->
-    </div>
+    <nav>
+        <div class="logo">
+            <label> WeFood
+            <img src="../../assets/images/icon.png" alt="Logo WeFood">
+            </label>
+        </div>
+        <div class="menu">
+            <button id="profileButton">PROFILE</button>
+        </div>
+    </nav>
   </header>
 
-  <aside>
-    <button>Bottone 1</button>
-    <button>Bottone 2</button>
-    <button>Bottone 3</button>
-  </aside>
-
   <main>
-    <div class="post-section">
-      <!-- <div ng-repeat="post in posts" class="post"> -->
-        <!-- <img ng-src="{{post.imageUrl}}" alt="{{post.name}}"> -->
-        <!-- <p>{{post.name}}</p> -->
-      <!-- </div> -->
+    <div class="side left">
+      <app-most-popular-combination-of-ingredients (mostPopularCombinationOfIngredients)="mostPopularCombinationOfIngredients($event)"></app-most-popular-combination-of-ingredients>
+      <app-find-users-by-ingredient-usage (findUsersByIngredientUsage)="findUsersByIngredientUsage($event)"></app-find-users-by-ingredient-usage>
     </div>
+    <div class="grid-container">
+        <!-- <div class="grid-col" *ngFor="let item of list_of_posts">
+                <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
+                <div class="label">{{ item.recipeName }}</div>
+        </div> -->
+    </div>    
+    <div class="side right">
+    </div>    
   </main>
 </body>
 

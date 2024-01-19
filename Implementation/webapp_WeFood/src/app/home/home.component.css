@@ -1,79 +1,222 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* PAGE */
 
 body {
-    margin: 60px 0 0;
+    margin: 100px 0 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: Calibri, sans-serif;
+
 }
 
+/* HEADER */
 
 header {
-    background-color: #fff;
+    background-color: #F25C54;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: fixed;
     width: 100%;
+    padding: 0;
     top: 0;
     z-index: 1000; 
+    left: 0;
 }
+
+/* NAVBAR */
 
 nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 50px;
+    height: 55px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.logo label {
+    position: relative;
+    top: -12px;
+    color: #FFFFFF;
+    font-size: 30px;
+    font-weight: bold;
+    padding-right: 5px;
+    transition: 0.2s;
+}
+
+.logo label:hover {
+    cursor: pointer;
+    font-size: 35px;
+    transition: 0.2s;
+    padding-left: 0px;
+}
+
+.logo img {
+    position: relative;
+    top: 12px;
+    width: 50px;
+    height: 50px;
 }
 
 .menu button {
-    background-color: blue;
+    position: relative;
+    right: 10px;
+    background-color: #F25C54;
     color: white;
+    font-weight: bold;
+    font-size: 14px;
     border: none;
     padding: 10px 20px;
-    margin-left: 10px;
     border-radius: 5px;
     cursor: pointer;
+    transition: 0.05s;
 }
 
 .menu button:hover {
-    background-color: darkblue;
+    border: 3px solid;
+    border-color: #FFCD00;
+    transition: 0.05s;
 }
 
-.feed {
-    margin-top: 60px; /* Per evitare che il contenuto sia sotto l'header */
-    padding: 20px;
+
+
+/* MAIN */
+
+main {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
 }
+
+/* SIDEBAR */
+
+.side {
+    flex: 1;
+}
+
+.side.left {
+    min-height: 300px;
+    margin-left: 0;
+    top: 100px;
+    position: sticky;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* INPUT */
+
+
+/* SLIDER */
+
+.side.left label {
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 15px;
+    color: #FF6B6B;
+    font-weight: light;
+}
+
+.slider-label {
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 20px;
+    color: #FF6B6B;
+    font-weight: bold;
+}
+
+.slider {
+    -webkit-appearance: none;
+    max-width: 350px;
+    width: 50%;
+    height: 20px;
+    border: 2px solid #FFCD00;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 5px;
+    height: 25px;
+    border-radius: 0%;
+    cursor: pointer;
+    border: 5px solid #FF6B6B;
+    box-shadow: -400px 0 0 400px #FFCD00;
+}
+
+
+/* BUTTON */
+
+.side button {
+    padding: 8px 0;
+    max-width: 350px;
+    width: 50%;
+    margin-top: 20px;
+    background-color: #FF6B6B;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.side button:hover {
+    background-color: #F25C54;
+    transition: 0.2s;
+    transform: scale(1.01); /* Leggera scala su hover */
+}
+
+
+/* FEED VIEW*/
 
 .grid-container {
+    flex-direction: 4.67;
+    width: 70%;
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* Tre colonne di uguale larghezza */
     grid-gap: 10px; /* Spazio tra le colonne */
     padding: 10px; /* Padding attorno alla griglia */
-    background-color: #fafafa; /* Colore di sfondo simile a quello di Instagram */
+    background-color: white; /* Colore di sfondo simile a quello di Instagram */
     max-width: 800px; /* Larghezza massima della griglia */
-    margin: auto; /* Centra la griglia orizzontalmente */
 }
 
 .grid-col {
     position: relative;
     overflow: hidden; /* Nasconde le parti dell'immagine che sforano */
-    border-radius: 10px;
+    border-radius: 5px;
     background-color: white;
     height: 200px; /* Altezza fissa per ogni colonna */
 }
 
 .label {
+    visibility: hidden;
     position: absolute;
     bottom: 0px;
-    padding-right: 3px;
-    background-color: #f8f8f8; /* Colore di sfondo del riquadro */
+    padding: 10px 5px;
+    background-color: rgba(255, 255, 255, 0.75); /* Colore di sfondo del riquadro */
     border-radius: 0px; /* Rendi i bordi del riquadro arrotondati */
     width: 100%; /* Larghezza del riquadro basata sul contenuto */
-    border: 1px solid black;
+    font-weight: bolder;
+    font-size: 20px;
+    color: #F25C54;
+    text-align: center;
     /* rimuovi position: absolute; e altre proprietà relative alla posizione */
 }
+
+img:hover + .label {
+    visibility: visible;
+}
+
+.label:hover {
+    visibility: visible;
+}
+
 
 img {
     width: 100%;
@@ -81,10 +224,42 @@ img {
     object-fit: cover; /* Mantiene le proporzioni mentre copre l'area della colonna */
     object-position: center; /* Mantiene il centro dell'immagine visibile */
     transition: transform 0.3s ease;
+    cursor: pointer;
 }
 
 .grid-col:hover img {
-    transform: scale(1.05);
+    transform: scale(1.1);
 }
 
+/* LOADING */
 
+.loading-container {
+    flex:4.67;
+    width: 70%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Tre colonne di uguale larghezza */
+    grid-gap: 10px; /* Spazio tra le colonne */
+    padding: 10px; /* Padding attorno alla griglia */
+    max-width: 800px; /* Larghezza massima della griglia */
+}
+
+.loading {
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #f25c54;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+    /* Element has to be centered in height */
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

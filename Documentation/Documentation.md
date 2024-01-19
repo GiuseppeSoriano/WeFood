@@ -1987,9 +1987,63 @@ Last but not least, controller package and the apidto package manage all the com
 
 GIUSE SCRIVI QUI: DETTAGLI DEGNI DI NOTA - DRIVER MONGODB
 
+#### BaseMongoDB: The Driver to deal with MongoDB queries
+
+The BaseMongoDB class (`it.unipi.lsmsdb.wefood.repository.base.BaseMongoDB`) is an abstract Java class providing a comprehensive suite of functionalities to interact with MongoDB. It estabilishes connections, executes queries and handles data manipulation tasks like insterions, updates and deletions. The code is structured to support various MongoDB operations through a unified interface, offering a unique method that takes as input parameter the query in the MongoShell format.
+
+##### Connection handling 
+At the core, the class manages a MongoDB connection using the MongoClient instance. It employs the Singleton pattern to ensure that only one instance of MongoClient exists. This approach prevents unnecessary multiple connections to the database. The connection details, such as host addresses and database name, are configured as static final strings. 
+In details, these are how parameters have been setted:
+-   `private static final String MONGODB_DATABASE = "WeFood";`
+-   `private static final String WRITE_CONCERN = "1";` This parameter is set to "1", indicating that the write operation will be considered successful as soon as the data is written to the primary node in the MongoDB cluster. This level of write concern balances between performance and data safety, ensuring that each write operation is acknowledged by the primary node, thus offering a moderate level of data durability without the overhead of waiting for multiple nodes to acknowledge.
+-   `private static final String WTIMEOUT = "5000";` The write timeout is configured to 5000 milliseconds (5 seconds). This setting specifies the maximum amount of time the server will wait for a write operation to be acknowledged. If the operation is not acknowledged within this timeframe, it will result in a timeout exception. This timeout value helps in maintaining a balance between application responsiveness and waiting for database operations, ensuring that the application does not hang indefinitely on slow write operations.
+-   `private static final String READ_PREFERENCE = "nearest";`  The read preference has been set to "nearest", which directs the server to read from the nearest member (either primary or secondary) of the MongoDB cluster based on network latency. This setting is crucial for achieving low-latency read operations, as it ensures that the application reads data from the geographically closest node, thereby reducing network latency and improving the overall read performance.
+
+##### Error handling 
+Throughout the class, there's a consistent approach to error handling. The methods throw exceptions like MongoException, IllegalArgumentException, and IllegalStateException to signal failures during database operations. This exception-based approach ensures robust error reporting and handling. Error handling is entrusted to calling methods.
+
+##### Query execution
+
+The central component of query execution in the `BaseMongoDB` class is the method `executeQuery`, designed to handle various MongoDB operations. This method receives a single string input, `mongosh_string`, which is crucial as it contains all the information necessary to determine the type of operation to perform and its specific parameters.
+The input string, `mongosh_string`, follows a format resembling a MongoDB shell command. It includes the collection name, the operation to be performed, and the parameters for that operation.
+Example format: `db.collection.operation({param1: value1, ...})`.
+The method starts by dissecting the `mongosh_string` to extract essential components: the collection name and the operation details. The operation name (e.g., `find`, `insertOne`) is isolated, which guides the method to invoke the corresponding operation-specific method. The parameters for the operation are extracted from the remaining part of the `mongosh_string`. This part of the string represents the operation's arguments and is in JSON format.
+Depending on the operation, the parameters extracted from `mongosh_string` may need further processing. For example, in a `find` operation, the query parameters might need to be split into individual components like `find`, `project`, `sort`, and `limit`. This is achieved through various parsing methods, regular expressions, or JSON manipulations.
+
+**FIND**
+Once the executeQuery method has isolated `operationDoc` for the find operation, it transitions into a tailored query execution process. This part of the method takes the `operationDoc`, a string that encapsulates the specifics of the MongoDB find operation – such as criteria, projection, sorting, and limit – and prepares it for execution.
+Parsing this string involves converting the query parameters into a BSON format compatible with the MongoDB Java driver. The query criteria and any specified projection details are transformed into Document objects. Similarly, sorting instructions and the query limit are extracted and formatted appropriately. This meticulous preparation ensures that the MongoDB driver receives the query in a structure it can understand and process.
+Once the query components are parsed and formatted, the find method executes the query against the specified MongoDB collection. It uses the MongoDB Java driver to interact with the database, applying the criteria, projection, sorting, and limiting as defined in the `operationDoc`. The results are then collected and returned, providing a seamless bridge between the input string format and the MongoDB query execution. 
+
+**AGGREGATE**
+Handling the aggregate operation follows a similar pattern of precision and adaptation as the find operation, yet it caters to the more complex nature of aggregation in MongoDB.
+After the executeQuery method identifies and isolates the `operationDoc` specific to the aggregate operation, the next step involves interpreting and structuring this string for execution. The `operationDoc` for an aggregation contains a sequence of MongoDB aggregation pipeline stages, represented as an array of JSON objects.
+The primary task is to parse this string into a series of Bson objects, each corresponding to a stage in the MongoDB aggregation pipeline. This process requires a nuanced understanding of the MongoDB aggregation framework, as each stage—whether it's `$match`, `$group`, `$sort`, or others—has its unique structure and function. The parsing process ensures that these stages are accurately converted from their string representation into Bson objects, which are the format required by the MongoDB Java driver.
+Once the stages are parsed and organized, the aggregate method proceeds to execute this pipeline against the specified MongoDB collection. This involves passing the array of Bson stages to the MongoDB driver, which then performs the aggregation on the database. The result of this aggregation is a list of Document objects, each representing a record in the final aggregated output.
+
+**INSERT ONE**
+The `operationDoc` contains the data for the document to be inserted in a JSON-like format.
+The core task here is to parse this data string into a Document object. This is because the MongoDB Java driver requires the data to be in BSON format for insertion, and Document is the Java equivalent of a BSON object. The parsing ensures that the data structure, including any nested objects or arrays, is accurately represented in a format that MongoDB can understand.
+Once the data is parsed into a Document, the insertOne method is invoked. This method takes the prepared Document and uses the MongoDB Java driver to insert it into the specified collection. The operation results in an `InsertOneResult`, which includes information about the success of the operation (the `_id` of the inserted document).
+
+**UPDATE ONE**
+For the updateOne operation in the BaseMongoDB class, the process is tailored to update a single document in a MongoDB collection. This operation is slightly more complex due to the nature of update operations, which often involve conditional modifications based on specific criteria.
+The critical step here is to parse the `operationDoc` into two main components: the filter criteria and the update details. The filter criteria determine which document in the collection will be updated, while the update details specify how the document should be modified.
+
+-   The filter part of `operationDoc` is converted into a Document object. This conversion is essential to match the BSON format expected by the MongoDB Java driver.
+
+-   The update portion, potentially containing various update operators (`$set`, `$unset`, `$push`, `$pull`), is also parsed into a BSON format.
+Each operator and its corresponding data need to be accurately represented to ensure the update is performed correctly.
+
+With these components structured correctly, the updateOne method proceeds to execute the update operation. This involves calling the appropriate method from the MongoDB Java driver, passing the filter criteria and update details. The operation results in an `UpdateResult`, which includes information about the success of the operation (the number of documents updated).
+
+**DELETE ONE**
+When the executeQuery method identifies a `deleteOne` operation, it shifts its focus to handling the `operationDoc`, which in this case contains the criteria for selecting the document to be deleted.
+The key step here is converting the `operationDoc` into a BSON format that MongoDB understands. This conversion is achieved by parsing the string into a Document object. The Document encapsulates the criteria used to identify the document that needs to be deleted from the collection. This criteria involves key-value pairs that match the attributes of the document to be removed.
+With the deletion criteria correctly formatted, the deleteOne method executes the delete operation using the MongoDB Java driver. This process involves passing the parsed criteria to the driver, which then performs the deletion operation on the specified collection. The result of this operation is a `DeleteResult` object, which provides information about the outcome (the number of documents deleted).
 
 
-
+#### Models
 
 More details on the classes and their attributes are as follows.
 
@@ -2043,6 +2097,7 @@ More details on the classes and their attributes are as follows.
 - name: `String`
 - calories: `Double`
 
+DI QUESTO HO SCRITTO SOPRA NELLA DESCRIZIONE DEL DRIVER, EVENTUALMENTE CONTROLLARE
 Fare riferimento a deployment database
 private static final String MONGODB_DATABASE = "WeFood";
     private static final String WRITE_CONCERN = "1";

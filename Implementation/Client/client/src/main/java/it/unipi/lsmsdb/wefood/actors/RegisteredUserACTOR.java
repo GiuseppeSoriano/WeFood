@@ -612,11 +612,11 @@ public class RegisteredUserACTOR {
         System.out.println("-> logout");
         System.out.println("-> findNewIngredientsBasedOnFriendsUsage");
         System.out.println("-> findUsersToFollowBasedOnUserFriends");
-        System.out.println("-> findMostFollowedUsers");
-        System.out.println("-> findUsersByIngredientUsage");
-        System.out.println("-> findMostUsedIngredientByUser");
-        System.out.println("-> findMostLeastUsedIngredient");
-        System.out.println("-> mostPopularCombinationOfIngredients");
+        System.out.println("-> findMostFollowedUsers");                         // IMPLEMENTED
+        System.out.println("-> findUsersByIngredientUsage");                    // IMPLEMENTED
+        System.out.println("-> findMostUsedIngredientByUser");                  // HOW TO IMPLEMENT?
+//        System.out.println("-> findMostLeastUsedIngredient");
+        System.out.println("-> mostPopularCombinationOfIngredients");           // IMPLEMENTED
         System.out.println("-> uploadPost");
         System.out.println("-> modifyPost");
         System.out.println("-> deletePost");

@@ -1,27 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>La mia App di Ricette</title>
+    <title>WeFood</title>
 </head>
 <body>
     <header>
         <nav>
-            <div class="logo">WeFood</div>
+            <div class="logo">
+                <label> WeFood
+                <img src="../../assets/images/icon.png" alt="Logo WeFood">
+                </label>
+            </div>
             <div class="menu">
-                <button id="loginButton" (click) = "openPopup()">Login</button>
-                <button id="signupButton">Registrati</button>
+                <button id="loginButton" (click) = "openPopup()">LOGIN</button>
             </div>
         </nav>
     </header>
     <main>
-        <div class="grid-container">
+        <div class="side left">
+
+            <label>Hours</label>
+            <span class="slider-label">{{hours_var}}</span>
+            <input type="range" min="1" max="87600" class="slider" name="hours_var" [(ngModel)]="hours_var">
+            
+            <label>Number of Posts</label>
+            <span class="slider-label">{{limit_var}}</span>
+            <input type="range" min="3" max="120" step="3" class="slider" name="limit_var" [(ngModel)]="limit_var">
+            
+            <button (click)="getPosts()">Get Posts</button>
+        </div>
+        <div *ngIf="isLoading" class="loading-container">
+            <div class="loading"></div>
+        </div>
+        <div *ngIf="!isLoading"class="grid-container">
             <!-- <div class="grid-row"> -->
                 <div class="grid-col" *ngFor="let item of list_of_posts">
                     <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
                     <div class="label">{{ item.recipeName }}</div>
-                <!-- </div> -->
-            </div>
-        </div>        
+                </div>
+            <!-- </div> -->
+        </div>    
+        <div class="side"></div>    
     </main>
     <footer>
         <!-- Informazioni sul footer -->

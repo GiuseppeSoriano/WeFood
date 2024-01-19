@@ -1,4 +1,5 @@
 export interface RegisteredUserInterface {
+    _id: string;
     username: string;
     password: string;
     name: string;
@@ -6,12 +7,14 @@ export interface RegisteredUserInterface {
 }
 
 export class RegisteredUser implements RegisteredUserInterface {
+    _id: string;
     username: string;
     password: string;
     name: string;
     surname: string;
   
-    constructor(username:string = "", password:string = "", name:string = "", surname:string = "") {
+    constructor(id:string="", username:string = "", password:string = "", name:string = "", surname:string = "") {
+      this._id = id;
       this.username = username;
       this.password = password;
       this.name = name;

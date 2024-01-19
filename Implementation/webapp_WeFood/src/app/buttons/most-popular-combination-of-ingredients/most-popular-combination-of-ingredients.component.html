@@ -1,0 +1,8 @@
+<div>
+    <button (click)="toggleDropdown()">Most Popular Combinations of Ingredients</button>
+    <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
+      <!-- <div>Insert the ingredient</div> -->
+      <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName">
+      <button type="submit">SEARCH</button>
+    </div>
+</div>
