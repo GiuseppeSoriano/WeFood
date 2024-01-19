@@ -58,7 +58,7 @@ public class PostService {
             // Other types of exceptions can be handled if necessary: Neo4jException, IllegalStateException
             catch(Exception e){
                 System.err.println("Exception in uploadPostNeo4j: " + e.getMessage());
-                System.err.println("Neo4j is inconsistent, Relationships of Recipe " + postDTO.getId() + " are inconsistent");
+                System.err.println("Neo4j is inconsistent, Relationships of Recipe " + postDTO.getId() + " are inconsistent. Databases are not synchronized");
                 return false;
             }
         }

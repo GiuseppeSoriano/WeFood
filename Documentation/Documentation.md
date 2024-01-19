@@ -210,6 +210,7 @@ The *UML Class Diagram* shown in Figure \ref{fig:class_diagram} represents the m
 
 
 \newpage
+
 # 4. DataBases
 Before cleaning and preparing the dataset needed to populate the databases, it is necessary to define the structure of the latter. In particular, two different databases will be used: a document DB and a graph DB.
 
@@ -441,6 +442,7 @@ While reading operations are more frequent for the redundancies, the writing ope
 
 
 \newpage
+
 # 5. Dataset
 To populate the databases with a substantial volume of realistic data, datasets sourced from Kaggle were employed.
 
@@ -1061,17 +1063,18 @@ Creation operations are:
 Reading operations are:
 
 1. `Find User by username`;
-2. `Get all the Ingredients`;
-3. `Find Ingredient by name`;
-4. `Find Most Recent Top Rated Posts`;
-5. `Find Most Recent Top Rated Posts by set of ingredients`;
-6. `Find Most Recent Posts by minCalories and maxCalories`;
-7. `Find Post by Recipe name`;
-8. `Find Post by _id`;
-9. `Find Users Followed by a User`;
-10. `Find Followers of a User`;
-11. `Find Friends of a User`: a User's friends are the Users that follow him/her and that he/she follows;
-12. `Find Recipes by set of ingredients`;
+2. `Find User Page by username`;
+3. `Get all the Ingredients`;
+4. `Find Ingredient by name`;
+5. `Find Most Recent Top Rated Posts`;
+6. `Find Most Recent Top Rated Posts by set of ingredients`;
+7. `Find Most Recent Posts by minCalories and maxCalories`;
+8. `Find Post by Recipe name`;
+9. `Find Post by _id`;
+10. `Find Users Followed by a User`;
+11. `Find Followers of a User`;
+12. `Find Friends of a User`: a User's friends are the Users that follow him/her and that he/she follows;
+13. `Find Recipes by set of ingredients`;
 
 
 **MongoDB**
@@ -1080,17 +1083,29 @@ Reading operations are:
 ```javascript
     db.User.find({
         username: String
+    }, {
+        posts: 0
     })
 ```
 
-2. `Get all the Ingredients`:
+2. `Find User Page by username`:
+```javascript
+    db.User.find({
+        username: String
+    }, {
+        username: 1, 
+        posts: 1
+    })
+```
+
+3. `Get all the Ingredients`:
 ```javascript
     db.Ingredient.find({}, {
         _id: 0
     })
 ```
 
-3. `Find Ingredient by name`:
+4. `Find Ingredient by name`:
 ```javascript
     db.Ingredient.find({
         name: String
@@ -1099,7 +1114,7 @@ Reading operations are:
     })
 ```
 
-4. `Find Most Recent Top Rated Posts`:
+5. `Find Most Recent Top Rated Posts`:
 ```javascript
     db.Post.find({
         timestamp: {
@@ -1113,7 +1128,7 @@ Reading operations are:
     }).limit(limit)
 ```
 
-5. `Find Most Recent Top Rated Posts by set of ingredients`:
+6. `Find Most Recent Top Rated Posts by set of ingredients`:
 ```javascript
     db.Post.find({
         timestamp: {
@@ -1130,7 +1145,7 @@ Reading operations are:
     }).limit(limit)
 ```
 
-6. `Find Most Recent Posts by minCalories and maxCalories`:
+7. `Find Most Recent Posts by minCalories and maxCalories`:
 ```javascript
     db.Post.find({
         timestamp: {
@@ -1148,7 +1163,7 @@ Reading operations are:
     }).limit(limit)
 ```
 
-7. `Find Posts by Recipe name`:
+8. `Find Posts by Recipe name`:
 ```javascript
     db.Post.find({
         "recipe.name": {
@@ -1161,7 +1176,7 @@ Reading operations are:
     }).limit(10)
 ```
 
-8. `Find Post by _id`:
+9. `Find Post by _id`:
 ```javascript
     db.Post.find({
         _id: ObjectId("..."),
@@ -1176,25 +1191,25 @@ Reading operations are:
 
 **Neo4j**
 
-9. `Find Users Followed by a User`:
+10. `Find Users Followed by a User`:
 ```javascript
     MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)
     RETURN u2
 ```
 
-10. `Find Followers of a User`:
+11. `Find Followers of a User`:
 ```javascript
     MATCH (u1:User)-[:FOLLOWS]->(u2:User {username: String})
     RETURN u1
 ```
 
-11. `Find Friends of a User`:
+12. `Find Friends of a User`:
 ```javascript
     MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u1)
     RETURN u2
 ```
 
-12. `Find Recipes by set of ingredients`:
+13. `Find Recipes by set of ingredients`:
 ```javascript
     MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)
     WHERE i.name IN [String, ...]
@@ -1258,7 +1273,7 @@ Update operations are:
 ### 6.1.4. Delete
 Deletion operations are:
 
-1. `Delete User`: Users have the option to delete their own profiles, bearing in mind that all *non-personal information* will be retained for statistical purposes and to preserve the social network's current state attributed to that user. Although the user's profile becomes invisible, their posts will be preserved, allowing other users to still access the recipes uploaded by him/her in their feed. Once a profile is deleted, re-registration using the previous username is not permitted;
+1. `Delete User`: Users have the option to delete their own profiles, bearing in mind that all *non-personal information* will be retained for statistical purposes. Once a profile is deleted, re-registration using the previous username is not permitted;
 2. `Delete Post`;
 3. `Delete Post from User`;
 4. `Delete Comment`;
@@ -1279,18 +1294,14 @@ Deletions not allowed:
     db.User.updateOne({
         _id: ObjectId("...")
     }, {
-        $set: {
-            deleted: true
-        }
-    })
-    db.User.updateOne({
-        _id: ObjectId("...")
-    }, {
         $unset: {
             password: "",
             name: "",
             surname: "",
             posts: ""
+        },
+        $set: {
+            deleted: true
         }
     })
 ```
@@ -1344,6 +1355,12 @@ Deletions not allowed:
 
 
 **Neo4j**
+
+1. `Delete User`:
+```javascript
+    MATCH (u:User {username: String})
+    DETACH DELETE u
+```
 
 6. `Delete Recipe`:
 ```javascript
@@ -1725,82 +1742,102 @@ In contrast, the fields `totalCalories` and `timestamp` remain the same after th
 db.User.createIndex( { "username": 1 }, { unique: true } )
 ```
 
-| Index | nReturned | executionTimeMillis | totalKeysExamined | totalDocsExamined |
-|-------|-----------|---------------------|-------------------|-------------------|
-| No    | 1         | 78                  | 0                 | 27901             |
-| Yes   | 1         | 2                   | 1                 | 1                 |
+| Index | `nReturned` | `executionTimeMillis` | `totalKeysExamined` | `totalDocsExamined` |
+|-------|-------------|-----------------------|---------------------|---------------------|
+| No    | 1           | 78                    | 0                   | 27901               |
+| Yes   | 1           | 2                     | 1                   | 1                   |
 
 **Operation**: Find User by `username`.
 
 **Reason**: The inclusion of an index on the `username` field for the Users, as illustrated in the table, proves highly beneficial in significantly reducing the execution time of queries involving `username` lookup. This optimization is particularly valuable during the login phase and when Users or administrators need to access a User Profile. Examining potential drawbacks in this scenario, it becomes evident that the index does not require frequent updates. Specifically, updates are unnecessary after the creation (i.e., sign up) of a new user, as users cannot change their usernames. Similarly, updates are not required when a user decides to delete their account from the platform. This is because the `username` information is retained even after account deletion, preventing other users from signing up with the same `username`.
 
 ## 7.2. Neo4j
-The deployment of Neo4j was more straightforward compared to the previous setup. This ease was attributed to the deployment on a single machine, whereas setting up a cluster on multiple machines with replicas would have required the enterprise edition of Neo4j.
+The deployment of Neo4j was more straightforward compared to the previous setup. This ease was attributed to the deployment on a *single machine*, whereas setting up a cluster on multiple machines with replicas would have required the enterprise edition of Neo4j.
 
 ---
 
-| Index | `Total DB hits` | `ms`        |
-|-------|-----------------|-------------|
-| No    | 3826            | 74          |
-| Yes   | 5               | 5           |
+### 7.2.1. Indexes
+The indexes implemented in Neo4j are:
+
+- `Ingredient`:
+  - `name`: text index.
+
+- `Recipe`:
+  - `_id`: text index.
+
+- `User`:
+  - `username`: text index.
 
 
-Ingredient:name
-TEXT INDEX
+In particular:
 
-Find ingredient By name
 
-```
+`--> Ingredient:name`
+
+```javascript
 CREATE TEXT INDEX ingredient_index FOR (i:Ingredient) ON (i.name);
 ```
 
+\begin{table}[h]
+    \begin{tabularx}{\textwidth}{XXX}
+        \toprule
+        Index & \texttt{Total DB hits} & \texttt{ms} \\
+        \midrule
+        No & 3826  & 74 \\
+        Yes & 5 & 5 \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+**Operation**: Find Ingredient by `name`.
+
+**Reason**: Same reason that led to the creation of the equivalent index in MongoDB.
 
 
-| Index | `Total DB hits` | `ms`        |
-|-------|-----------------|-------------|
-| No    | 462651          | 202         |   
-| Yes   | 6               | 14          |
+`--> Recipe:_id`
 
-
-```
+```javascript
 CREATE TEXT INDEX recipe_index FOR (r:Recipe) ON (r._id);
 ```
 
-
-Recipe:_id fase creazione e cancellazione agevolate
-TEXT INDEX
-
-Find Recipe by _id
-
-
-
-| Index | `Total DB hits` | `ms`        |
-|-------|-----------------|-------------|
-| No    | 55808           | 65          |
-| Yes   | 5               | 12          |
+\begin{table}[h]
+    \begin{tabularx}{\textwidth}{XXX}
+        \toprule
+        Index & \texttt{Total DB hits} & \texttt{ms} \\
+        \midrule
+        No & 462651 & 202 \\
+        Yes & 6 & 14 \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
 
 
+**Operation**: Find Recipe by `_id`.
 
-```
+**Reason**: The introduction of such an index is justified by the fact that this `_id` is the primary key of the Post that contains the Recipe that is stored in MongoDB. By doing this, the process of finding a Recipe by `_id` is optimized as it is in MongoDB. Indeed, during the creation phase the recipe is referenced by id for creating all the relationships with the ingredients. Even the deletion of the recipes are optimized by this index because it is possible to find the recipe by `_id` and then delete it. 
+
+
+`--> User:username`
+
+```javascript
 CREATE TEXT INDEX user_index FOR (u:User) ON (u.username);
 ```
 
-User:username
-TEXT INDEX
+\begin{table}[h]
+    \begin{tabularx}{\textwidth}{XXX}
+        \toprule
+        Index & \texttt{Total DB hits} & \texttt{ms} \\
+        \midrule
+        No & 55808  & 65 \\
+        Yes & 5 & 12 \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
 
-Find User by username
+**Operation**: Find User by `username`.
 
+**Reason**: Explain...
 
-
-
-
-
-### 7.2.1. Indexes (TO BE UPDATED)
-
-
-Here there aren't much information stored if compared again with MongoDB. However an index that could be useful to consider is the one relative to the name of the ingedients. Could be also considered an index on the names on the Recipes because they are the most present nodes in the graphDB and so they could bring enormous benefits.
-
-An index on the ingredient name in the Ingredient nodes is also a key component in helping the user browsing accross posts specifying different subset of ingredients. We expect that this operations, along with the previously described, will be very frequent and so should be optimized to provide a better experience for the user.
 
 ## 7.3. Consistency, Availability and Partition Tolerance
 The ones of the title are the three main properties that a distributed system can have. However, it is impossible to have all of them at the same time as the CAP theorem states. In accordance with the predefined non-functional requirements, hence, the primary objective is to ensure the Availability and Partition tolerance of the system, allowing for a certain degree of relaxation in consistency constraints. This strategic approach allows to the main actors of the system, the users, to continue to use the application even if some information they see are not completely updated. These in a practical scenario means to not see for example the latest post that a friend uploaded. Eventually however is granted to the user that he will be able to see the latest post of his friend. This is the main idea behind the design of the system. Hence the design is intentionally aligned with the Availability and Partition tolerance intersection of the CAP theorem, placing a high value on achieving eventual consistency. In the next paragraph the consistency management of the system will be discussed in detailed investingating in particular on the consistency between databases.
