@@ -70,7 +70,8 @@ public class RecipeImageService {
         }
         catch(IOException e){
             System.out.println("IOException in getWebImage: " + e);
-            return null;
+            // We try to return the default one before giving up
+            return getLocalImage("DEFAULT");
         }
     }
 

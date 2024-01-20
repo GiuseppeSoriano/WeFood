@@ -1754,8 +1754,6 @@ db.User.createIndex( { "username": 1 }, { unique: true } )
 ## 7.2. Neo4j
 The deployment of Neo4j was more straightforward compared to the previous setup. This ease was attributed to the deployment on a *single machine*, whereas setting up a cluster on multiple machines with replicas would have required the enterprise edition of Neo4j.
 
----
-
 ### 7.2.1. Indexes
 The indexes implemented in Neo4j are:
 
@@ -1768,9 +1766,7 @@ The indexes implemented in Neo4j are:
 - `User`:
   - `username`: text index.
 
-
-In particular:
-
+More in detail:
 
 `--> Ingredient:name`
 
@@ -1791,7 +1787,7 @@ CREATE TEXT INDEX ingredient_index FOR (i:Ingredient) ON (i.name);
 
 **Operation**: Find Ingredient by `name`.
 
-**Reason**: Same reason that led to the creation of the equivalent index in MongoDB.
+**Reason**: As for MongoDB, introducing an index on the `name` field of the Ingredients helps to improve the User experience. Indeed, all the suggestions regarding the Ingredients will receive a boost after the introduction of this index.
 
 
 `--> Recipe:_id`
@@ -1814,7 +1810,7 @@ CREATE TEXT INDEX recipe_index FOR (r:Recipe) ON (r._id);
 
 **Operation**: Find Recipe by `_id`.
 
-**Reason**: The introduction of such an index is justified by the fact that this `_id` is the primary key of the Post that contains the Recipe that is stored in MongoDB. By doing this, the process of finding a Recipe by `_id` is optimized as it is in MongoDB. Indeed, during the creation phase the recipe is referenced by id for creating all the relationships with the ingredients. Even the deletion of the recipes are optimized by this index because it is possible to find the recipe by `_id` and then delete it. 
+**Reason**: The introduction of such an index is justified by the fact that this `_id` corresponds to the `_id` of the Post that contains the Recipe that is stored in MongoDB. By doing this, the process of finding a Recipe by `_id` is optimized as it is in MongoDB, where `_id` is by default indexed, being the primary key of the collection. Improvement in the performance of the system will be evident both in the creation phase and in the deletion phase of the Recipes, during which a particular Recipe is searched by `_id` among all the Recipes stored in the graph DB.
 
 
 `--> User:username`
@@ -1836,8 +1832,9 @@ CREATE TEXT INDEX user_index FOR (u:User) ON (u.username);
 
 **Operation**: Find User by `username`.
 
-**Reason**: Explain...
+**Reason**: locating a specific User by `username` is a prerequisite for various features in WeFood. These operations, along with those involving *suggestions*, are also connected to the *friendship system* provided to Users. Updating this index is not a relevant issue since Users cannot modify their usernames. The index only needs updates in the rare event of Users deleting their profiles. Considering the infrequency of such occurrences, the introduction of this index is expected to bring about more benefits than drawbacks.
 
+---
 
 ## 7.3. Consistency, Availability and Partition Tolerance
 The ones of the title are the three main properties that a distributed system can have. However, it is impossible to have all of them at the same time as the CAP theorem states. In accordance with the predefined non-functional requirements, hence, the primary objective is to ensure the Availability and Partition tolerance of the system, allowing for a certain degree of relaxation in consistency constraints. This strategic approach allows to the main actors of the system, the users, to continue to use the application even if some information they see are not completely updated. These in a practical scenario means to not see for example the latest post that a friend uploaded. Eventually however is granted to the user that he will be able to see the latest post of his friend. This is the main idea behind the design of the system. Hence the design is intentionally aligned with the Availability and Partition tolerance intersection of the CAP theorem, placing a high value on achieving eventual consistency. In the next paragraph the consistency management of the system will be discussed in detailed investingating in particular on the consistency between databases.
@@ -1984,8 +1981,6 @@ Post consistency:
 
 Last but not least, controller package and the apidto package manage all the comunication with the client and provide a possibility for the client to interact with all the classes described before.
 
-
-GIUSE SCRIVI QUI: DETTAGLI DEGNI DI NOTA - DRIVER MONGODB
 
 #### BaseMongoDB: The Driver to deal with MongoDB queries
 
