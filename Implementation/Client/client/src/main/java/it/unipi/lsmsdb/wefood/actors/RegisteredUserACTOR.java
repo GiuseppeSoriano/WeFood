@@ -609,30 +609,35 @@ public class RegisteredUserACTOR {
 
     private static void printAvailableCommands() {
         System.out.println("Available commands:");
+
         System.out.println("-> logout");
-        System.out.println("-> findNewIngredientsBasedOnFriendsUsage");
-        System.out.println("-> findUsersToFollowBasedOnUserFriends");
-        System.out.println("-> findMostFollowedUsers");                         // IMPLEMENTED
+
         System.out.println("-> findUsersByIngredientUsage");                    // IMPLEMENTED
-        System.out.println("-> findMostUsedIngredientByUser");                  // HOW TO IMPLEMENT?
-//        System.out.println("-> findMostLeastUsedIngredient");
         System.out.println("-> mostPopularCombinationOfIngredients");           // IMPLEMENTED
-        System.out.println("-> uploadPost");
-        System.out.println("-> modifyPost");
-        System.out.println("-> deletePost");
+        System.out.println("-> findNewIngredientsBasedOnFriendsUsage");
         System.out.println("-> browseMostRecentTopRatedPosts");
         System.out.println("-> browseMostRecentTopRatedPostByIngredients");
         System.out.println("-> browseMostRecentPostsByCalories");
         System.out.println("-> findPostByRecipeName");
-        System.out.println("-> averageTotalCaloriesByUser");
         System.out.println("-> findRecipeByIngredients");
+
+        System.out.println("-> findMostUsedIngredientByUser");                  // FA VEDERE NELLA PAGINA DELL'UTENTE
+        System.out.println("-> averageTotalCaloriesByUser");
+        System.out.println("-> uploadPost");
+        System.out.println("-> modifyPost");
+        System.out.println("-> deletePost");
         System.out.println("-> modifyPersonalInformation");
         System.out.println("-> deleteUser");
+        System.out.println("-> findUsersToFollowBasedOnUserFriends");
+        System.out.println("-> findMostFollowedUsers");
+
         System.out.println("-> followUser");
         System.out.println("-> unfollowUser");
+
         System.out.println("-> findFriends");
         System.out.println("-> findFollowers");
         System.out.println("-> findFollowed");
+
         System.out.println("-> help");
         System.out.println("-> exit");
     }

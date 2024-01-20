@@ -1,25 +1,135 @@
-/* Aggiungi al tuo CSS globale o al file login-popup.component.css */
+/* login-popup.component.css */
+
+
+
+
 .login-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 20px;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
-    z-index: 1001;
-  }
+  padding: 15px 70px 30px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #6A040F; 
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  border-radius: 10px; /* Smussa il bordo dei bottoni */
+  border-color: #F48C06;
+  font-family: Calibri, sans-serif;
+}
+
+.login-popup form {
+  display: flex;
+  flex-direction: column;
+}
+
+label.close {
+  position: relative;
+  right: -270px;
+  color: white;
+  font-weight: bolder;
+  font-size: 35px;
+  cursor: pointer;
+}
+
+label.login {
+  text-align: center; /* Centra il testo del titolo */
+  font-weight: bolder; /* Rende il testo corsivo */
+  color: white; /* Utilizza il colore desiderato per il testo */
+  font-size: 28px;
+  margin-bottom: 35px;
+}
+
+.login-popup input {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  font-size: 17px;
+  width: 100%;
+  border-radius: 5px;
+  border: 4px solid transparent;
   
-  .login-popup form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .login-popup input {
-    margin-bottom: 10px;
-  }
-  
-  .login-popup button {
-    margin-top: 10px;
-  }
-  
+  outline: none;
+  color: #370617;
+  font-weight: bolder;
+  box-sizing: border-box;
+}
+
+.login-popup input::placeholder {
+  color: #370617;
+  opacity: 0.7;
+
+}
+
+.login-popup input:focus {
+  border-color: #FFBA08;
+}
+
+
+.login-popup button {
+  margin-top: 20px;
+  text-transform: uppercase; /* Testo in maiuscolo */
+  cursor: pointer;
+  padding: 12px 0; /* Aggiungi spazio orizzontale e verticale ai pulsanti */
+  text-align: center; /* Centra il testo */
+  font-weight: bolder;
+  border-radius: 5px; /* Smussa il bordo dei bottoni */
+  transition: 0.2s;
+}
+
+.login-popup button[type="submit"] {
+  margin-top: 25px;
+  background-color: #FAA307;
+  color: white; 
+  font-size: 16px;
+}
+
+.login-popup button[type="submit"]:hover {
+  background-color: #FFBA08; 
+  transition: 0.2s;
+  transform: scale(1.05); /* Leggera scala su hover */
+}
+
+.login-popup label.info {
+  margin-top: 10px;
+  margin-left: 3px;
+  color: white;
+  font-size: 14px;
+}
+.login-popup label.info a {
+  color: #FAA307;
+  font-size: 15px;
+  font-weight: bolder;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.login-popup label.info a:hover {
+  transition: 0.2s;
+  color: #FFBA08;
+}
+
+
+.login-popup button[type="button"] {
+  font-size: 8px; /* Riduci la dimensione del pulsante "Chiudi" */
+  width: 50px; /* Larghezza fissa del pulsante "Chiudi" */
+  margin: 15px auto 0; /* Centra orizzontalmente il pulsante "Chiudi" e aggiungi spazio in alto */
+  margin-top: 15px;
+  text-align: center; /* Centra il testo */
+}
+
+.login-popup button.register {
+  display: none; /* Nascondi il pulsante "Registrati" di default */
+}
+
+.login-popup span {
+  margin-top: 60px; /* Spingi più in basso il testo "Turn to admin" */
+  align-self: flex-end; /* Allinea a destra */
+  font-size: 10px; /* Riduci la dimensione del testo "Turn to admin" */
+  cursor: pointer;
+  color: #FFBA08;
+}
+
+/* Aggiungi questo per mostrare il pulsante "Registrati" quando necessario */
+.login-popup span.show-register button.register {
+  display: inline-block;
+  margin-top: 5px;
+  visibility: hidden; /* Nasconde il pulsante senza alterare le dimensioni */
+}

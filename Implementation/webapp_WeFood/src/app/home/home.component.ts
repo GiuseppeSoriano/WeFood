@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { PostService } from '../services/post_service/post.service';
 import { PostDTOInterface } from '../models/post-dto.model';
 
@@ -16,6 +16,8 @@ export class HomeComponent implements OnInit {
 
   hours_var: number = 87600;
   limit_var: number = 30;
+
+  canBeClosed = false;
 
   constructor(private postService: PostService) { }
 
@@ -42,10 +44,18 @@ export class HomeComponent implements OnInit {
 
   openPopup() {
     this.showLoginPopup = true;
+    setTimeout(() => {
+      this.canBeClosed = true;
+    }, 300);
   }
 
   closePopup() {
-    this.showLoginPopup = false;
-  }
+    if (this.canBeClosed) {
+      // Allow the user to scroll the page again
+      document.body.style.overflow = 'auto';
 
+      this.canBeClosed = false;
+      this.showLoginPopup = false;
+    }
+  }
 }

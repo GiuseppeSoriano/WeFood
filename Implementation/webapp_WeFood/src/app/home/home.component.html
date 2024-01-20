@@ -17,6 +17,7 @@
         </nav>
     </header>
     <main>
+        <div class="overlay" *ngIf="showLoginPopup"></div>
         <div class="side left">
 
             <label>Hours</label>
@@ -27,7 +28,7 @@
             <span class="slider-label">{{limit_var}}</span>
             <input type="range" min="3" max="120" step="3" class="slider" name="limit_var" [(ngModel)]="limit_var">
             
-            <button (click)="getPosts()">Get Posts</button>
+            <button (click)="getPosts()">Search</button>
         </div>
         <div *ngIf="isLoading" class="loading-container">
             <div class="loading"></div>

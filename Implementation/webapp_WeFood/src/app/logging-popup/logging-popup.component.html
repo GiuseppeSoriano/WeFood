@@ -1,17 +1,19 @@
 <!-- login-popup.component.html -->
 <div class="login-popup">
-    <form>
-      <h3>{{ adminLogin ? 'Login as Admin' : 'Login as User' }}</h3>
-  
+  <form>
+      <label class="close" (click)="close()">&times;</label>
+      <label class="login">{{ adminLogin ? 'Admin Login' : 'Login' }}</label>
+
       <input [(ngModel)]="username" name="username" type="text" placeholder="Username" required>
       <input [(ngModel)]="password" name="password" type="password" placeholder="Password" required>
-  
-      <button type="submit" (click)="adminLogin ? loginAsAdmin() : loginAsUser()">Login</button>
-      <button type="button" (click)="close()">Chiudi</button>
-  
-      <span (click)="switchLogin()" style="cursor: pointer;">
-        {{ adminLogin ? 'Turn to user' : 'Turn to admin' }}
+
+      <button type="submit" (click)="adminLogin ? loginAsAdmin() : loginAsUser()" class="btn-style">Login</button>
+      <label class="info">Not Registered yet?  <a (click)="register()">Sign Up now!</a></label>
+
+      <span (click)="switchLogin()" style="cursor: pointer;" [class.show-register]="showRegisterButton">
+        {{ adminLogin ? 'User?' : 'Admin?' }}
       </span>
-    </form>
-  </div>
-  
+    
+  </form>
+</div>
+

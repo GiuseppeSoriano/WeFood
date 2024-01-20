@@ -38,8 +38,8 @@ button {
   /* STILE QUANDO IL MENU A TENDINA È VISIBILE */
   .dropdown-visible {
     /* padding: 5px; */
-    max-height: 200px; /* Regola questa altezza in base al contenuto del menu */
-    transition: 0.3s ease-in-out;
+    max-height: 500px; /* Regola questa altezza in base al contenuto del menu */
+    transition: 0.75s ease-in-out;
   }
   
   /* INPUT ALL'INTERNO DEL MENU A TENDINA */
@@ -48,8 +48,8 @@ button {
     color: #FFFFFF;
     font-weight: bold;
   }
-
-  .dropdown-container input {
+  
+  .dropdown-container div {
     width: 100%;
     box-sizing: border-box;
     /* margin: 5px 0; */
@@ -60,48 +60,99 @@ button {
     font-size: 14px; /* Dimensione del font */
     font-weight: bold; /* Grassetto */
     color: #9D0208;
+    text-align: center;
     /* change placeholder color */
   }
-  .dropdown-container input::placeholder {
-    color: #9D0208;
-    opacity: 0.7; /* Firefox */
-    text-align: center;
-  }
-  
-  .dropdown-container input:focus {
-    color: #9D0208;
-    border: #FFCD00 2px solid;
-    outline: none;
-    opacity: 0.7; /* Firefox */
-    background-color: transparent;
-    /* text-align: center; */
-  }
 
-  .dropdown-list {
-    max-height: 120px; /* Imposta l'altezza massima */
-    overflow-y: auto; /* Abilita lo scroll verticale se l'elenco è più lungo dell'altezza massima */
-    margin: 0;
-    padding: 0;
-
+  .inputIngredient {
     width: 100%;
     box-sizing: border-box;
+    /* margin: 5px 0; */
+    padding: 8px;
+    border: 2px solid #FFFFFF; /* Bordi colorati */
     background-color: #FFFCEB;
     border-radius: 5px; /* Bordo arrotondato */
     font-size: 14px; /* Dimensione del font */
     font-weight: bold; /* Grassetto */
-    color: #9D0208;
+    color: #6A040F;
+    /* change placeholder color */
+  }
+  .inputIngredient::placeholder {
+    color: #6A040F;
+    opacity: 0.8; 
     text-align: center;
-
-    cursor: pointer;
-  }
-
-  .listElement{
-    margin: 0;
-    height: 30px;
-  }
-
-  .listSpacer{
-    margin: 0;
-    height: 6px;
   }
   
+  .inputIngredient:focus {
+    color: #6A040F;
+    font-weight: bold;
+    border: #FFCD00 2px solid;
+    outline: none;
+    /* text-align: center; */
+  }
+
+  
+/* STILE HOURS AND LIMIT*/
+
+.dropdown-container label {
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 15px;
+    color: #370617;
+    font-weight: light;
+}
+
+.slider-label {
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 20px;
+    color: #6A040F;
+    font-weight: bold;
+}
+
+.slider {
+    /* removing default appearance */
+    -webkit-appearance: none;
+    appearance: none; 
+    /* creating a custom design */
+    max-width: 350px;
+    width: 50%;
+    cursor: pointer;
+    outline: none;
+    border-radius: 15px;
+    /*  overflow: hidden;  remove this line*/
+    
+    /* New additions */
+    height: 5px;
+    background: #9D0208;
+    margin-top: 8px;
+    margin-bottom: 15px;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none; 
+    /* creating a custom design */
+    height: 15px;
+    width: 15px;
+    background-color: #FAA307;
+    border-radius: 50%;
+    border: none;
+    transition: .2s ease-in-out;
+}
+
+/* Hover, active & focus Thumb: Webkit */
+.slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 8px rgba(255, 185, 8, 0.2)
+    
+}
+  
+.slider:active::-webkit-slider-thumb{
+    box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
+}
+
+.slider:focus::-webkit-slider-thumb{
+    box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
+}

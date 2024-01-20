@@ -14,6 +14,11 @@ import { PostService } from './services/post_service/post.service';
 import { MostPopularCombinationOfIngredientsComponent } from './buttons/most-popular-combination-of-ingredients/most-popular-combination-of-ingredients.component';
 import { CommonModule } from '@angular/common';
 import { FindUsersByIngredientUsageComponent } from './buttons/find-users-by-ingredient-usage/find-users-by-ingredient-usage.component';
+import { FindNewIngredientsBasedOnFriendsUsageComponent } from './buttons/find-new-ingredients-based-on-friends-usage/find-new-ingredients-based-on-friends-usage.component';
+import { BrowseMostRecentTopRatedPostsComponent } from './buttons/browse-most-recent-top-rated-posts/browse-most-recent-top-rated-posts.component';
+import { BrowseMostRecentTopRatedPostByIngredientsComponent } from './buttons/browse-most-recent-top-rated-post-by-ingredients/browse-most-recent-top-rated-post-by-ingredients.component';
+
+import { FilterIngredientPipe } from './pipes/filter-ingredient.pipe';
 
 @NgModule({
   declarations: [
@@ -22,7 +27,11 @@ import { FindUsersByIngredientUsageComponent } from './buttons/find-users-by-ing
     LoggingPopupComponent,
     RegisteredUserFeedComponent,
     MostPopularCombinationOfIngredientsComponent,
-    FindUsersByIngredientUsageComponent
+    FindUsersByIngredientUsageComponent,
+    FindNewIngredientsBasedOnFriendsUsageComponent,
+    BrowseMostRecentTopRatedPostsComponent,
+    BrowseMostRecentTopRatedPostByIngredientsComponent,
+    FilterIngredientPipe
   ],
   imports: [
     BrowserModule,

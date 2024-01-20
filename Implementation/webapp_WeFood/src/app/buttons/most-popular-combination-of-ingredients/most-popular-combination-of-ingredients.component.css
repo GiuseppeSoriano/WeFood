@@ -1,92 +1,92 @@
 button {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 1px 0;
-    padding: 10px;
-    background-color: #F25C54; /* Colore di sfondo principale */
-    color: white; /* Colore del testo */
-    border: none; /* Nessun bordo */
-    border-radius: 5px; /* Bordo arrotondato */
-    font-size: 16px; /* Dimensione del font */
-    font-weight: bold; /* Grassetto */
-    text-transform: uppercase; /* Testo in maiuscolo */
-    cursor: pointer; /* Cambia il cursore in un puntatore */
-    transition: background-color 0.3s, transform 0.2s; /* Transizione fluida per hover e click */
-  }
-  
-  button:hover {
-    background-color: #FF6B6B; /* Cambia colore al passaggio del mouse */
-    transform: scale(1.01); /* Leggera scala su hover */
-  }
-  
-  button:active {
-    background-color: #F4845F; /* Colore quando il pulsante è premuto */
-    transform: scale(0.95); /* Riduci la scala quando cliccato */
-  }
-  
-  /* CONTENITORE DEL MENU A TENDINA */
-  .dropdown-container {
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-    background-color: #FFFCEB;
-    border-radius: 5px;
-    transition: 0.3s ease-in-out;
-    max-height: 0; /* Imposta l'altezza massima iniziale a 0 */
-  }
-  
-  /* STILE QUANDO IL MENU A TENDINA È VISIBILE */
-  .dropdown-visible {
-    /* padding: 5px; */
-    max-height: 200px; /* Regola questa altezza in base al contenuto del menu */
-    transition: 0.3s ease-in-out;
-  }
-  
-  /* INPUT ALL'INTERNO DEL MENU A TENDINA */
-  .dropdown-container button {
-    background-color: #FFE45C;
-    color: #F25C54;
-  }
-  
-  .dropdown-container div {
-    width: 100%;
-    box-sizing: border-box;
-    /* margin: 5px 0; */
-    padding: 8px;
-    border: 2px solid #FFFFFF; /* Bordi colorati */
-    background-color: #FFFCEB;
-    border-radius: 5px; /* Bordo arrotondato */
-    font-size: 14px; /* Dimensione del font */
-    font-weight: bold; /* Grassetto */
-    color: #F25C54;
-    text-align: center;
-    /* change placeholder color */
-  }
+  width: 100%;
+  box-sizing: border-box;
+  margin: 1px 0;
+  padding: 10px;
+  background-color: #6A040F; /* Colore di sfondo principale */
+  color: white; /* Colore del testo */
+  border: none; /* Nessun bordo */
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 16px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  text-transform: uppercase; /* Testo in maiuscolo */
+  cursor: pointer; /* Cambia il cursore in un puntatore */
+  transition: background-color 0.3s, transform 0.2s; /* Transizione fluida per hover e click */
+}
 
-  .dropdown-container input {
-    width: 100%;
-    box-sizing: border-box;
-    /* margin: 5px 0; */
-    padding: 8px;
-    border: 2px solid #FFFFFF; /* Bordi colorati */
-    background-color: #FFFCEB;
-    border-radius: 5px; /* Bordo arrotondato */
-    font-size: 14px; /* Dimensione del font */
-    font-weight: bold; /* Grassetto */
-    color: #F25C54;
-    /* change placeholder color */
-  }
-  .dropdown-container input::placeholder {
-    color: #F25C54;
-    opacity: 0.7; /* Firefox */
-    text-align: center;
-  }
-  
-  .dropdown-container input:focus {
-    color: #F25C54;
-    border: #FFCD00 2px solid;
-    outline: none;
-    opacity: 0.7; /* Firefox */
-    /* text-align: center; */
-  }
-  
+button:hover {
+  background-color: #9D0208; /* Cambia colore al passaggio del mouse */
+  transform: scale(1.01); /* Leggera scala su hover */
+}
+
+button:active {
+  background-color: #F4845F; /* Colore quando il pulsante è premuto */
+  transform: scale(0.95); /* Riduci la scala quando cliccato */
+}
+
+/* CONTENITORE DEL MENU A TENDINA */
+.dropdown-container {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: #FFFCEB;
+  border-radius: 5px;
+  transition: 0.3s ease-in-out;
+  max-height: 0; /* Imposta l'altezza massima iniziale a 0 */
+}
+
+/* STILE QUANDO IL MENU A TENDINA È VISIBILE */
+.dropdown-visible {
+  /* padding: 5px; */
+  max-height: 200px; /* Regola questa altezza in base al contenuto del menu */
+  transition: 0.3s ease-in-out;
+}
+
+/* INPUT ALL'INTERNO DEL MENU A TENDINA */
+.dropdown-container button {
+  background-color: #F48C06;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.dropdown-container div {
+  width: 100%;
+  box-sizing: border-box;
+  /* margin: 5px 0; */
+  padding: 8px;
+  border: 2px solid #FFFFFF; /* Bordi colorati */
+  background-color: #FFFCEB;
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 14px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  color: #9D0208;
+  text-align: center;
+  /* change placeholder color */
+}
+
+.dropdown-container input {
+  width: 100%;
+  box-sizing: border-box;
+  /* margin: 5px 0; */
+  padding: 8px;
+  border: 2px solid #FFFFFF; /* Bordi colorati */
+  background-color: #FFFCEB;
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 14px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  color: #9D0208;
+  /* change placeholder color */
+}
+.dropdown-container input::placeholder {
+  color: #9D0208;
+  opacity: 0.7; /* Firefox */
+  text-align: center;
+}
+
+.dropdown-container input:focus {
+  color: #9D0208;
+  border: #FFCD00 2px solid;
+  outline: none;
+  opacity: 0.7; /* Firefox */
+  /* text-align: center; */
+}

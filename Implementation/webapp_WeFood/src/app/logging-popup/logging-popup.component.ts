@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
 import { NavigationExtras, Router } from '@angular/router';
 
@@ -12,12 +12,15 @@ export class LoggingPopupComponent implements OnInit {
   username: string = "";
   password: string = "";
   adminLogin: boolean = false;
+  showRegisterButton: boolean = true;
 
   @Output() closePopup: EventEmitter<void> = new EventEmitter();
   
-  constructor(private userService: RegisteredUserService, private router:Router) { }
+  constructor(private userService: RegisteredUserService, private router:Router, private eRef:ElementRef) { }
 
   ngOnInit(): void {
+    // Prevent the user from scrolling the page when the popup is open
+    document.body.style.overflow = 'hidden';
   }
 
   close() {
@@ -55,9 +58,22 @@ export class LoggingPopupComponent implements OnInit {
 
   }
 
+  register() {
+    this.onLogin();
+  }
+
   switchLogin() {
     this.adminLogin = !this.adminLogin;
     this.username = "";
     this.password = "";
+    this.showRegisterButton = !this.showRegisterButton;
   }
+
+  @HostListener('document:click', ['$event'])
+  clickout(event:any) {
+    if (!this.eRef.nativeElement.contains(event.target)) {
+        this.close();
+    }
+  }
+  
 }

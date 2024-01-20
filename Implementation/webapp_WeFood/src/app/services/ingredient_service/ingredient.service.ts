@@ -9,14 +9,24 @@ import { RegisteredUserInterface } from 'src/app/models/registered-user.model';
   providedIn: 'root'
 })
 export class IngredientService {
+  ingredients: IngredientInterface[] =[];
 
   constructor(private http: HttpClient) { }
 
+  initializeIngredients() {
+    this.http.post<IngredientInterface[]>('http://localhost:8080/ingredient/getAllIngredients', {}).subscribe(
+      data => {
+        this.ingredients = data;
+        console.log(this.ingredients);
+      },
+      error => {
+        alert('Error in loading page');
+      }
+    );
+  }
+
   getAllIngredients() {
-    return this.http.post<IngredientInterface[]>('http://localhost:8080/ingredient/getAllIngredients', {})
-      .pipe(
-        catchError(this.handleError)
-      );
+    return this.ingredients;
   }
 
   mostPopularCombinationsOfIngredients(ingredient_name: string) {

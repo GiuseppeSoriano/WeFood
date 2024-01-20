@@ -1,8 +1,20 @@
 <div>
-    <button (click)="toggleDropdown()">Find users that most used an ingredient</button>
-    <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
-      <!-- <div>Insert the ingredient</div> -->
-      <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName">
-      <button type="submit">SEARCH</button>
+  <button (click)="toggleDropdown()">Find users that most used an ingredient</button>
+  <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
+    <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName" (click)="showList=true">
+    
+    <div *ngIf="showList" class="dropdown-list">
+      <div class="listSpacer"></div>
+      <div *ngFor="let ingredient of ingredientsList | filterIngredient:ingredientName" 
+           (mouseenter)="setIngredientDetailed(ingredient)"
+           (mouseleave)="setIngredientDetailed(null)"
+           (click)="setIngredient(ingredient.name)" 
+           class="listElement">
+        {{ ingredient.name }}
+        <span *ngIf="ingredientDetailed === ingredient"> ({{ ingredient.calories }} kcal/100g)</span>
+      </div>
     </div>
+    
+    <button type="submit" (click)="doQuery()">SEARCH</button>
+  </div>
 </div>

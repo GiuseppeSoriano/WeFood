@@ -1,0 +1,17 @@
+<div>
+    <button (click)="toggleDropdown()">browse most recent top rated post by ingredients</button>
+    <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
+      <!-- <div>Insert the ingredient</div> -->
+      <input type="text" placeholder="Ingredient name" class="inputIngredient">
+      <div>
+        <label>Hours</label>
+        <span class="slider-label">{{hours_var}}</span>
+        <input type="range" min="1" max="87600" class="slider" name="hours_var" [(ngModel)]="hours_var">
+        
+        <label>Number of Posts</label>
+        <span class="slider-label">{{limit_var}}</span>
+        <input type="range" min="3" max="120" step="3" class="slider" name="limit_var" [(ngModel)]="limit_var">
+      </div>
+      <button type="submit">SEARCH</button>
+    </div>
+</div>
