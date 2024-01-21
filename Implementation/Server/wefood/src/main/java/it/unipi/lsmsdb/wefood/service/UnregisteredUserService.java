@@ -26,7 +26,7 @@ public class UnregisteredUserService {
             // Other types of exceptions can be handled if necessary: Neo4jException, IllegalStateException
             catch(Exception e){
                 RegisteredUserDAO.cancelUserMongoDB(registeredUser.getUsername());
-                System.out.println("Exception in UnregisteredUserDAO.createRegisteredUser: " + e.getMessage());
+                System.err.println("Exception in UnregisteredUserDAO.createRegisteredUser: " + e.getMessage());
                 return null;
             }
         }
@@ -34,7 +34,10 @@ public class UnregisteredUserService {
         catch(Exception e){
             if(registeredUser != null)
                 System.err.println("Databases are not synchronized, user " + registeredUser.getId() + " has been created in MongoDB but not in Neo4j");
-            System.out.println("Exception in UnregisteredUserDAO.register: " + e.getMessage());
+            if(e.getMessage().contains("duplicate key error"))
+                System.out.println("Username already exists");
+            else
+                System.err.println("Exception in UnregisteredUserDAO.register: " + e.getMessage());
             return null;
         }
     }

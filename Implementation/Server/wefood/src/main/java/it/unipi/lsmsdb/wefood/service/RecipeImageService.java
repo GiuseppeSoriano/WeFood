@@ -15,7 +15,7 @@ import it.unipi.lsmsdb.wefood.model.Post;
 public class RecipeImageService {
 
     private static final String LOCAL_RECIPES_IMAGES_PATH = "RecipesImages/";
-    private static final String DEFAULT_IMAGE_PATH = LOCAL_RECIPES_IMAGES_PATH + "Default/image.png";
+    private static final String DEFAULT_IMAGE_PATH = LOCAL_RECIPES_IMAGES_PATH + "Default/WeFood.jpg";
     
     public String storePostImage(Post post){
         String username = post.getUsername();

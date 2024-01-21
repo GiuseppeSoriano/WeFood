@@ -1840,10 +1840,17 @@ The trio of properties highlighted in the title represents the fundamental chara
 
 This is the main idea behind the design of the system. Consequently, the intentional alignment of the design with the intersection of Availability and Partition Tolerance in the CAP theorem places considerable emphasis on achieving eventual consistency. The subsequent paragraph will delve into a detailed discussion of the system's consistency management, focusing particularly on the *Inter-Database consistency*.
 
+Intra-database:
+Osservazioni fatte sull'intra-database consistency. nominando anche vote-post 
+Post-collection prima.
+
 ## 7.4. Inter-Database Consistency
 Besides of ensuring *intra-database consistency* within a single database for *redundancy* updates, a trickier concern involves maintaining consistency between different databases. Two types of consistency are guaranteed, depending on the nature of the operation performed.
 
-- For operations deemed particularly delicate, **Strict Consistency** is ensured. An example is *User Registration*, where ensuring the correctness of setup before Users can utilize the application takes precedence. Similarly, all operations executed by the Admin are handled with strict consistency, prioritizing the assurance that everything went well over a quick response. In such cases, strict consistency entails rolling back the databases to the previous state if an operation fails. The scheme in Figure \ref{fig:strict_consistency} is adopted, where the operation is first executed in MongoDB. If it fails, no modifications are made, and a `False` response is returned. If successful, the same operation is performed in Neo4j, with the user experiencing a *little delay*. If an issue arises, MongoDB is rolled back to maintain consistency between the two databases, resulting in a `False` return. If all goes well, a `True` return signifies successful execution, ensuring consistency.
+- For operations deemed particularly delicate, **Strict Consistency** is ensured. (An example) is *User Registration*, where ensuring the correctness of setup before Users can utilize the application takes precedence. Similarly, all operations executed by the Admin are handled with strict consistency, prioritizing the assurance that everything went well over a quick response. In such cases, strict consistency entails rolling back the databases to the previous state if an operation fails. The scheme in Figure \ref{fig:strict_consistency} is adopted, where the operation is first executed in MongoDB. If it fails, no modifications are made, and a `False` response is returned. If successful, the same operation is performed in Neo4j, with the user experiencing a *little delay*. If an issue arises, MongoDB is rolled back to maintain consistency between the two databases, resulting in a `False` return. If all goes well, a `True` return signifies successful execution, ensuring consistency.
+
+Tutte le operazioni che prevedono la gestione della consistenza effettuate da actor diversi da registered user sono gestite in strict consitency.
+Aggiungere fatto che admin fa solo create ingredient
 
 \begin{figure}
     \centering
@@ -1851,6 +1858,8 @@ Besides of ensuring *intra-database consistency* within a single database for *r
     \caption{Strict Consistency scheme.}
     \label{fig:strict_consistency}
 \end{figure}
+
+Non fare such ma nominare i casi.
 
 - Conversely, when main social network operations are performed by Users, such as uploading or deleting a Post<!--(or even deleting a User account)-->, the primary focus, as specified in the Non-Functional Requirements, is on providing high availability and a quick response over strict consistency constraints. In these cases, the necessary is to return control as swiftly as possible to the User. Although strict consistency is not guaranteed, availability takes precedence. **Eventual Consistency** is adopted in such scenarios (Figure \ref{fig:eventual_consistency}). The operation begins in MongoDB, and if it fails, no further action is taken. If MongoDB operation succeeds, an immediate `True` response is given, as waiting is unnecessary. Subsequently, a Thread is initiated to asynchronously handle consistency with Neo4j. Given that no critical information is stored in Neo4j, Users can continue using the application even if the two databases are temporarily inconsistent. If the Thread encounters issues, no action is taken, prioritizing system availability over consistency. A log message or automatic trigger can be scheduled for future consistency recovery. Users can seamlessly use the application, and if Neo4j is down, they can still access features unrelated to Neo4j. Human operators, notified by log messages, are responsible for rectifying the situation if necessary. If both MongoDB and Neo4j operations succeed, no further intervention is required.
 
