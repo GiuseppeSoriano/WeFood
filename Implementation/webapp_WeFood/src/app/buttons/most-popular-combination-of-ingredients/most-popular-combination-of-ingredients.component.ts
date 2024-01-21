@@ -1,4 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
+import { IngredientInterface } from 'src/app/models/ingredient.model';
+import { IngredientService } from 'src/app/services/ingredient_service/ingredient.service';
 
 @Component({
   selector: 'app-most-popular-combination-of-ingredients',
@@ -7,28 +9,64 @@ import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } fro
 })
 export class MostPopularCombinationOfIngredientsComponent implements OnInit {
   ingredientName: string = "";
+  suggestions: string[] = [];
+  ingredientsList: IngredientInterface[] = [];    // LIST WITH ALL INGREDIENTS. INITIALIZED IN ngOnInit() WITH THE CALL TO THE SERVICE
+  ingredientDetailed: any = null;   // USED TO SHOW CALORIES
 
-  constructor(private eRef: ElementRef) { }
+  showList: boolean = false;      // USED TO HANDLE LIST VISIBILITY
+  canCloseList: boolean = true;   // USED TO HANDLE LIST VISIBILITY
+
+  constructor(private eRef: ElementRef, private ingredientService: IngredientService) { }
 
   ngOnInit(): void {
+    this.ingredientsList = this.ingredientService.getAllIngredients();
   }
 
-  @Output() mostPopularCombinationOfIngredients = new EventEmitter<any>();
 
-  onExecute() {
-    // Prepara i dati da inviare
-    const dataToEmit = {
-      // I tuoi dati qui
-    };
-
-    // Emetti l'evento con i dati
-    this.mostPopularCombinationOfIngredients.emit(dataToEmit);
+  execute() {
+    this.showList = false;
+    if(!this.ingredientsList.some(ingredient => ingredient.name === this.ingredientName)) {
+      this.suggestions = ["Insert a valid ingredient"];
+      return;
+    }
+    this.ingredientService.mostPopularCombinationOfIngredients(this.ingredientName).subscribe(
+      data => {
+        console.log(data);
+        this.suggestions = ["No suggestions available"];
+        if (data.length > 0)
+          this.suggestions = data;
+      },
+      error => {
+        if (error.status === 401) {
+          // Gestisci l'errore 401 qui
+          alert('Wrong username or password');
+        }
+      }
+    );
   }
 
+  setIngredientDetailed(ingredient: any) {
+    this.ingredientDetailed = ingredient;
+  }
+
+  newIngredientIsBeingInserted() {
+    this.showList=true;
+    this.suggestions = [];
+  }
+  
   activeDropdownIndex: boolean = false;
 
   toggleDropdown(): void {
-    this.activeDropdownIndex = !this.activeDropdownIndex;
+    if(this.showList) {
+      this.showList = false;
+    }
+    else{
+      setTimeout(() => {
+        this.suggestions = [];
+        this.ingredientName = "";
+      }, 300);
+      this.activeDropdownIndex = !this.activeDropdownIndex;
+    }
   }
 
   isActiveDropdown(): boolean {
@@ -38,10 +76,23 @@ export class MostPopularCombinationOfIngredientsComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   clickout(event:any) {
     if (!this.eRef.nativeElement.contains(event.target)) {
-      if (this.isActiveDropdown()) {
+      if(this.showList) {
+        this.showList = false;
+      }
+      else if (this.isActiveDropdown() && this.canCloseList) {
         this.toggleDropdown();
       }
     }
+  }
+
+  setIngredient(ingredientName: string) {
+    this.ingredientName = ingredientName;
+    this.showList = false;
+    this.ingredientDetailed = null;
+    this.canCloseList = false;
+        setTimeout(() => {
+          this.canCloseList = true;
+        }, 300);
   }
 
 }

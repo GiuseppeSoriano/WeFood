@@ -38,7 +38,7 @@ button:active {
 /* STILE QUANDO IL MENU A TENDINA È VISIBILE */
 .dropdown-visible {
   /* padding: 5px; */
-  max-height: 200px; /* Regola questa altezza in base al contenuto del menu */
+  max-height: 230px; /* Regola questa altezza in base al contenuto del menu */
   transition: 0.3s ease-in-out;
 }
 
@@ -47,21 +47,6 @@ button:active {
   background-color: #F48C06;
   color: #FFFFFF;
   font-weight: bold;
-}
-
-.dropdown-container div {
-  width: 100%;
-  box-sizing: border-box;
-  /* margin: 5px 0; */
-  padding: 8px;
-  border: 2px solid #FFFFFF; /* Bordi colorati */
-  background-color: #FFFCEB;
-  border-radius: 5px; /* Bordo arrotondato */
-  font-size: 14px; /* Dimensione del font */
-  font-weight: bold; /* Grassetto */
-  color: #9D0208;
-  text-align: center;
-  /* change placeholder color */
 }
 
 .dropdown-container input {
@@ -88,5 +73,34 @@ button:active {
   border: #FFCD00 2px solid;
   outline: none;
   opacity: 0.7; /* Firefox */
+  background-color: transparent;
   /* text-align: center; */
+}
+
+.dropdown-list {
+  max-height: 160px; /* Imposta l'altezza massima */
+  overflow-y: auto; /* Abilita lo scroll verticale se l'elenco è più lungo dell'altezza massima */
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #FFFCEB;
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 14px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  color: #9D0208;
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.listElement{
+  margin: 0;
+  height: 30px;
+}
+
+.listSpacer{
+  margin: 0;
+  height: 6px;
 }

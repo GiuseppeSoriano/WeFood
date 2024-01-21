@@ -1,8 +1,6 @@
 /* login-popup.component.css */
 
 
-
-
 .login-popup {
   padding: 15px 70px 30px;
   position: fixed;
@@ -29,7 +27,15 @@ label.close {
   font-weight: bolder;
   font-size: 35px;
   cursor: pointer;
+  opacity: 0.8;
+  transition: 0.2s;
 }
+
+label.close:hover {
+  opacity: 1;
+  transition: 0.2s;
+}
+
 
 label.login {
   text-align: center; /* Centra il testo del titolo */
@@ -64,6 +70,20 @@ label.login {
 }
 
 
+.login-popup label.response {
+  margin-top: 10px;
+  margin-bottom: -5px;
+  color: white;
+  font-size: 15px;
+  font-weight: bolder;
+  text-align: center;
+  visibility: hidden;
+}
+
+.login-popup label.response.visible {
+  visibility: visible;
+}
+
 .login-popup button {
   margin-top: 20px;
   text-transform: uppercase; /* Testo in maiuscolo */
@@ -91,6 +111,7 @@ label.login {
 .login-popup label.info {
   margin-top: 10px;
   margin-left: 3px;
+  margin-bottom: 10px;
   color: white;
   font-size: 14px;
 }
@@ -99,37 +120,43 @@ label.login {
   font-size: 15px;
   font-weight: bolder;
   cursor: pointer;
-  transition: 0.2s;
 }
 .login-popup label.info a:hover {
-  transition: 0.2s;
   color: #FFBA08;
 }
 
-
-.login-popup button[type="button"] {
-  font-size: 8px; /* Riduci la dimensione del pulsante "Chiudi" */
-  width: 50px; /* Larghezza fissa del pulsante "Chiudi" */
-  margin: 15px auto 0; /* Centra orizzontalmente il pulsante "Chiudi" e aggiungi spazio in alto */
-  margin-top: 15px;
-  text-align: center; /* Centra il testo */
+.login-popup label.invisible {
+  visibility: hidden;
 }
 
-.login-popup button.register {
-  display: none; /* Nascondi il pulsante "Registrati" di default */
-}
 
-.login-popup span {
-  margin-top: 60px; /* Spingi più in basso il testo "Turn to admin" */
+.login-popup span.admin {
+  text-transform: uppercase; /* Testo in maiuscolo */
+  margin-top: 50px;
+  margin-bottom: 10px; 
   align-self: flex-end; /* Allinea a destra */
-  font-size: 10px; /* Riduci la dimensione del testo "Turn to admin" */
+  font-size: 12px; 
   cursor: pointer;
-  color: #FFBA08;
+  color: white;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+  
+
+.login-popup span.admin:hover {
+  opacity: 1;
+  transition: 0.2s;
 }
 
-/* Aggiungi questo per mostrare il pulsante "Registrati" quando necessario */
-.login-popup span.show-register button.register {
-  display: inline-block;
-  margin-top: 5px;
-  visibility: hidden; /* Nasconde il pulsante senza alterare le dimensioni */
+.login-popup label.checkPassword {
+  margin-top: 0px;
+  margin-bottom: 10px;
+  color: white;
+  font-size: 15px;
+  visibility: hidden;
 }
+
+.login-popup label.checkPassword.visible {
+  visibility: visible;
+}
+

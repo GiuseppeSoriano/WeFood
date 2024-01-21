@@ -1,8 +1,9 @@
 <div>
-    <button>Find new ingredients based on friends usage</button>
+    <button (click)="toggleDropdown()">Find new ingredients based on friends usage</button>
     <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
-      <!-- <div>Insert the ingredient</div> -->
-      <!-- <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName"> -->
-      <!-- <button type="submit">SEARCH</button> -->
+      <div *ngIf="suggestions !== []" class="dropdown-list">
+        <div class="listSpacer"></div>
+        <div *ngFor="let suggestion of suggestions" class="listElement">{{ suggestion }}</div>
+      </div>
     </div>
 </div>

@@ -29,8 +29,9 @@ export class IngredientService {
     return this.ingredients;
   }
 
-  mostPopularCombinationsOfIngredients(ingredient_name: string) {
-    return this.http.post<string[]>('http://localhost:8080/ingredient/mostPopularCombinationsOfIngredients', {ingredient_name})
+  mostPopularCombinationOfIngredients(ingredient_name: string) {
+    console.log(ingredient_name);
+    return this.http.post<string[]>('http://localhost:8080/ingredient/mostPopularCombinationOfIngredients', ingredient_name)
       .pipe(
         catchError(this.handleError)
       );

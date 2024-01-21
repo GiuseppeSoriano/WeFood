@@ -19,6 +19,8 @@ import { BrowseMostRecentTopRatedPostsComponent } from './buttons/browse-most-re
 import { BrowseMostRecentTopRatedPostByIngredientsComponent } from './buttons/browse-most-recent-top-rated-post-by-ingredients/browse-most-recent-top-rated-post-by-ingredients.component';
 
 import { FilterIngredientPipe } from './pipes/filter-ingredient.pipe';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import { UploadPostComponent } from './posts/upload-post/upload-post.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +33,9 @@ import { FilterIngredientPipe } from './pipes/filter-ingredient.pipe';
     FindNewIngredientsBasedOnFriendsUsageComponent,
     BrowseMostRecentTopRatedPostsComponent,
     BrowseMostRecentTopRatedPostByIngredientsComponent,
-    FilterIngredientPipe
+    FilterIngredientPipe,
+    AdminDashboardComponent,
+    UploadPostComponent
   ],
   imports: [
     BrowserModule,

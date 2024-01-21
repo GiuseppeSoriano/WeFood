@@ -2,6 +2,8 @@ import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } fro
 import { IngredientInterface } from 'src/app/models/ingredient.model';
 import { IngredientService } from 'src/app/services/ingredient_service/ingredient.service';
 import { FilterIngredientPipe } from 'src/app/pipes/filter-ingredient.pipe';
+import { RegisteredUserService } from 'src/app/services/registered_user_service/registered-user.service';
+import { RegisteredUserDTOInterface } from 'src/app/models/registered-user-dto.model';
 
 @Component({
   selector: 'app-find-users-by-ingredient-usage',
@@ -16,18 +18,34 @@ export class FindUsersByIngredientUsageComponent implements OnInit {
   showList: boolean = false;      // USED TO HANDLE LIST VISIBILITY
   canCloseList: boolean = true;   // USED TO HANDLE LIST VISIBILITY
 
-  constructor(private eRef: ElementRef, private ingredientService: IngredientService) { }
+  suggestions: RegisteredUserDTOInterface[] = [];     // USED TO SHOW SUGGESTIONS
+
+  constructor(private eRef: ElementRef, private ingredientService: IngredientService, private registeredUserService: RegisteredUserService) { }
 
   ngOnInit(): void {
     this.ingredientsList = this.ingredientService.getAllIngredients();
   }
 
-  doQuery() {
+  execute() {
+    console.log(this.ingredientName);
     this.showList = false;
     if(!this.ingredientsList.some(ingredient => ingredient.name === this.ingredientName)) {
-      alert("Ingredient not found");
+      this.suggestions = [{_id: "", username: "Insert a valid ingredient"}];
+      return;
     }
-    // HERE WE SHOULD CALL ONEXECUTE() TO RETURN THE OUTPUT TO REGISTERED USER FEED COMPONENT
+    this.registeredUserService.findUsersByIngredientUsage(this.ingredientName).subscribe(
+      data => {
+        this.suggestions = [{_id: "", username: "No suggestions available"}];
+        if (data.length > 0)
+          this.suggestions = data;
+      },
+      error => {
+        if (error.status === 401) {
+          // Gestisci l'errore 401 qui
+          alert('Wrong username or password');
+        }
+      }
+    );
   }
 
   setIngredientDetailed(ingredient: any) {
@@ -42,8 +60,13 @@ export class FindUsersByIngredientUsageComponent implements OnInit {
     if(this.showList) {
       this.showList = false;
     }
-    else
+    else{
+      setTimeout(() => {
+        this.suggestions = [];
+        this.ingredientName = "";
+      }, 300);
       this.activeDropdownIndex = !this.activeDropdownIndex;
+    }
   }
 
   isActiveDropdown(): boolean {

@@ -9,13 +9,24 @@ import { RegisteredUser, RegisteredUserInterface } from 'src/app/models/register
   providedIn: 'root'
 })
 export class RegisteredUserService {
+  info: RegisteredUserInterface = new RegisteredUser();
+  infoDTO: RegisteredUserDTOInterface = new RegisteredUserDTO();
+
   constructor(private http: HttpClient) { }
 
   login(username: string, password: string) {
-    return this.http.post<RegisteredUserInterface>('http://localhost:8080/registereduser/login', { username, password })
-      .pipe(
-        catchError(this.handleError)
-      );
+    this.http.post<RegisteredUserInterface>('http://localhost:8080/registereduser/login', { username, password }).subscribe(
+      data => {
+        this.info = data;
+        this.infoDTO = new RegisteredUserDTO(data._id, data.username);
+      },
+      error => {
+        if (error.status === 401) {
+          // Gestisci l'errore 401 qui
+          alert('Wrong username or password');
+        }
+      }
+    );
   }
 
   modifyPersonalInformation(info: RegisteredUserInterface) {

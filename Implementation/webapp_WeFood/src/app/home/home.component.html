@@ -12,7 +12,7 @@
                 </label>
             </div>
             <div class="menu">
-                <button id="loginButton" (click) = "openPopup()">LOGIN</button>
+                <button id="loginButton" (click) = "openPopup()" [disabled]="showLoginPopup">LOGIN</button>
             </div>
         </nav>
     </header>

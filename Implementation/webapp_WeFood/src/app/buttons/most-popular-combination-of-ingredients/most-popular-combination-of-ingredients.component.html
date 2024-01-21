@@ -2,7 +2,27 @@
     <button (click)="toggleDropdown()">Most Popular Combinations of Ingredients</button>
     <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
       <!-- <div>Insert the ingredient</div> -->
-      <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName">
-      <button type="submit">SEARCH</button>
+      <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName" (click)="newIngredientIsBeingInserted()">
+    
+      <div *ngIf="showList" class="dropdown-list">
+        <div class="listSpacer"></div>
+        <div *ngFor="let ingredient of ingredientsList | filterIngredient:ingredientName" 
+             (mouseenter)="setIngredientDetailed(ingredient)"
+             (mouseleave)="setIngredientDetailed(null)"
+             (click)="setIngredient(ingredient.name)" 
+             class="listElement">
+          {{ ingredient.name }}
+          <span *ngIf="ingredientDetailed === ingredient"> ({{ ingredient.calories }} kcal/100g)</span>
+        </div>
+      </div>
+  
+      <button (click)="execute()">SEARCH</button>
+
+      <div *ngIf="suggestions !== []" class="dropdown-list">
+        <div class="listSpacer"></div>
+        <div *ngFor="let suggestion of suggestions" class="listElement">{{ suggestion }}</div>
+      </div>
+
     </div>
+    
 </div>

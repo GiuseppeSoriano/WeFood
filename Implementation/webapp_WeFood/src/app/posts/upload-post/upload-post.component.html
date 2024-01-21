@@ -1,0 +1,50 @@
+<div class="popup-overlay">
+    <div class="upload-post">
+      <label class="close" (click)="close()">&times;</label>
+  
+      <!-- Image Section -->
+      <div class="section">
+        <label>Image</label>
+        <input [(ngModel)]="recipe.image" name="image" type="text" placeholder="Image" required>
+        <!-- <input type="file" ng2FileSelect [uploader]="uploader" /> -->
+      </div>
+  
+      <!-- Recipe Info Section -->
+      <div class="section">
+        <label>Recipe Name</label>
+        <input [(ngModel)]="recipe.name" name="recipe name" type="text" required>
+        <label>Description</label>
+        <input [(ngModel)]="post.description" name="desc" type="text" required>
+      </div>
+  
+      <!-- Ingredient Section -->
+      <div class="section">
+        <label>Ingredient</label>
+        <input [(ngModel)]="ingredientName" name="ingredientName" type="text" required>
+        <label>Quantity (g)</label>
+        <input [(ngModel)]="quantity" name="quantity" type="number" required>
+        <button (click)="submitIngredient()">SUBMIT INGREDIENT</button>
+  
+        <div *ngFor="let ingredient of recipe.ingredients | keyvalue" class="item">
+          {{ ingredient.key }} - {{ ingredient.value }}g
+          <button (click)="removeIngredient(ingredient.key)" class="remove-btn">&times;</button>
+        </div>
+      </div>
+  
+      <!-- Step Section -->
+      <div class="section">
+        <label>Step</label>
+        <input [(ngModel)]="step" name="step" type="text" required>
+        <button (click)="submitStep()">SUBMIT STEP</button>
+  
+        <div *ngFor="let step of recipe.steps" class="item">
+          {{ step }}
+          <button (click)="removeStep(step)" class="remove-btn">&times;</button>
+        </div>
+      </div>
+  
+      <button (click)="submitPost()">SUBMIT POST</button>
+    </div>
+  </div>
+  
+  

@@ -15,6 +15,11 @@
       </div>
     </div>
     
-    <button type="submit" (click)="doQuery()">SEARCH</button>
+    <button type="submit" (click)="execute()">SEARCH</button>
+
+    <div *ngIf="suggestions !== []" class="dropdown-list">
+      <div class="listSpacer"></div>
+      <div *ngFor="let suggestion of suggestions" class="listElement">{{ suggestion.username }}</div>
+    </div>
   </div>
 </div>
