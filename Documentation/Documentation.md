@@ -1832,104 +1832,36 @@ CREATE TEXT INDEX user_index FOR (u:User) ON (u.username);
 
 **Operation**: Find User by `username`.
 
-**Reason**: locating a specific User by `username` is a prerequisite for various features in WeFood. These operations, along with those involving *suggestions*, are also connected to the *friendship system* provided to Users. Updating this index is not a relevant issue since Users cannot modify their usernames. The index only needs updates in the rare event of Users deleting their profiles. Considering the infrequency of such occurrences, the introduction of this index is expected to bring about more benefits than drawbacks.
+**Reason**: locating a specific User by `username` is a prerequisite for various features in *WeFood*. These operations, along with those involving *suggestions*, are also connected to the *friendship system* provided to Users. Updating this index is not a relevant issue since Users cannot modify their usernames. The index only needs updates in the rare event of Users deleting their profiles. Considering the infrequency of such occurrences, the introduction of this index is expected to bring about more benefits than drawbacks.
 
----
 
 ## 7.3. Consistency, Availability and Partition Tolerance
-The ones of the title are the three main properties that a distributed system can have. However, it is impossible to have all of them at the same time as the CAP theorem states. In accordance with the predefined non-functional requirements, hence, the primary objective is to ensure the Availability and Partition tolerance of the system, allowing for a certain degree of relaxation in consistency constraints. This strategic approach allows to the main actors of the system, the users, to continue to use the application even if some information they see are not completely updated. These in a practical scenario means to not see for example the latest post that a friend uploaded. Eventually however is granted to the user that he will be able to see the latest post of his friend. This is the main idea behind the design of the system. Hence the design is intentionally aligned with the Availability and Partition tolerance intersection of the CAP theorem, placing a high value on achieving eventual consistency. In the next paragraph the consistency management of the system will be discussed in detailed investingating in particular on the consistency between databases.
+The trio of properties highlighted in the title represents the fundamental characteristics of a distributed system. However, as the *CAP theorem* states, achieving all three simultaneously in a functional system is deemed impossible. Aligned with the predetermined Non-Functional Requirements (Section **2.2.**), it becomes necessary to prioritize the *Availability* and *Partition Tolerance* of the system, allowing for a measured relaxation in *Consistency constraints*. This strategic approach allows to the primary system actors, the Users, to persist in utilizing the application even if certain displayed information is *not entirely up-to-date*. In practical terms, this might translate to scenarios such as not immediately viewing the latest Recipes (e.g., during a network partition) or encountering non-updated suggestions after the upload of a new Recipe (e.g., if Neo4j is temporarily down). Nevertheless, Users are assured of *eventually* accessing the most recent information. The timeline for this "eventually" remains uncertain, as consistency updates may employ diverse approaches, and in the event of significant faults, human operator intervention may be necessary.
 
+This is the main idea behind the design of the system. Consequently, the intentional alignment of the design with the intersection of Availability and Partition Tolerance in the CAP theorem places considerable emphasis on achieving eventual consistency. The subsequent paragraph will delve into a detailed discussion of the system's consistency management, focusing particularly on the *Inter-Database consistency*.
 
 ## 7.4. Inter-Database Consistency
+Besides of ensuring *intra-database consistency* within a single database for *redundancy* updates, a trickier concern involves maintaining consistency between different databases. Two types of consistency are guaranteed, depending on the nature of the operation performed.
 
-Besides of the consistency that must me granted inside a sigle database (i.e. the intra-database consistency), a more delicate problem that must be considered is the consistency between the different databases.
+- For operations deemed particularly delicate, **Strict Consistency** is ensured. An example is *User Registration*, where ensuring the correctness of setup before Users can utilize the application takes precedence. Similarly, all operations executed by the Admin are handled with strict consistency, prioritizing the assurance that everything went well over a quick response. In such cases, strict consistency entails rolling back the databases to the previous state if an operation fails. The scheme in Figure \ref{fig:strict_consistency} is adopted, where the operation is first executed in MongoDB. If it fails, no modifications are made, and a `False` response is returned. If successful, the same operation is performed in Neo4j, with the user experiencing a *little delay*. If an issue arises, MongoDB is rolled back to maintain consistency between the two databases, resulting in a `False` return. If all goes well, a `True` return signifies successful execution, ensuring consistency.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{Resources/"strict_consistency.jpg"}
+    \caption{Strict Consistency scheme.}
+    \label{fig:strict_consistency}
+\end{figure}
 
-Considering the most delicate situation where the consistency must me granted, is when a user upload a new post.
-Inside MongoDB when a post is uploaded two operations must be performed, in the following order:
+- Conversely, when main social network operations are performed by Users, such as uploading or deleting a Post<!--(or even deleting a User account)-->, the primary focus, as specified in the Non-Functional Requirements, is on providing high availability and a quick response over strict consistency constraints. In these cases, the necessary is to return control as swiftly as possible to the User. Although strict consistency is not guaranteed, availability takes precedence. **Eventual Consistency** is adopted in such scenarios (Figure \ref{fig:eventual_consistency}). The operation begins in MongoDB, and if it fails, no further action is taken. If MongoDB operation succeeds, an immediate `True` response is given, as waiting is unnecessary. Subsequently, a Thread is initiated to asynchronously handle consistency with Neo4j. Given that no critical information is stored in Neo4j, Users can continue using the application even if the two databases are temporarily inconsistent. If the Thread encounters issues, no action is taken, prioritizing system availability over consistency. A log message or automatic trigger can be scheduled for future consistency recovery. Users can seamlessly use the application, and if Neo4j is down, they can still access features unrelated to Neo4j. Human operators, notified by log messages, are responsible for rectifying the situation if necessary. If both MongoDB and Neo4j operations succeed, no further intervention is required.
 
-a post is inserted inside the Post collection
-If it fails nothing must be done because the post was not uploaded.
-The post is added to the posts array of the user that uploaded it.
-If it fails, the post is deleted from the Post collection.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{Resources/"eventual_consistency.jpg"}
+    \caption{Eventual Consistency scheme.}
+    \label{fig:eventual_consistency}
+\end{figure}  
 
-Inside neo4j:
-
-a new node related to the recipe is created.
-If it fails nothing must be undone, but the databases are not consistent
-after this:
-RecipeDAO.createRecipeIngredientsRelationship(recipeDTO, ingredients);
-// This method call is at the same level of the
-// previous one because if the previous one throws
-// an exception, or the following one does, the
-// first catches blocks will be executed and when
-// RecipeDAO.deleteRecipe(recipeDTO) is called, it
-// in addition of deleting the recipe, it will also
-// delete the relationships created by the previous
-// method call if they have been created (DETACH DELETE r
-// inside the implementation of deleteRecipe) 
-IngredientDAO.createIngredientIngredientRelationship(ingredients);
-// The following method call is at the same level of the
-// previous ones because if the previous one does not throw
-// an exception, but the following one does, the previous
-// method call does not have to be rolled back because
-// it is not expected a delete method call to be executed
-// for the creation of IngredientIngredientRelationships (see documentation)
-RegisteredUserDAO.createUserUsedIngredient(new RegisteredUserDTO(user.getId(), user.getUsername()), ingredients);
-return true;
-catch(Neo4jException e){
-System.out.println("Neo4jException in uploadPostNeo4j: " + e.getMessage());
-RecipeDAO.deleteRecipe(recipeDTO);
-// deleteUserUsedIngredient does not have to be called because
-// the method call createUserUsedIngredient is the last one to be
-// executed and if it throws an exception, so it's not necessary 
-// to execute the rollback                
-return false;
-}
-
-public boolean uploadPost(Post post, RegisteredUser user) {
-    String id = uploadPostMongoDB(post, user);
-    if(id == null)
-        return false;
-    PostDTO postDTO = new PostDTO(id, post.getRecipe().getImage(), post.getRecipe().getName());
-    if(uploadPostNeo4j(user, postDTO, post))
-        return true;
-    else{
-        if(deletePostMongoDB(postDTO, user)){
-            // Databases are consistent again
-        }
-        else 
-            System.err.println("Databases are not synchronized, Post " + id + " has not been added only in MongoDB");
-        return false;
-    }
-}
-
-
-The main idea that can be generilized from this insights is that...
-coherently with the discussion of the CAP theorem, the consistency is not the most important thing that must be granted inside our application. Our idea of managing the the consistency in this way is consistent, because if for example neo4j is not able to handle requests due to some crash, the user can continue to use the application utilizing the features that are not related to neo4j, that are mostly reltated to suggestions and nothing really important. In this way the accessibility of the application is guaranteed and the social network is also able to continue to work. 
-Partition tolerance
-The system continues to operate despite an arbitrary number of messages being dropped (or delayed) by the network between nodes.
-Is not about partition tolerant. Anyway is also tolerant to the partition of the mongodb replicas, because the user can continue to use the application even if the mongodb replicas two out of tree are down because one replicas can be up. Unfortunately when all the mongodb replicas are down and the neo4j is up, the user can not use the application because the user can not login nor doing the other things as the main functionalities are handled by the documentDB. Anyway a situation like this one is really difficutl to appear in a real scenario because it really unlikely that all the mongodb replicas are down.
-
-
-
-
-Explain how the rollback is implemented and that neo4j is waited to be consistent before sending the response to the user. If it is not consistent this is not a problem.
-
-
-In the service package we find all the classes which, in some cases, also handle the consistency in the two databases and inside the single database. In general four cases of consistency management can be found:
-User creation consistency:
-    If a user is created in MongoDB, we try the creation in Neo4j. If it fails in Neo4j, we display server-side that the databases are not synchronized.
-Ingredient creation consistency:
-    The same as described in the case of the user.
-Post consistency:
-    During the creation of a post, first of all we try the creation in MongoDB in the Post collection. After this we update the redunducies in the User collection. If the latter fails, an inconsistency in MongoDB is displayed server-side (we know the updated version of the database can be found in the Post collection).
-    After all this steps, we have to create nodes and the relations in Neo4j. This are the Recipe node, the ingredient-ingredient relations, the user-ingredient relation and the recipe-ingredient relation. We try as the first step, to create the node. If this fails, we handle the case of the failed operation in Neo4j (described at the end). If this goes through, we start the creation of the relations. If one of this creations fails, we try to delete the recipe node and we display that Neo4j remains consistent but with a failed operation. If the ingredient-ingredient operation fails, the deletion of the recipe-ingredient relation is not handled separately. In fact the deletion of the recipe node is done in a way so that also all the relations are delete (DETACH DELETE). If the creation of user-ingredient fails, the ingredient-ingredient relations are not deleted, because utilized just for statistical purposes, and the user will never directly see that his informations are not precise. But this is not a problem since the most important thing is to show to the user some "good" informations that makes him stay active in the social network. If the creation in Neo4j of all the previous described steps fails, we try a rollback in MongoDB. We try to remove the post from the User collection. If the operation fails, we display that the databases are not consistent. Otherwise, we try to delete the Post also in the Post collection. If the operation fails, we display that MongoDB is not consistent and that the databases are not synchronized. Otherwise we only display that the operations was not completed successfuly (databases in this case are synchronized and consistent). 
-
-    During the deletion of a post, we start from deleting informations from MongoDB, in particular from the User collection. If it fails, we display that the operation failed, otherwise we try also the deletion in the Post collection. If it fails we display the inconsistency in MongoDB and we display that the operation failed. If the operation is completed, we try the deletion in Neo4j, where we try to delete the recipe and all the relations to ingredients. If this operation fails, we display that the databases are not synchronized and the operation fails. Otherwise we try to delete the relation user-ingredient. If it fails, we display an inconsistency in Neo4j and the fact that the databases are not synchronized and the operation fails. Otherwise the operation is completed.
-
-    There are several techniques to handle the inconsistency (eventual consistency) wich can remain from the steps described before while still giving the opportunity to use the social network, such as inserting a trigger at the start of Neo4j which verifies that the graph is consistent with all the informations stored in the MongoDB collections. To handle inconsistencies in MongoDB, we could try with a series of actions (routine) to run every x hours/days etc.., that restore the consistency. In general, handling the eventual consistency depends on the type of service that you want to provide to the users. For instance, we could offer a limited set of functinalities in Neo4j, like how instagram functionalities some time are blocked, or start a maintenance period where all the consistencies are restored.
-
+---
 
 aggiungere link githyb e rendere pubblico il repository
 + inserire credenziali utente e admin in manuale utente
