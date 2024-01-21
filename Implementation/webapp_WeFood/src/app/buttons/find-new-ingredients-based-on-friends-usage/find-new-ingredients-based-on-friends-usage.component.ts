@@ -14,30 +14,34 @@ export class FindNewIngredientsBasedOnFriendsUsageComponent implements OnInit {
 
   ngOnInit(): void {
   }
-  
+
   execute() {
-    this.ingredientService.findNewIngredientsBasedOnFriendsUsage(this.registeredUserService.info).subscribe(
-      data => {
-        console.log(data);
-        this.suggestions = ["No suggestions available"];
-        if (data.length > 0)
-          this.suggestions = data;
-      },
-      error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
+    if(!this.isActiveDropdown()){
+      this.ingredientService.findNewIngredientsBasedOnFriendsUsage(this.registeredUserService.info).subscribe(
+        data => {
+          console.log(data);
+          this.suggestions = ["No suggestions available"];
+          if (data.length > 0)
+            this.suggestions = data;
+        },
+        error => {
+          if (error.status === 401) {
+            // Gestisci l'errore 401 qui
+            alert('Wrong username or password');
+          }
         }
-      }
-    );
+      );
+    }
+    this.toggleDropdown();
   }
 
   activeDropdownIndex: boolean = false;
 
   toggleDropdown(): void {
-    setTimeout(() => {
-      this.suggestions = [];
-    }, 300);
+    if (this.suggestions.length > 0)
+      setTimeout(() => {
+        this.suggestions = [];
+      }, 300);
     this.activeDropdownIndex = !this.activeDropdownIndex;
   }
 

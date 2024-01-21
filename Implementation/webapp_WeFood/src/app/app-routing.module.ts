@@ -9,6 +9,7 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
 import { BrowseMostRecentTopRatedPostsComponent } from './buttons/browse-most-recent-top-rated-posts/browse-most-recent-top-rated-posts.component';
 import { BrowseMostRecentTopRatedPostByIngredientsComponent } from './buttons/browse-most-recent-top-rated-post-by-ingredients/browse-most-recent-top-rated-post-by-ingredients.component';
 import { UploadPostComponent } from './posts/upload-post/upload-post.component';
+import { UserPersonalPageComponent } from './user-personal-page/user-personal-page.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -20,6 +21,7 @@ const routes: Routes = [
   { path: 'browse-most-recent-top-rated-post-by-ingredients', component: BrowseMostRecentTopRatedPostByIngredientsComponent },
   { path: 'admin-dashboard', component: AdminDashboardComponent},
   { path: 'upload-post', component: UploadPostComponent },
+  { path: 'user-personal-page', component: UserPersonalPageComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

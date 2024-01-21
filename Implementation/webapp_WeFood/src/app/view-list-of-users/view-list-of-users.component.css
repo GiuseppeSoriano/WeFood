@@ -1,0 +1,56 @@
+.popup-overlay {
+    padding: 15px 60px 50px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #6A040F; 
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    border-radius: 10px; /* Smussa il bordo dei bottoni */
+    border-color: #F48C06;
+    font-family: Calibri, sans-serif;
+    color: #6A040F;
+    /*height: 50vh; /* Altezza massima del 35% della viewport height */
+    /*overflow-y: auto; /* Aggiunge la scrollbar se il contenuto supera l'altezza massima */
+    text-align: center; /* Centra il testo del titolo */
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    height: 500px;
+}
+
+.popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    margin-top: 10px; /* Aggiunto per spaziare il contenuto dal titolo */
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.title {
+    font-weight: bolder; /* Rende il testo corsivo */
+    color: white; /* Utilizza il colore desiderato per il testo */
+    font-size: 28px;
+    margin-bottom: 10px; /* Ridotto il margine per evitare spazi eccessivi */
+}
+
+.item {
+    margin-bottom: 10px;
+}
+
+.close-btn {
+    align-self: flex-end;
+    font-size: 35px;
+    cursor: pointer;
+    color: white;
+    position: relative;
+    right: -25px;
+}
+
+/* Nascondi la barra di scorrimento orizzontale */
+.popup-content::-webkit-scrollbar {
+    display: none;
+}

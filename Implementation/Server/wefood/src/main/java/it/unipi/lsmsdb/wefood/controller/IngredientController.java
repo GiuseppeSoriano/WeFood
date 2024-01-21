@@ -39,6 +39,7 @@ public class IngredientController {
 
     @PostMapping("/findNewIngredientsBasedOnFriendsUsage")
     public ResponseEntity<List<String>> findNewIngredientsBasedOnFriendsUsage(@RequestBody RegisteredUserDTO request){
+        System.out.println(request.getUsername());
         return ResponseEntity.ok(ingredientService.findNewIngredientsBasedOnFriendsUsage(request));
     }
     

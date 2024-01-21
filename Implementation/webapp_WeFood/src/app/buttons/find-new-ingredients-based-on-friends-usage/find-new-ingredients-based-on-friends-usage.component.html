@@ -1,5 +1,5 @@
 <div>
-    <button (click)="toggleDropdown()">Find new ingredients based on friends usage</button>
+    <button (click)="execute()">Find new ingredients based on friends usage</button>
     <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
       <div *ngIf="suggestions !== []" class="dropdown-list">
         <div class="listSpacer"></div>

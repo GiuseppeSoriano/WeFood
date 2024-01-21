@@ -21,6 +21,8 @@ import { BrowseMostRecentTopRatedPostByIngredientsComponent } from './buttons/br
 import { FilterIngredientPipe } from './pipes/filter-ingredient.pipe';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { UploadPostComponent } from './posts/upload-post/upload-post.component';
+import { UserPersonalPageComponent } from './user-personal-page/user-personal-page.component';
+import { ViewListOfUsersComponent } from './view-list-of-users/view-list-of-users.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +37,9 @@ import { UploadPostComponent } from './posts/upload-post/upload-post.component';
     BrowseMostRecentTopRatedPostByIngredientsComponent,
     FilterIngredientPipe,
     AdminDashboardComponent,
-    UploadPostComponent
+    UploadPostComponent,
+    UserPersonalPageComponent,
+    ViewListOfUsersComponent
   ],
   imports: [
     BrowserModule,

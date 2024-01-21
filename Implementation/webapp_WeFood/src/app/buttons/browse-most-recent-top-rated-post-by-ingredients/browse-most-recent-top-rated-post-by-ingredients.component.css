@@ -1,95 +1,186 @@
 button {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 1px 0;
-    padding: 10px;
-    background-color: #6A040F; /* Colore di sfondo principale */
-    color: white; /* Colore del testo */
-    border: none; /* Nessun bordo */
-    border-radius: 5px; /* Bordo arrotondato */
-    font-size: 16px; /* Dimensione del font */
-    font-weight: bold; /* Grassetto */
-    text-transform: uppercase; /* Testo in maiuscolo */
-    cursor: pointer; /* Cambia il cursore in un puntatore */
-    transition: background-color 0.3s, transform 0.2s; /* Transizione fluida per hover e click */
-  }
+  width: 100%;
+  box-sizing: border-box;
+  margin: 1px 0;
+  padding: 10px;
+  background-color: #6A040F; /* Colore di sfondo principale */
+  color: white; /* Colore del testo */
+  border: none; /* Nessun bordo */
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 16px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  text-transform: uppercase; /* Testo in maiuscolo */
+  cursor: pointer; /* Cambia il cursore in un puntatore */
+  transition: background-color 0.3s, transform 0.2s; /* Transizione fluida per hover e click */
+}
   
-  button:hover {
-    background-color: #9D0208; /* Cambia colore al passaggio del mouse */
-    transform: scale(1.01); /* Leggera scala su hover */
-  }
+button:hover {
+  background-color: #9D0208; /* Cambia colore al passaggio del mouse */
+  transform: scale(1.01); /* Leggera scala su hover */
+}
   
-  button:active {
-    background-color: #F4845F; /* Colore quando il pulsante è premuto */
-    transform: scale(0.95); /* Riduci la scala quando cliccato */
-  }
-  
-  /* CONTENITORE DEL MENU A TENDINA */
-  .dropdown-container {
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-    background-color: #FFFCEB;
-    border-radius: 5px;
-    transition: 0.3s ease-in-out;
-    max-height: 0; /* Imposta l'altezza massima iniziale a 0 */
-  }
-  
-  /* STILE QUANDO IL MENU A TENDINA È VISIBILE */
-  .dropdown-visible {
-    /* padding: 5px; */
-    max-height: 500px; /* Regola questa altezza in base al contenuto del menu */
-    transition: 0.75s ease-in-out;
-  }
-  
-  /* INPUT ALL'INTERNO DEL MENU A TENDINA */
-  .dropdown-container button {
-    background-color: #F48C06;
-    color: #FFFFFF;
-    font-weight: bold;
-  }
-  
-  .dropdown-container div {
-    width: 100%;
-    box-sizing: border-box;
-    /* margin: 5px 0; */
-    padding: 8px;
-    border: 2px solid #FFFFFF; /* Bordi colorati */
-    background-color: #FFFCEB;
-    border-radius: 5px; /* Bordo arrotondato */
-    font-size: 14px; /* Dimensione del font */
-    font-weight: bold; /* Grassetto */
-    color: #9D0208;
-    text-align: center;
-    /* change placeholder color */
-  }
+button:active {
+  background-color: #F4845F; /* Colore quando il pulsante è premuto */
+  transform: scale(0.95); /* Riduci la scala quando cliccato */
+}
 
-  .inputIngredient {
-    width: 100%;
-    box-sizing: border-box;
-    /* margin: 5px 0; */
-    padding: 8px;
-    border: 2px solid #FFFFFF; /* Bordi colorati */
-    background-color: #FFFCEB;
-    border-radius: 5px; /* Bordo arrotondato */
-    font-size: 14px; /* Dimensione del font */
-    font-weight: bold; /* Grassetto */
-    color: #6A040F;
-    /* change placeholder color */
-  }
-  .inputIngredient::placeholder {
-    color: #6A040F;
-    opacity: 0.8; 
-    text-align: center;
-  }
-  
-  .inputIngredient:focus {
-    color: #6A040F;
-    font-weight: bold;
-    border: #FFCD00 2px solid;
-    outline: none;
-    /* text-align: center; */
-  }
+/* CONTENITORE DEL MENU A TENDINA */
+.dropdown-container {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: #FFFCEB;
+  border-radius: 5px;
+  transition: 0.3s ease-in-out;
+  max-height: 0; /* Imposta l'altezza massima iniziale a 0 */
+}
+
+/* STILE QUANDO IL MENU A TENDINA È VISIBILE */
+.dropdown-visible {
+  /* padding: 5px; */
+  max-height: 500px; /* Regola questa altezza in base al contenuto del menu */
+  transition: 0.75s ease-in-out;
+}
+
+/* INPUT ALL'INTERNO DEL MENU A TENDINA */
+.dropdown-container button {
+  background-color: #F48C06;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.dropdown-container .time-box {
+  width: 100%;
+  box-sizing: border-box;
+  /* margin: 5px 0; */
+  padding: 8px;
+  border: 2px solid #FFFFFF; /* Bordi colorati */
+  background-color: #FFFCEB;
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 14px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  color: #9D0208;
+  text-align: center;
+  /* change placeholder color */
+}
+
+
+/* INPUT TO ADD A NEW INGREDIENT */
+input.newIngredient {
+  margin-top: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 15px;
+  background-color: #6A040F;
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 16px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  color: white;
+  /* change placeholder color */
+}
+input.newIngredient::placeholder {
+  color: #FFFFFF;
+  opacity: 0.95; 
+  text-align: center;
+}
+
+input.newIngredient:focus {
+  outline: none;
+  border-bottom: 3px solid #FAA307;
+}
+
+
+/*listIngredientsAdded*/
+.listIngredientsAdded {
+  margin-top: 8px;
+  max-height: 150px;
+  overflow-y: auto; /* Abilita lo scroll verticale se l'elenco è più lungo dell'altezza massima */
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 5px; /* Bordo arrotondato */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #FFFFFF;
+  border: 2px solid #9D0208;
+}
+
+span.ingredientsAdded {
+  margin: 0;
+  padding: 0px 15px;
+  font-size: 18px;
+  text-align: left;
+  display: flex;;
+  justify-content: space-between;
+  align-items: center;
+  color: #6A040F;
+  font-weight: bold;
+  border-bottom: 1px solid #9D0208;
+}
+
+
+span.remove {
+  position: relative;
+  font-size: 30px;
+  right: 0px;
+  cursor: pointer;
+  font-weight: bold; 
+  color: #6A040F;
+  transition: 0.2s;
+}
+
+span.remove:hover {
+  transition: 0.2s;
+  color: #F48C06;
+}
+
+
+/* STYLE INGREDIENT LIST */
+.dropdownList {
+  margin-top: 8px;
+  max-height: 150px;
+  overflow-y: auto; /* Abilita lo scroll verticale se l'elenco è più lungo dell'altezza massima */
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 5px; /* Bordo arrotondato */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #FFFFFF;
+  border: 2px solid #9D0208;
+}
+
+span.listElement{
+  margin: 0;
+  padding: 10px 15px;
+  font-size: 18px;
+  text-align: left;
+  display: flex;;
+  justify-content: space-between;
+  align-items: center;
+  color: #6A040F;
+  font-weight: bold;
+  border-bottom: 1px solid #9D0208;
+  cursor: pointer;
+}
+
+span.calories {
+  position: relative;
+  font-size: 18px;
+  right: 0px;
+  font-weight: bold; 
+  color: #F48C06;
+}
+
+span.calories span{
+  font-size: 13px;
+  color: #6A040F;
+  font-weight: bold;
+}
+
+
 
   
 /* STILE HOURS AND LIMIT*/
@@ -99,7 +190,7 @@ button {
     display: block;
     text-align: center;
     font-size: 15px;
-    color: #370617;
+    color: #6A040F;
     font-weight: light;
 }
 
@@ -156,3 +247,4 @@ button {
 .slider:focus::-webkit-slider-thumb{
     box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
 }
+

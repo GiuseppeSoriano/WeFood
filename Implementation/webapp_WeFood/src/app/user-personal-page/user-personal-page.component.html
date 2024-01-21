@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+  <header>
+    <nav>
+      <div class="logo">
+        <label (click)="modifyPersonalInfo()"> {{ getUser().username }}
+          <img src="../../assets/images/icon.png" alt="Logo WeFood">
+        </label>
+      </div>
+      <div class="user-info">
+      </div>
+      <div class="menu">
+        <button id="friendsButton" (click)="showFriends()">FRIENDS</button>
+        <button id="followersButton" (click)="showFollowers()">FOLLOWERS</button>
+        <button id="followedButton" (click)="showFollowed()">FOLLOWED</button>
+        <button id="logoutButton" (click)="logout()">LOGOUT</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- <div *ngIf="!isLoading" [ngClass]="{'noposts': list_of_posts.length === 0}" class="grid-container">
+        <div class="grid-col" *ngFor="let item of list_of_posts">
+            <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
+            <div class="label">{{ item.recipeName }}</div>
+        </div>
+    <img *ngIf="list_of_posts.length === 0" src="../../assets/images/SadBread.png" alt="No Posts Found" class="noposts">
+    <label *ngIf="list_of_posts.length === 0" class="noposts">No Posts Found</label>
+    </div> -->
+
+    <main>
+      <div class="side left">
+      </div>
+      <div *ngIf="isLoading" class="loading-container">
+          <div class="loading"></div>
+      </div>
+      <div *ngIf="!isLoading" [ngClass]="{'noposts': list_of_posts.length === 0}" class="grid-container">
+          <!-- <div class="grid-row"> -->
+              <div class="grid-col" *ngFor="let item of list_of_posts">
+                  <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
+                  <div class="label">{{ item.recipeName }}</div>
+              </div>
+          <!-- </div> -->
+          <img *ngIf="list_of_posts.length === 0" src="../../assets/images/SadBread.png" alt="No Posts Found" class="noposts">
+          <label *ngIf="list_of_posts.length === 0" class="noposts">No Posts Found</label>
+      </div>    
+      <div class="side"></div>    
+  </main>
+</body>
+
+</html>
+
+<app-view-list-of-users *ngIf="showUsersPopup" 
+                   [users]="users" 
+                   (close)="closePopup()" 
+                   (closePopup)="closePopup()">
+</app-view-list-of-users>

@@ -1,6 +1,8 @@
 import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { PostService } from '../services/post_service/post.service';
 import { PostDTOInterface } from '../models/post-dto.model';
+import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
+import { AdminService } from '../services/admin_service/admin.service';
 
 @Component({
   selector: 'app-home',
@@ -19,10 +21,12 @@ export class HomeComponent implements OnInit {
 
   canBeClosed = false;
 
-  constructor(private postService: PostService) { }
+  constructor(private postService: PostService, private userService: RegisteredUserService, private adminService: AdminService) { }
 
   ngOnInit(): void {
     this.getPosts();
+    this.userService.logout();
+    this.adminService.logout();
   }
 
   getPosts(): void {

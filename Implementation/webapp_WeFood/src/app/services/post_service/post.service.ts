@@ -56,6 +56,7 @@ export class PostService {
   }
 
   browseMostRecentTopRatedPostsByIngredients(ingredientNames: string[], hours: number, limit: number){
+    if(ingredientNames.length == 0) return this.browseMostRecentTopRatedPosts(hours, limit);
     const requestData = {
       ingredientNames: ingredientNames,
       hours: hours,

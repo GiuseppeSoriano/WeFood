@@ -57,7 +57,6 @@ nav {
 
 .menu button {
   position: relative;
-  right: 10px;
   background-color: transparent;
   color: white;
   font-weight: bold;
@@ -67,6 +66,13 @@ nav {
   border-radius: 5px;
   cursor: pointer;
   transition: 0.05s;
+}
+
+.menu #logoutButton{
+right:10px;
+}
+.menu #profileButton{
+right:50px;
 }
 
 .menu button:hover {
@@ -83,6 +89,18 @@ main {
   justify-content: center;
   align-items: flex-start;
   width: 100%;
+}
+
+div.overlay {
+  z-index: 1;
+  position: fixed;
+  padding: 0;
+  margin: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(3, 7, 30, 0.5); 
 }
 
 /* SIDEBAR */
@@ -217,28 +235,47 @@ button:active {
   grid-template-columns: repeat(3, 1fr); /* Tre colonne di uguale larghezza */
   grid-gap: 10px; /* Spazio tra le colonne */
   padding: 10px; /* Padding attorno alla griglia */
-  background-color: #fafafa; /* Colore di sfondo simile a quello di Instagram */
+  background-color: white; /* Colore di sfondo simile a quello di Instagram */
   max-width: 800px; /* Larghezza massima della griglia */
+}
+
+.grid-container.noposts {
+  grid-template-columns: repeat(1, 1fr);
 }
 
 .grid-col {
   position: relative;
   overflow: hidden; /* Nasconde le parti dell'immagine che sforano */
-  border-radius: 10px;
+  border-radius: 5px;
   background-color: white;
   height: 200px; /* Altezza fissa per ogni colonna */
 }
 
 .label {
+  visibility: hidden;
   position: absolute;
   bottom: 0px;
-  padding-right: 3px;
-  background-color: #f8f8f8; /* Colore di sfondo del riquadro */
+  padding: 13px 8px;
+  background-color: rgba(106, 4, 15, 0.8); /* Colore di sfondo del riquadro */
   border-radius: 0px; /* Rendi i bordi del riquadro arrotondati */
   width: 100%; /* Larghezza del riquadro basata sul contenuto */
-  border: 1px solid black;
-  /* rimuovi position: absolute; e altre proprietà relative alla posizione */
+  font-weight: bolder;
+  font-size: 17px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  box-sizing: border-box;
+
 }
+
+img:hover + .label {
+  visibility: visible;
+}
+
+.label:hover {
+  visibility: visible;
+}
+
 
 img {
   width: 100%;
@@ -246,10 +283,11 @@ img {
   object-fit: cover; /* Mantiene le proporzioni mentre copre l'area della colonna */
   object-position: center; /* Mantiene il centro dell'immagine visibile */
   transition: transform 0.3s ease;
+  cursor: pointer;
 }
 
 .grid-col:hover img {
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 /* LOADING */
@@ -265,9 +303,9 @@ img {
 }
 
 .loading {
-  border: 5px solid #FAA307;
+  border: 7px solid #FAA307;
   border-radius: 50%;
-  border-top: 5px solid #370617;
+  border-top: 7px solid #6A040F;
   width: 50px;
   height: 50px;
   animation: spin 1s linear infinite;
@@ -283,4 +321,37 @@ img {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+
+/* NO POSTS IMAGE */
+img.noposts {
+  margin: auto;
+  position: relative;
+  display: block;
+  width: 350px;
+  top: 70px;
+  cursor: default;
+}
+
+/* NO POSTS LABEL */
+label.noposts{
+  position: relative;
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 23px;
+  top: 30px;
+  left: 20px;
+  color: #6A040F;
+  cursor: default;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  padding: 10px;
+  margin-bottom: 10px;
 }

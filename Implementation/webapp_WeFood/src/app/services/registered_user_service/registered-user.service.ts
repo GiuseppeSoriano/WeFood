@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { RegisteredUserDTO, RegisteredUserDTOInterface } from 'src/app/models/registered-user-dto.model';
 import { RegisteredUserPageInterface } from 'src/app/models/registered-user-page.model';
 import { RegisteredUser, RegisteredUserInterface } from 'src/app/models/registered-user.model';
@@ -10,42 +10,60 @@ import { RegisteredUser, RegisteredUserInterface } from 'src/app/models/register
 })
 export class RegisteredUserService {
   info: RegisteredUserInterface = new RegisteredUser();
-  infoDTO: RegisteredUserDTOInterface = new RegisteredUserDTO();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    this.loadUserCredentials();
+  }
 
-  login(username: string, password: string) {
-    this.http.post<RegisteredUserInterface>('http://localhost:8080/registereduser/login', { username, password }).subscribe(
+  private loadUserCredentials() {
+    const savedInfo = localStorage.getItem('userCredentials');
+    if (savedInfo) {
+      this.info = JSON.parse(savedInfo);
+    }
+  }
+
+  setCredentials(info: RegisteredUserInterface) {   // USED TO SET THE CREDENTIALS OF THE LOGGED USER WHEN USER REGISTERS
+    this.info = info;
+    localStorage.setItem('userCredentials', JSON.stringify(info));
+  }
+
+  login(username: string, password: string){
+    
+    return this.http.post<RegisteredUserInterface>('http://localhost:8080/registereduser/login', { username, password }).subscribe(
       data => {
-        this.info = data;
-        this.infoDTO = new RegisteredUserDTO(data._id, data.username);
+        this.setCredentials(data);
       },
       error => {
         if (error.status === 401) {
           // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
+          this.info = new RegisteredUser();
         }
       }
     );
   }
 
-  modifyPersonalInformation(info: RegisteredUserInterface) {
-    return this.http.post<boolean>('http://localhost:8080/registereduser/modifyPersonalInformation', info)
+  logout() {
+    localStorage.removeItem('userCredentials');
+    this.info = new RegisteredUser();
+  }
+
+  modifyPersonalInformation() {
+    return this.http.post<boolean>('http://localhost:8080/registereduser/modifyPersonalInformation', this.info)
       .pipe(
         catchError(this.handleError)
       );
   }
 
-  deleteUser(info: RegisteredUserInterface) {
-    return this.http.post<boolean>('http://localhost:8080/registereduser/deleteUser', info)
+  deleteUser() {
+    return this.http.post<boolean>('http://localhost:8080/registereduser/deleteUser', this.info)
       .pipe(
         catchError(this.handleError)
       );
   }
 
-  followUser(info: RegisteredUserInterface, userToFollow_var: RegisteredUserInterface) {
+  followUser(userToFollow_var: RegisteredUserInterface) {
     const requestData = {
-      registeredUserDTO: new RegisteredUserDTO(info._id, info.username),
+      registeredUserDTO: new RegisteredUserDTO(this.info._id, this.info.username),
       usernameToFollow: userToFollow_var
     };
     return this.http.post<boolean>('http://localhost:8080/registereduser/followUser', requestData)
@@ -54,9 +72,9 @@ export class RegisteredUserService {
       );
   }
 
-  unfollowUser(info: RegisteredUserInterface, userToUnfollow_var: RegisteredUserInterface) {
+  unfollowUser(userToUnfollow_var: RegisteredUserInterface) {
     const requestData = {
-      registeredUserDTO: new RegisteredUserDTO(info._id, info.username),
+      registeredUserDTO: new RegisteredUserDTO(this.info._id, this.info.username),
       usernameToFollow: userToUnfollow_var
     };
     return this.http.post<boolean>('http://localhost:8080/registereduser/unfollowUser', requestData)
@@ -65,32 +83,32 @@ export class RegisteredUserService {
       );
   }
 
-  findFriends(info: RegisteredUserInterface) {
-    const registeredUserDTO = new RegisteredUserDTO(info._id, info.username);
+  findFriends() {
+    const registeredUserDTO = new RegisteredUserDTO(this.info._id, this.info.username);
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFriends', registeredUserDTO)
       .pipe(
         catchError(this.handleError)
       );
   }
 
-  findFollowers(info: RegisteredUserInterface) {
-    const registeredUserDTO = new RegisteredUserDTO(info._id, info.username);
+  findFollowers() {
+    const registeredUserDTO = new RegisteredUserDTO(this.info._id, this.info.username);
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFollowers', registeredUserDTO)
       .pipe(
         catchError(this.handleError)
       );
   }
 
-  findFollowed(info: RegisteredUserInterface) {
-    const registeredUserDTO = new RegisteredUserDTO(info._id, info.username);
+  findFollowed() {
+    const registeredUserDTO = new RegisteredUserDTO(this.info._id, this.info.username);
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFollowed', registeredUserDTO)
       .pipe(
         catchError(this.handleError)
       );
   }
 
-  findUsersToFollowBasedOnUserFriends(info: RegisteredUserInterface) {
-    const registeredUserDTO = new RegisteredUserDTO(info._id, info.username);
+  findUsersToFollowBasedOnUserFriends() {
+    const registeredUserDTO = new RegisteredUserDTO(this.info._id, this.info.username);
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findUsersToFollowBasedOnUserFriends', registeredUserDTO)
       .pipe(
         catchError(this.handleError)

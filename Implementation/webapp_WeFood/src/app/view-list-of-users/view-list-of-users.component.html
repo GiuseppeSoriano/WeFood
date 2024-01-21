@@ -1,0 +1,11 @@
+<div class="popup-overlay">
+    <span class="close-btn" (click)="close()">&times;</span>
+    <label class="title">Users</label>
+
+    <div class="popup-content">
+        <div *ngFor="let item of users" class="item">
+            {{ item.username }}
+        </div>
+    </div>
+</div>
+

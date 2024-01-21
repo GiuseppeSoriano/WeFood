@@ -35,46 +35,47 @@ export class LoggingPopupComponent implements OnInit {
   }
 
   onLogin() {
-    this.userService.login(this.username, this.password);
-    if(this.userService.info == null){
-      this.response = true;
-      this.response_msg = "Wrong username or password";
-      return;
-    }
+    this.userService.login(this.username, this.password).add(() => {
 
-    this.closePopup.emit();
-    this.router.navigate(['/registered-user-feed']);
+      if(this.userService.info.username === ""){
+        this.response = true;
+        this.response_msg = "Wrong username or password";
+        this.username = "";
+        this.password = "";
+        return;
+      }
 
-    this.username = "";
-    this.password = "";
+      this.closePopup.emit();
+      this.router.navigate(['/registered-user-feed']);
+
+      this.username = "";
+      this.password = "";
+    });
   }
 
   loginAsUser() {
     this.onLogin();
   }
 
+  // BISOGNA EFFETTUARE DIVERSAMENTE IL LOGIN PER L'ADMIN: LE INFORMAZIONI VANNO SALVATE NEL SERVICE, LA GESTIONE SI SNELLISCE
+  // VA BENE GIUSE. Eseguo subito D:
   loginAsAdmin() {
-    this.adminService.login(this.username, this.password).subscribe(
-      data => {
-        this.closePopup.emit();
-        // go to Admin Dashboard
-        const navigationExtras: NavigationExtras = {
-          state: {
-            Admin: data,
-          }
-        };
-        this.router.navigate(['/admin-dashboard'], navigationExtras);
-      },
-      error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          this.response = true;
-          this.response_msg = "Wrong username or password";
-        }
+    this.adminService.login(this.username, this.password).add(() => {
+      
+      if(this.adminService.info.username === ""){
+        this.response = true;
+        this.response_msg = "Wrong username or password";
+        this.username = "";
+        this.password = "";
+        return;
       }
-    );
-    this.username = "";
-    this.password = "";
+
+      this.closePopup.emit();
+      this.router.navigate(['/admin-dashboard']);
+
+      this.username = "";
+      this.password = "";
+    });
   }
 
   register() {
@@ -91,12 +92,8 @@ export class LoggingPopupComponent implements OnInit {
       data => {
         this.closePopup.emit();
         // go to RegisteredUser feed
-        const navigationExtras: NavigationExtras = {
-          state: {
-            User: data,
-          }
-        };
-        this.router.navigate(['/registered-user-feed'], navigationExtras);
+        this.userService.setCredentials(data);
+        this.router.navigate(['/registered-user-feed']);
       },
       error => {
         if (error.status === 401) {

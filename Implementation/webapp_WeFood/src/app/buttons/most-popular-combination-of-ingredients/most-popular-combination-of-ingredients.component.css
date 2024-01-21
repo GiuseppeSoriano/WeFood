@@ -59,17 +59,17 @@ button:active {
   border-radius: 5px; /* Bordo arrotondato */
   font-size: 14px; /* Dimensione del font */
   font-weight: bold; /* Grassetto */
-  color: #9D0208;
+  color: #6A040F;
   /* change placeholder color */
 }
 .dropdown-container input::placeholder {
-  color: #9D0208;
+  color: #6A040F;
   opacity: 0.7; /* Firefox */
   text-align: center;
 }
 
 .dropdown-container input:focus {
-  color: #9D0208;
+  color: #6A040F;
   border: #FFCD00 2px solid;
   outline: none;
   opacity: 0.7; /* Firefox */
