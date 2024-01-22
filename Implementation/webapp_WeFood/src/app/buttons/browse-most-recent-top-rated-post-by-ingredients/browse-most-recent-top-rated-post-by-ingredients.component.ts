@@ -12,7 +12,6 @@ export class BrowseMostRecentTopRatedPostByIngredientsComponent implements OnIni
   limit_var: number = 30;
 
   ingredients_chosen: string[] = [];
-
   ingredientName: string = "";
   ingredientsList: IngredientInterface[] = [];    // LIST WITH ALL INGREDIENTS. INITIALIZED IN ngOnInit() WITH THE CALL TO THE SERVICE
   ingredientsRemaining: IngredientInterface[] = [];    // LIST WITH ALL INGREDIENTS. INITIALIZED IN ngOnInit() WITH THE CALL TO THE SERVICE

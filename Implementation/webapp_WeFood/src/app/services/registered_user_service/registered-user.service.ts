@@ -47,8 +47,8 @@ export class RegisteredUserService {
     this.info = new RegisteredUser();
   }
 
-  modifyPersonalInformation() {
-    return this.http.post<boolean>('http://localhost:8080/registereduser/modifyPersonalInformation', this.info)
+  modifyPersonalInformation(info_updated: RegisteredUserInterface) {
+    return this.http.post<boolean>('http://localhost:8080/registereduser/modifyPersonalInformation', info_updated)
       .pipe(
         catchError(this.handleError)
       );

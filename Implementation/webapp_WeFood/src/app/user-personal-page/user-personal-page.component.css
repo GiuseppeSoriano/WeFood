@@ -43,7 +43,7 @@ nav {
 
 .logo label:hover {
     cursor: pointer;
-    font-size: 35px;
+    font-size: 30px;
     transition: 0.2s;
     padding-left: 0px;
 }
@@ -53,6 +53,13 @@ nav {
     top: 15px;
     width: 45px;
     height: 45px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .menu button {
@@ -66,20 +73,42 @@ nav {
     border-radius: 5px;
     cursor: pointer;
     transition: 0.05s;
+    border: 3px solid;
+    border-color: transparent;
 }
 
-.menu #logoutButton{
-  right:10px;
+
+.homeButton {
+    margin-right: 50px;
+    position: relative;
+    background-color: transparent;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.05s;
+    border: 3px solid;
+    border-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-.menu #followedButton{
-  right:50px;
+
+.homeButton:hover {
+    border: 3px solid;
+    border-color: #FFBA08;
+    transition: 0.05s;
 }
-.menu #followersButton{
-  right:90px;
+
+.homeButton img {
+    position: relative;
+    width: 45px;
+    margin-right: 12px;
 }
-.menu #friendsButton{
-  right:130px;
-}
+
 
 .menu button:hover {
     border: 3px solid;
@@ -342,27 +371,19 @@ label.noposts{
     cursor: default;
 }
 
-.user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: white;
-    padding: 10px;
-    margin-bottom: 10px;
-  }
-  
-  .username {
+
+.username {
     font-size: 18px;
     margin-bottom: 5px;
     cursor: pointer;
-  }
-  
-  .nav-links {
+}
+
+.nav-links {
     display: flex;
     gap: 10px;
     margin-top: 5px;
-  }
-  
-  .link {
+}
+
+.link {
     cursor: pointer;
-  }
+}

@@ -11,6 +11,7 @@ import { RegisteredUserDTOInterface } from '../models/registered-user-dto.model'
   styleUrls: ['./user-personal-page.component.css']
 })
 export class UserPersonalPageComponent implements OnInit {
+
   @Input() users: RegisteredUserDTOInterface[] = [];
   showUsersPopup: boolean = false;
   canBeClosed = false;
@@ -18,6 +19,8 @@ export class UserPersonalPageComponent implements OnInit {
   constructor(private router: Router, private userService: RegisteredUserService) { }
   isLoading: boolean = false;
   list_of_posts: PostDTOInterface[] = [];
+
+  info_updated: RegisteredUserInterface = new RegisteredUser();
   
   ngOnInit(): void {
     this.getPosts();
@@ -42,6 +45,10 @@ export class UserPersonalPageComponent implements OnInit {
       this.canBeClosed = false;
       this.showUsersPopup = false;
     }
+  }
+
+  goToHomePage() {
+    this.router.navigate(['/registered-user-feed']);
   }
 
   showFollowers() {
@@ -90,17 +97,17 @@ export class UserPersonalPageComponent implements OnInit {
   }
 
   modifyPersonalInfo() {
-    this.userService.modifyPersonalInformation().subscribe(
-      data => {
-        alert(data);
-      },
-      error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
-        }
-      }
-    );
+    // this.userService.modifyPersonalInformation(this.info_updated).subscribe(
+    //   data => {
+    //     alert(data);
+    //   },
+    //   error => {
+    //     if (error.status === 401) {
+    //       // Gestisci l'errore 401 qui
+    //       alert('Wrong username or password');
+    //     }
+    //   }
+    // );
   }
 
   showSelectedPost() {

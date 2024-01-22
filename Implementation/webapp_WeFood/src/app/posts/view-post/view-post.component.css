@@ -1,0 +1,458 @@
+.popup-overlay {
+    padding: 0px 45px 30px;
+    box-sizing: border-box;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white; 
+    /* border: 5px solid #6A040F; */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+    z-index: 1001;
+    border-radius: 5px; /* Smussa il bordo dei bottoni */
+    text-align: center; /* Centra il testo del titolo */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 490px;
+    height: 650px;
+    font-family: Calibri, sans-serif;
+}
+
+.close-btn {
+    font-size: 30px;
+    cursor: pointer;
+    color: #6A040F;
+    position: relative;
+    font-weight: bolder;
+    right: -220px;
+}
+
+.close-btn:hover {
+    color: #FFBA08;
+}
+
+
+.popup-content {
+    max-height: 50px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    margin-top: 10px; /* Aggiunto per spaziare il contenuto dal titolo */
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+
+.recipeInfo {
+    padding: 0px 150px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-weight: bolder; /* Rende il testo corsivo */
+    color: #6A040F; /* Utilizza il colore desiderato per il testo */
+    font-size: 20px;
+    margin-bottom: 10px; /* Ridotto il margine per evitare spazi eccessivi */
+    top: -15px;
+}
+
+.recipeInfo label.avgStarRanking {
+    position: relative;
+    top: -12px;
+    margin-right: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    color: #6A040F;
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+.recipeInfo .avgStarRanking img{
+    width: 40px;
+    height: 40px;
+}
+
+
+
+.recipeImage.invisible {
+    display: none;
+}
+
+.recipeImage {
+    display: block;
+    border-radius: 5px;
+    width: 390px;
+    height: 290px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.recipeImage img {
+    display: none;
+    width: 100%;
+    min-height: 100%; /* Assicura che l'altezza dell'immagine copra la colonna */
+    object-fit: cover; /* Mantiene le proporzioni mentre copre l'area della colonna */
+    object-position: center; /* Mantiene il centro dell'immagine visibile */
+    transition: transform 0.3s ease;
+}
+.recipeImage img:hover {
+    transform: scale(1.1);
+}
+
+.recipeImage img.visible {
+    display: block;
+}
+
+.recipeImage .ingredients {
+    visibility: hidden;
+}
+
+.recipeImage .ingredients.visible {
+    visibility: visible;
+    max-height: 85px;
+    overflow-y: auto;
+
+}
+
+.ingredients {
+    border: #6A040F 3px solid;
+    border-radius: 5px;
+    padding: 0px;   
+    margin-bottom: 5px;
+}
+
+.ingredients .ingredient {
+    border: 1px solid #6A040F;
+    padding: 5px 25px 5px 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+    color: #6A040F;
+    font-size: 16px;
+    font-weight: bolder;
+    margin-left: -1px;
+    margin-top: -1px;
+}
+
+.ingredients .ingredient .quantity {
+    color: #F48C06;
+    font-weight: bolder;
+}
+
+.ingredients .ingredient .quantity span {
+    color: #6A040F;
+    font-weight: normal;
+}
+
+label.info {
+    display: none;
+}
+
+label.info.visible {
+    display: block;
+    margin-left: 3px;
+    margin-bottom: -10px;
+    width: 100%;
+    text-align: left;
+    color: #9D0208;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+
+.recipeImage .steps {
+    visibility: hidden;
+}
+
+.recipeImage .steps.visible {
+    visibility: visible;
+    max-height: 130px;
+    overflow-y: auto;
+}
+
+.steps {
+    margin-top: 15px;
+    border: #6A040F 3px solid;
+    border-radius: 5px;
+    padding: 0px;   
+    margin-bottom: 5px;
+}
+
+.steps .step {
+    border: 1px solid #6A040F;
+    padding: 5px 25px 5px 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+    color: #6A040F;
+    font-size: 16px;
+    font-weight: bolder;
+    margin-left: -1px;
+    margin-top: -1px;
+}
+
+
+
+label.username {
+    color: #6A040F;
+    font-weight: bold;
+    position: relative;
+    top: -25px;
+    font-size: 18px;
+    left: -148px;
+    cursor: pointer;
+    text-align: left;
+}
+
+label.timestamp {
+    color: #6A040F; 
+    position: relative;
+    top: -25px;
+    font-size: 15px;
+    left: -170px;
+    text-align: left;
+}
+
+
+
+div.description {
+    margin: 5px 8px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: left;
+    max-height: 70px;
+    overflow-y: auto;
+}
+
+div.description label {
+    text-align: justify;
+    color: #370617;
+    font-size: 15px;
+    text-align: left;   
+}
+
+
+.star-ranking {
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.star-ranking span {
+    font-size: 20px;
+    color: #370617;
+    font-weight: bolder;
+    margin: 0px 5px;
+    opacity: 0.5;
+}
+
+
+/* Star Ranking Effect HOVER */
+.star-ranking span:has(~ span:hover), .star-ranking span:hover {
+    color: #FFBA08;
+}
+
+
+.star-ranking span.selected {
+    color: #FFBA08;
+    opacity: 1;
+}
+
+
+
+div.interactions{
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+
+}
+
+button.toggle {
+    margin: 12px 5px 0px;
+    width: 120px;
+    padding: 8px 0px;
+    font-size: 12px;
+    background-color: #6A040F;
+    color: white;
+    font-weight: bolder;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+
+button.toggle:hover {
+    background-color: #9D0208;
+}
+
+
+
+
+.commentsWrap {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.comments {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-top: 15px;
+    border: #6A040F 3px solid;
+    border-radius: 5px;
+    padding: 0px;   
+    margin-bottom: 5px;
+    max-height: 280px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.comments .comment {
+    border: 1px solid #6A040F;
+    padding: 5px 25px 5px 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+    color: #6A040F;
+    font-size: 16px;
+    font-weight: bolder;
+    margin-left: -1px;
+    margin-top: -1px;
+
+}
+
+
+.container-header-comment {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+label.usernameComment {
+    color: #6A040F;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+label.commentTimestamp {
+    font-weight: normal;
+}
+
+img.deleteInteraction {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+}
+
+label.commentText {
+    text-align: justify;
+    color: #6A040F;
+    font-size: 14px;
+    font-weight: normal;    
+}
+
+
+.comment-box label {
+    position: relative;
+
+}
+
+label.noComments {
+    margin: 15px 0px;
+    display: block;
+    width: 100%;
+    color: #6A040F;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+
+
+input.newCommentText {
+    display: inline;
+    padding: 10px 15px;
+    box-sizing: border-box;
+    width: 100%;
+    border: 3px solid #6A040F;
+    color: #6A040F;
+    border-radius: 5px;
+    font-size: 14px;
+    
+}
+
+
+input.newCommentText::placeholder {
+    color: #6A040F;
+    opacity: 0.8;
+}
+
+.comment-box label {
+    color: #6A040F;
+    position: relative;
+    top: -35px;
+    right: -180px;
+    font-size: 20px;
+    font-weight: bolder;
+    cursor: pointer;
+}
+
+.comment-box label:hover {
+    color: #F48C06;
+}
+
+
+img.delete {
+    margin-top: 40px;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+
+}
+
+
+
+
+/* Miscellaneous styles. */
+.star-ranking span {
+    cursor: pointer;
+    font-style: normal;
+}
+
+body {
+    align-items: center;
+    background: #000;
+    display: flex;
+    font-size: 48px;
+    height: 100%;
+    justify-content: center;
+    margin: 0;
+}
+
+html {
+    height: 100%;
+}
+
+
+/* Nascondi la barra di scorrimento orizzontale */
+.popup-content::-webkit-scrollbar {
+    display: none;
+}

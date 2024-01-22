@@ -30,4 +30,5 @@ export class Post implements PostInterface {
         this.starRankings = starRankings;
         this.recipe = recipe;
     }
+
 }

@@ -1,51 +1,257 @@
 .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  padding: 0px 45px 30px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white; 
+  /* border: 5px solid #6A040F; */
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+  z-index: 1001;
+  border-radius: 5px; /* Smussa il bordo dei bottoni */
+  text-align: center; /* Centra il testo del titolo */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 490px;
+  height: 600px;
+  font-family: Calibri, sans-serif;
 }
-  
-.upload-post {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 400px;
-    width: 100%;
-    position: relative;
-  }
-  
-.close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-    font-size: 20px;
-  }
-  
-.section {
-    margin-bottom: 20px;
-  }
-  
+
+.close-btn {
+  font-size: 30px;
+  cursor: pointer;
+  color: #6A040F;
+  position: relative;
+  font-weight: bolder;
+  right: -220px;
+}
+
+.close-btn:hover {
+  color: #FFBA08;
+}
+
+.popup-content {
+  max-height: 50px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  margin-top: 10px; /* Aggiunto per spaziare il contenuto dal titolo */
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.recipeInfo {
+  padding: 0px 150px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.recipeImage {
+  border-radius: 5px;
+  width: 390px;
+  max-height: 290px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.recipeImage img {
+  width: 100%;
+  min-height: 100%; /* Assicura che l'altezza dell'immagine copra la colonna */
+  object-fit: cover; /* Mantiene le proporzioni mentre copre l'area della colonna */
+  object-position: center; /* Mantiene il centro dell'immagine visibile */
+  transition: transform 0.3s ease;
+}
+.recipeImage img:hover {
+  transform: scale(1.1);
+}
+
+.recipeImage img.visible {
+  display: block;
+}
+
+/* INPUT FOR IMAGE UPLOAD */
+input.imageUpload {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 15px;
+  background-color: white; /* Colore di sfondo rosso scuro */
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 16px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  color: #6A040F; /* Colore del testo */
+  cursor: pointer; /* Cursor pointer per indicare che è cliccabile */
+}
+
+input.imageUpload::file-selector-button {
+  color: #6A040F;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px; 
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+input.imageUpload:focus {
+  outline: none;
+  border-bottom: 3px solid #FAA307; /* Bordi arancioni quando in focus */
+}
+
+input.imageUpload::-webkit-file-upload-button {
+  cursor: pointer;
+}
+
+.title {
+  font-weight: bolder; /* Rende il testo corsivo */
+  color: #6A040F; /* Utilizza il colore desiderato per il testo */
+  font-size: 20px;
+  margin-bottom: 10px; /* Ridotto il margine per evitare spazi eccessivi */
+  top: -15px;
+  border-radius: 5px;
+  border: none;
+  background-color: ivory;
+  padding: 5px 10px;
+}
+.title::placeholder {
+  color: #6A040F;
+  opacity: 0.85; 
+  text-align: center;
+}
+
+
 .item {
-    margin-bottom: 5px;
-    position: relative;
-  }
-  
-.remove-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    cursor: pointer;
-  }
-  
-  /* Additional styling for ng2-file-upload */
-.ng2-file-select {
-    margin-top: 10px;
-  }
-  
-  
+  margin-bottom: 10px;
+}
+
+
+
+/* Nascondi la barra di scorrimento orizzontale */
+.popup-content::-webkit-scrollbar {
+  display: none;
+}
+
+
+
+
+/* INGREDIENTS */
+ 
+input.newIngredient {
+  margin-top: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 15px;
+  background-color: #6A040F;
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 16px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  color: white;
+  /* change placeholder color */
+}
+input.newIngredient::placeholder {
+  color: #FFFFFF;
+  opacity: 0.95; 
+  text-align: center;
+}
+
+input.newIngredient:focus {
+  outline: none;
+  border-bottom: 3px solid #FAA307;
+}
+
+
+/*listIngredientsAdded*/
+.listIngredientsAdded {
+  margin-top: 8px;
+  max-height: 150px;
+  overflow-y: auto; /* Abilita lo scroll verticale se l'elenco è più lungo dell'altezza massima */
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 5px; /* Bordo arrotondato */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: #FFFFFF;
+  border: 2px solid #9D0208;
+}
+
+span.ingredientsAdded {
+  margin: 0;
+  padding: 0px 15px;
+  font-size: 18px;
+  text-align: left;
+  display: flex;;
+  justify-content: space-between;
+  align-items: center;
+  color: #6A040F;
+  font-weight: bold;
+  border-bottom: 1px solid #9D0208;
+}
+
+
+span.remove {
+  position: relative;
+  font-size: 30px;
+  right: 0px;
+  cursor: pointer;
+  font-weight: bold; 
+  color: #6A040F;
+  transition: 0.2s;
+}
+
+span.remove:hover {
+  transition: 0.2s;
+  color: #F48C06;
+}
+
+
+/* STYLE INGREDIENT LIST */
+.dropdownList {
+  margin-top: 8px;
+  max-height: 150px;
+  overflow-y: auto; /* Abilita lo scroll verticale se l'elenco è più lungo dell'altezza massima */
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 5px; /* Bordo arrotondato */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: #FFFFFF;
+  border: 2px solid #9D0208;
+}
+
+span.listElement{
+  margin: 0;
+  padding: 10px 15px;
+  font-size: 18px;
+  text-align: left;
+  display: flex;;
+  justify-content: space-between;
+  align-items: center;
+  color: #6A040F;
+  font-weight: bold;
+  border-bottom: 1px solid #9D0208;
+  cursor: pointer;
+}
+
+span.calories {
+  position: relative;
+  font-size: 18px;
+  right: 0px;
+  font-weight: bold; 
+  color: #F48C06;
+}
+
+span.calories span{
+  font-size: 13px;
+  color: #6A040F;
+  font-weight: bold;
+}

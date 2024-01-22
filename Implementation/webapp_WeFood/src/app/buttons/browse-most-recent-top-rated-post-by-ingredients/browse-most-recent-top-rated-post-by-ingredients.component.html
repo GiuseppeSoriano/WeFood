@@ -7,7 +7,6 @@
           {{ ingredient }}
           <span (click)="removeIngredient(ingredient)" class="remove">&times;</span>
         </span>
-        <!-- <hr> -->
       </div>
       
       <input class="newIngredient" type="text" placeholder="Add New Ingredient" name="ingredientName" [(ngModel)]="ingredientName" (click)="newIngredientIsBeingInserted()">

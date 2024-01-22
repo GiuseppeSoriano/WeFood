@@ -1,0 +1,89 @@
+<div class="popup-overlay">
+    <span class="close-btn" (click)="close()">&times;</span>
+
+    <label class="username">{{ post.username }}</label>
+    <label class="timestamp">{{ getTimeStamp(post.timestamp) }}</label>
+    <!-- <label class="timestamp">{{post.timestamp.getDay()}}/{{post.timestamp.getMonth() + 1}}/{{post.timestamp.getFullYear()}}, {{post.timestamp.getHours() % 60}}:{{post.timestamp.getMinutes() % 3600}}</label> -->
+    
+    <div class="recipeInfo">
+        <label class="title">{{ post.recipe.name }}</label>
+        <label class="avgStarRanking"><img src="../../../assets/images/avgStarRanking.png">{{ post.avgStarRanking }}</label>
+    </div>
+
+    
+    <div class="recipeImage" (click)="showIngredients()" [ngClass]="{'invisible': comments_visible || starRankings_visible}">
+        <img [ngClass]="{'visible': !ingredients}" src="data:image/jpeg;base64,{{ post.recipe.image }}" alt="Immagine ricetta" width="100px">
+        <label class="info" [ngClass]="{'visible': ingredients}">Ingredients</label>
+        <ul class="ingredients" [ngClass]="{'visible': ingredients}">
+            <li *ngFor="let ingredient of post.recipe.ingredients | keyvalue" class="ingredient">
+                &bull; {{ ingredient.key }}:
+                <span class="quantity">{{ingredient.value}} <span>grams</span></span>
+            </li>
+        </ul>
+        <label class="info" [ngClass]="{'visible': ingredients}">Steps</label>
+        <div class="steps" [ngClass]="{'visible': ingredients}">
+            <span class="step" *ngFor="let step of post.recipe.steps">
+                &bull; {{ step }}
+            </span>
+        </div>  
+    </div>
+
+    <div class="description">
+        <label>{{ post.description }}</label>
+    </div>
+
+    <!-- Star ranking section -->
+    <div class="star-ranking">
+        <span *ngFor="let star of [1, 2, 3, 4, 5]" (click)="votePost(star)" [class.selected]="star <= selectedStar">&#9733;</span>
+    </div>
+
+
+    <div class="interactions">
+        <button *ngIf="!starRankings_visible" class="toggle" (click)="toogleComments()">{{comments_visible ? 'HIDE' : 'COMMENTS'}}</button>
+        <button *ngIf="!comments_visible" class="toggle" (click)="toogleStarRankings()">{{starRankings_visible ? 'HIDE' : 'VOTES'}}</button>
+    </div>
+
+
+    <div class="commentsWrap" *ngIf="comments_visible">
+        <label class="info visible">Comments</label>
+
+        <div class="comments">
+            
+            <label *ngIf="post.comments.length === 0" class="noComments">No comments</label>
+                        
+            <div *ngIf="post.comments.length !== 0">
+                <div class="comment" *ngFor="let comment of post.comments" >
+                    
+                    <div class="container-header-comment">
+                        <label class="usernameComment">{{ comment.username }} <label class="commentTimestamp"> | {{getTimeStamp(comment.timestamp)}}</label></label>
+                        <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="true" (click)="deleteComment(comment)">
+                    </div>
+                    <!-- comment.username === getUser().username -->
+                    <label class="commentText">{{ comment.text }}</label>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="comment-box">
+            <input class="newCommentText" [(ngModel)]="newCommentText" placeholder="Add a Comment">
+            <label (click)="commentPost()">&#x279C;</label>
+        </div>
+        
+    </div>
+
+    <div *ngIf="starRankings_visible">
+        <label class="info visible">Rankings</label>
+
+        <div *ngFor="let vote of post.starRankings" class="starRanking">
+            {{vote.username}}: 
+            <div class="star-ranking">
+            <span *ngFor="let star of [1, 2, 3, 4, 5]" [class.selected]="star <= vote.vote">&#9733;</span></div>
+            <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="true" (click)="deleteVote(vote)">
+        <button *ngIf="vote.username === getUser().username" (click)="deleteVote(vote)">Delete Vote</button>
+        </div>
+    </div>
+    
+      
+    <img *ngIf="canDelete()" class="delete" src="../../../assets/images/recycle-bin.png" (click)="deletePost()">
+</div>

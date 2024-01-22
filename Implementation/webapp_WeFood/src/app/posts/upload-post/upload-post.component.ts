@@ -21,13 +21,80 @@ export class UploadPostComponent implements OnInit {
 
   post: PostInterface = new Post();
   recipe: RecipeInterface = new Recipe();
-  ingredientsList: IngredientInterface[] = [];
-  step: string = "";
+
+  stepBeingInserted: string = "";
+
+  ingredients_chosen: Map<string, number> = new Map<string, number>();
   ingredientName: string = "";
+  ingredientsList: IngredientInterface[] = [];    // LIST WITH ALL INGREDIENTS. INITIALIZED IN ngOnInit() WITH THE CALL TO THE SERVICE
+  ingredientsRemaining: IngredientInterface[] = [];    // LIST WITH ALL INGREDIENTS. INITIALIZED IN ngOnInit() WITH THE CALL TO THE SERVICE
+  ingredientDetailed: any = null;   // USED TO SHOW CALORIES
   quantity: number = 0;
+
+  showList: boolean = false;      // USED TO HANDLE LIST VISIBILITY
+  canCloseList: boolean = true;   // USED TO HANDLE LIST VISIBILITY
+
+  setIngredientDetailed(ingredient: any) {
+    this.ingredientDetailed = ingredient;
+  }
+  newIngredientIsBeingInserted() {
+    this.showList=true;
+  }
+
   //uploader: FileUploader = new FileUploader({});
 
   constructor(private postService: PostService, private ingredientService: IngredientService) {}
+
+  ngOnInit(): void {
+    // Prevent the user from scrolling the page when the popup is open
+    document.body.style.overflow = 'hidden';
+    this.ingredientsList = this.ingredientService.getAllIngredients();
+    this.ingredientsRemaining = this.ingredientsList;
+  }
+
+  /*Handle show list of ingredients*/
+  activeDropdownIndex: boolean = false;
+  toggleDropdown(): void {
+    if(this.showList) {
+      this.showList = false;
+    }
+    else{
+      setTimeout(() => {
+        this.ingredientName = "";
+      }, 300);
+      this.activeDropdownIndex = !this.activeDropdownIndex;
+    }
+  }
+  isActiveDropdown(): boolean {
+    return this.activeDropdownIndex;
+  }
+
+
+  addIngredient(ingredientName: string) {
+    this.recipe.ingredients.set(ingredientName, 0);
+    this.ingredientsRemaining = this.ingredientsRemaining.filter(ingredient => ingredient.name !== ingredientName);
+    this.ingredientName = "";
+    this.showList = false;
+    this.ingredientDetailed = null;
+    this.canCloseList = false;
+    setTimeout(() => {
+      this.canCloseList = true;
+    }, 300);
+  }
+
+  removingIngredient: boolean = false;
+
+  removeIngredient(ingredientName: string) {
+    this.removingIngredient = true;
+
+    this.recipe.ingredients.delete(ingredientName);
+    this.ingredientsRemaining.push(this.ingredientsList.find(ingredient => ingredient.name === ingredientName)!);
+    this.ingredientDetailed = null;
+
+    setTimeout(() => {
+      this.removingIngredient = false;
+    }, 300);
+  }
 
   submitPost() {
     //Sistemare
@@ -35,10 +102,6 @@ export class UploadPostComponent implements OnInit {
 
   }
 
-  submitStep() {
-    this.recipe.steps.push(this.step);
-    this.step = "";
-  }
 
   submitIngredient() {
     console.log(!this.checkIngredientExists(this.ingredientName.toLowerCase()));
@@ -61,48 +124,44 @@ export class UploadPostComponent implements OnInit {
     return this.recipe.ingredients.has(ingredientName);
   }
 
-  submitImage() {
-    // Verifica se ci sono elementi nella coda di caricamento
-    /*
-    if (this.uploader.queue.length > 0) {
-      // Ottieni il primo elemento della coda (puoi adattare questa logica in base alle tue esigenze)
-      const fileItem: FileItem = this.uploader.queue[0];
+  onFileSelected(event:any) {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
   
-      // Aggiungi l'immagine alla tua ricetta
-      this.recipe.image = fileItem._file.name;
-  
-      // Esegui il caricamento effettivo (puoi personalizzare questa parte in base alle tue esigenze)
-      fileItem.upload();
-    } else {
-      alert("Nessun file nella coda di caricamento.");
+      // Verifica il tipo MIME del file
+      if (file.type.match(/image\/*/)) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          // Qui hai la stringa base64, puoi inviarla al server o fare altre operazioni
+          this.post.recipe.image = reader.result as string;
+        };
+        reader.onerror = (error) => {
+          console.log('Error: ', error);
+        };
+      } else {
+        alert('File non immagine selezionato');
+        event.target.value = null; // Resettiamo il valore del campo di input
+        // Gestisci l'errore appropriatamente
+      }
     }
-    */
+  }
+  
+  fileSetted(): boolean {
+    return this.post.recipe.image != "DEFAULT";
+  }
+
+  addStep() {
+    // Aggiungi il passo alla lista se non è vuoto
+    if (this.stepBeingInserted !== "") {
+      this.recipe.steps.push(this.stepBeingInserted);
+      this.stepBeingInserted = "";
+    }
   }
 
   removeStep(step: string) {
     // Trova l'indice del passo da rimuovere
-    const index = this.recipe.steps.indexOf(step);
-  
-    // Rimuovi il passo dalla lista se l'indice è valido
-    if (index !== -1) {
-      this.recipe.steps.splice(index, 1);
-    }
-  }
-  
-  removeIngredient(key: string) {
-    // Rimuovi l'ingrediente dalla mappa degli ingredienti
-    this.recipe.ingredients.delete(key);
-  }
-
-  ngOnInit(): void {
-    // Prevent the user from scrolling the page when the popup is open
-    document.body.style.overflow = 'hidden';
-  
-    // Configura il caricatore di file
-    /*this.uploader.onAfterAddingFile = (fileItem: FileItem) => {
-      fileItem.withCredentials = false;
-    };
-    */
+    this.recipe.steps = this.recipe.steps.filter(s => s !== step);
   }
   
 

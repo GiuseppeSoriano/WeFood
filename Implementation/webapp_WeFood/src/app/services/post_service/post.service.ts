@@ -4,13 +4,14 @@ import { catchError, throwError } from 'rxjs';
 import { PostDTOInterface } from 'src/app/models/post-dto.model';
 import { PostInterface } from 'src/app/models/post.model';
 import { RegisteredUserInterface } from 'src/app/models/registered-user.model';
+import { RegisteredUserService } from '../registered_user_service/registered-user.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PostService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private userService: RegisteredUserService) { }
 
   uploadPost(post: PostInterface, postDTO: PostDTOInterface, info: RegisteredUserInterface) {
     const requestData = {

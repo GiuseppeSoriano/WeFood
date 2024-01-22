@@ -23,6 +23,8 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
 import { UploadPostComponent } from './posts/upload-post/upload-post.component';
 import { UserPersonalPageComponent } from './user-personal-page/user-personal-page.component';
 import { ViewListOfUsersComponent } from './view-list-of-users/view-list-of-users.component';
+import { ViewPostComponent } from './posts/view-post/view-post.component';
+import { ModifyPersonalInformationComponent } from './modify-personal-information/modify-personal-information.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +41,9 @@ import { ViewListOfUsersComponent } from './view-list-of-users/view-list-of-user
     AdminDashboardComponent,
     UploadPostComponent,
     UserPersonalPageComponent,
-    ViewListOfUsersComponent
+    ViewListOfUsersComponent,
+    ViewPostComponent,
+    ModifyPersonalInformationComponent
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,37 @@
+<!-- Nel tuo componente HTML -->
+<div class="popup-overlay">
+    <span class="close-btn" (click)="close()">&times;</span>
+    <label class="title">Personal Information</label>
+
+    <div class="popup-content">
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" [(ngModel)]="info.username">
+        </div>
+
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" [(ngModel)]="info.name">
+        </div>
+
+        <div>
+            <label for="surname">Surname:</label>
+            <input type="text" id="surname" [(ngModel)]="info.surname">
+        </div>
+        
+        <div>
+            <input [(ngModel)]="password" name="password" type="password" placeholder="New Password">
+            <input [(ngModel)]="confirmPassword" name="confirmPassword" type="password" placeholder="Confirm New Password">
+            <label class="checkPassword" [ngClass]="{'visible': !passwordsMatch}">
+                Passwords do not match.
+            </label>
+        </div>
+        
+        <div>
+            <label for="popupPassword">Enter Password:</label>
+            <input type="password" id="popupPassword" [(ngModel)]="popupPassword" required>
+        </div>
+
+        <button (click)="updateUserInfo()">Update</button>
+    </div>
+</div>

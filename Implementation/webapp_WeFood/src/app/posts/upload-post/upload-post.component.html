@@ -1,50 +1,51 @@
 <div class="popup-overlay">
-    <div class="upload-post">
-      <label class="close" (click)="close()">&times;</label>
-  
-      <!-- Image Section -->
-      <div class="section">
-        <label>Image</label>
-        <input [(ngModel)]="recipe.image" name="image" type="text" placeholder="Image" required>
-        <!-- <input type="file" ng2FileSelect [uploader]="uploader" /> -->
-      </div>
-  
-      <!-- Recipe Info Section -->
-      <div class="section">
-        <label>Recipe Name</label>
-        <input [(ngModel)]="recipe.name" name="recipe name" type="text" required>
-        <label>Description</label>
-        <input [(ngModel)]="post.description" name="desc" type="text" required>
-      </div>
-  
-      <!-- Ingredient Section -->
-      <div class="section">
-        <label>Ingredient</label>
-        <input [(ngModel)]="ingredientName" name="ingredientName" type="text" required>
-        <label>Quantity (g)</label>
-        <input [(ngModel)]="quantity" name="quantity" type="number" required>
-        <button (click)="submitIngredient()">SUBMIT INGREDIENT</button>
-  
-        <div *ngFor="let ingredient of recipe.ingredients | keyvalue" class="item">
-          {{ ingredient.key }} - {{ ingredient.value }}g
-          <button (click)="removeIngredient(ingredient.key)" class="remove-btn">&times;</button>
-        </div>
-      </div>
-  
-      <!-- Step Section -->
-      <div class="section">
-        <label>Step</label>
-        <input [(ngModel)]="step" name="step" type="text" required>
-        <button (click)="submitStep()">SUBMIT STEP</button>
-  
-        <div *ngFor="let step of recipe.steps" class="item">
-          {{ step }}
-          <button (click)="removeStep(step)" class="remove-btn">&times;</button>
-        </div>
-      </div>
-  
-      <button (click)="submitPost()">SUBMIT POST</button>
-    </div>
+  <span class="close-btn" (click)="close()">&times;</span>
+
+  <div class="recipeInfo">
+    <input class="title" type="text" [(ngModel)]="post.recipe.name" placeholder="Recipe name">
   </div>
+
+  <div class="recipeImage">
+    <input class="imageUpload" type="file" (change)="onFileSelected($event)" accept="image/*">
+    <img *ngIf="fileSetted()" src="{{ post.recipe.image }}" alt="Immagine ricetta">
+  </div>
+
+  <div class="popup-content">
+    <input [(ngModel)]="recipe.name" name="recipe name" type="text" placeholder="Recipe name" required>
+    <input [(ngModel)]="post.description" name="desc" type="text" placeholder="Description" required>
+  
+    <div *ngIf="recipe.ingredients.size !== 0" class="listIngredientsAdded">
+      <span *ngFor="let ingredient of recipe.ingredients | keyvalue" class="ingredientsAdded">
+        {{ ingredient.key }}
+        <input [(ngModel)]="ingredient.value" name="quantity" type="number" required>
+        <span (click)="removeIngredient(ingredient.key)" class="remove">&times;</span>
+      </span>
+    </div>
+    <input class="newIngredient" type="text" placeholder="Add New Ingredient" name="ingredientName" [(ngModel)]="ingredientName" (click)="newIngredientIsBeingInserted()">
+    <div *ngIf="showList" class="dropdownList">
+      <span *ngFor="let ingredient of ingredientsRemaining | filterIngredient:ingredientName" 
+          (mouseenter)="setIngredientDetailed(ingredient)"
+          (mouseleave)="setIngredientDetailed(null)"
+          (click)="addIngredient(ingredient.name)" 
+          class="listElement">
+        
+          {{ ingredient.name }}
+
+        <span *ngIf="ingredientDetailed === ingredient" class="calories">{{ ingredient.calories }}<span> kcal/100g</span></span>
+      </span>
+    </div>
+
+    <div *ngIf="recipe.steps.length !== 0" class="listIngredientsAdded">
+      <span *ngFor="let item of recipe.steps" class="ingredientsAdded">
+        {{ item }}
+        <span (click)="removeStep(stepBeingInserted)" class="remove">&times;</span>
+      </span>
+    </div>
+    <input class="newIngredient" type="text" placeholder="Add New Steps" name="step" [(ngModel)]="stepBeingInserted" (keyup.enter)="addStep()">
+
+  </div>
+  
+  <button (click)="submitPost()">SUBMIT POST</button>
+</div>
   
   

@@ -10,6 +10,8 @@ import { BrowseMostRecentTopRatedPostsComponent } from './buttons/browse-most-re
 import { BrowseMostRecentTopRatedPostByIngredientsComponent } from './buttons/browse-most-recent-top-rated-post-by-ingredients/browse-most-recent-top-rated-post-by-ingredients.component';
 import { UploadPostComponent } from './posts/upload-post/upload-post.component';
 import { UserPersonalPageComponent } from './user-personal-page/user-personal-page.component';
+import { ViewPostComponent } from './posts/view-post/view-post.component';
+import { ModifyPersonalInformationComponent } from './modify-personal-information/modify-personal-information.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -22,6 +24,8 @@ const routes: Routes = [
   { path: 'admin-dashboard', component: AdminDashboardComponent},
   { path: 'upload-post', component: UploadPostComponent },
   { path: 'user-personal-page', component: UserPersonalPageComponent },
+  { path: 'view-post', component: ViewPostComponent},
+  { path: 'modify-personal-information', component: ModifyPersonalInformationComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

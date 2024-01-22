@@ -55,6 +55,11 @@ nav {
   height: 50px;
 }
 
+.menu {
+  display: flex;
+  flex-direction: row;
+}
+
 .menu button {
   position: relative;
   background-color: transparent;
@@ -66,14 +71,10 @@ nav {
   border-radius: 5px;
   cursor: pointer;
   transition: 0.05s;
+  border: 3px solid;
+  border-color: transparent;
 }
 
-.menu #logoutButton{
-right:10px;
-}
-.menu #profileButton{
-right:50px;
-}
 
 .menu button:hover {
   border: 3px solid;
