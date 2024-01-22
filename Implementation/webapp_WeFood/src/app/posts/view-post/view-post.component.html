@@ -3,7 +3,6 @@
 
     <label class="username">{{ post.username }}</label>
     <label class="timestamp">{{ getTimeStamp(post.timestamp) }}</label>
-    <!-- <label class="timestamp">{{post.timestamp.getDay()}}/{{post.timestamp.getMonth() + 1}}/{{post.timestamp.getFullYear()}}, {{post.timestamp.getHours() % 60}}:{{post.timestamp.getMinutes() % 3600}}</label> -->
     
     <div class="recipeInfo">
         <label class="title">{{ post.recipe.name }}</label>
@@ -13,6 +12,7 @@
     
     <div class="recipeImage" (click)="showIngredients()" [ngClass]="{'invisible': comments_visible || starRankings_visible}">
         <img [ngClass]="{'visible': !ingredients}" src="data:image/jpeg;base64,{{ post.recipe.image }}" alt="Immagine ricetta" width="100px">
+        <div class="container-totalCalories"><div class="totalCalories" [ngClass]="{'visible': !ingredients}">{{ post.recipe.totalCalories }} <span>kcal</span></div></div>
         <label class="info" [ngClass]="{'visible': ingredients}">Ingredients</label>
         <ul class="ingredients" [ngClass]="{'visible': ingredients}">
             <li *ngFor="let ingredient of post.recipe.ingredients | keyvalue" class="ingredient">
@@ -33,7 +33,7 @@
     </div>
 
     <!-- Star ranking section -->
-    <div class="star-ranking">
+    <div class="star-ranking" *ngIf="!comments_visible">
         <span *ngFor="let star of [1, 2, 3, 4, 5]" (click)="votePost(star)" [class.selected]="star <= selectedStar">&#9733;</span>
     </div>
 
@@ -56,10 +56,20 @@
                     
                     <div class="container-header-comment">
                         <label class="usernameComment">{{ comment.username }} <label class="commentTimestamp"> | {{getTimeStamp(comment.timestamp)}}</label></label>
-                        <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="true" (click)="deleteComment(comment)">
+                        <div>
+                            <!-- BISOGNA AGGIUNGERE LOGICA CHE CONTROLLI SE EFFETTIVAMENTE L'UTENTE CHE HA FATTO IL COMMENTO E' L'UTENTE LOGGATO -->
+                            <img *ngIf="!editingComment" class="modifyInteraction" src="../../../assets/images/pencil.png" (click)="modifyComment(comment)">
+                            <img *ngIf="editingComment" class="modifyInteraction" src="../../../assets/images/check.png" (click)="modifyComment(comment)">
+                            <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="true" (click)="deleteComment(comment)">
+                        </div>
                     </div>
                     <!-- comment.username === getUser().username -->
-                    <label class="commentText">{{ comment.text }}</label>
+                    <!-- <textarea [disabled]="!editingComment" class="commentTextArea" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'>{{comment.text}}</textarea> -->
+                    
+                    <!-- Giuse alla fine ho dovuto fare la cosa brutta... Domani quando sistemi qui chiamami che vediamo se si può risolvere in altro modo. Avrei bisogno in pratica di qualche funzione oninit di typescript ma non so come fare... -->
+                    <textarea class="commentTextArea" *ngIf="editingComment" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' onmouseover='this.style.height = "";this.style.height = this.scrollHeight + "px"'>{{comment.text}}</textarea>
+                    <label class="commentText" *ngIf="!editingComment">{{comment.text}}</label>
+                
                 </div>
             </div>
 
@@ -69,18 +79,25 @@
             <input class="newCommentText" [(ngModel)]="newCommentText" placeholder="Add a Comment">
             <label (click)="commentPost()">&#x279C;</label>
         </div>
-        
     </div>
 
-    <div *ngIf="starRankings_visible">
-        <label class="info visible">Rankings</label>
+    <div class="starRankingsWrap" *ngIf="starRankings_visible">
+        <label class="info visible">Votes</label>
 
-        <div *ngFor="let vote of post.starRankings" class="starRanking">
-            {{vote.username}}: 
-            <div class="star-ranking">
-            <span *ngFor="let star of [1, 2, 3, 4, 5]" [class.selected]="star <= vote.vote">&#9733;</span></div>
-            <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="true" (click)="deleteVote(vote)">
-        <button *ngIf="vote.username === getUser().username" (click)="deleteVote(vote)">Delete Vote</button>
+        <div class="starRankings">
+            <label *ngIf="post.starRankings.length === 0" class="noStarRankings">No votes</label>
+
+            <div *ngIf="post.starRankings.length !== 0">
+                <div class="starRanking" *ngFor="let vote of post.starRankings">
+                    <div class="container-header-starRanking">
+                        <label class="usernameStarRanking">{{vote.username}}</label> 
+                        <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="true" (click)="deleteVote(vote)">
+                    </div>
+                    <div class="starRankingStars">
+                        <span *ngFor="let star of [1, 2, 3, 4, 5]" [class.selected]="star <= vote.vote">&#9733;</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     

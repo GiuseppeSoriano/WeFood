@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
-import { Comment } from 'src/app/models/comment.model';
+import { Comment, CommentInterface } from 'src/app/models/comment.model';
 import { Post, PostInterface } from 'src/app/models/post.model';
 import { Recipe, RecipeInterface } from 'src/app/models/recipe.model';
 import { StarRanking } from 'src/app/models/star-ranking.model';
@@ -17,6 +17,10 @@ import { RegisteredUserService } from 'src/app/services/registered_user_service/
   styleUrls: ['./view-post.component.css']
 })
 export class ViewPostComponent implements OnInit {
+editingComment: boolean = false;
+modifyComment(_t62: CommentInterface) {
+  this.editingComment = !this.editingComment;
+}
   comments_visible: boolean = false;
   starRankings_visible: boolean = false;
 

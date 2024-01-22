@@ -1,5 +1,5 @@
 .popup-overlay {
-    padding: 0px 45px 30px;
+    padding: 5px 45px 30px;
     box-sizing: border-box;
     position: fixed;
     top: 50%;
@@ -13,7 +13,7 @@
     text-align: center; /* Centra il testo del titolo */
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     width: 490px;
     height: 650px;
@@ -108,9 +108,50 @@
     transform: scale(1.1);
 }
 
+div.recipeImage:hover img {
+    transform: scale(1.1);
+}
+
 .recipeImage img.visible {
     display: block;
 }
+
+
+div.container-totalCalories {
+    position: absolute;
+    width: 390px;
+    height: 0px;
+    visibility: hidden;
+}
+
+div.totalCalories {
+    position: relative;
+    bottom: 46px;
+    padding: 10px 8px;
+    background-color: rgba(106, 4, 15, 0.8); /* Colore di sfondo del riquadro */
+    border-radius: 0px; /* Rendi i bordi del riquadro arrotondati */
+    width: 100%; /* Larghezza del riquadro basata sul contenuto */
+    font-weight: bolder;
+    font-size: 20px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+div.totalCalories span {
+    font-size: 17px;
+    font-weight: normal;
+}
+  
+.recipeImage img:hover + div.container-totalCalories {
+    visibility: visible;
+}   
+
+.container-totalCalories:hover {
+    visibility: visible;
+}
+
 
 .recipeImage .ingredients {
     visibility: hidden;
@@ -301,6 +342,7 @@ button.toggle:hover {
 
 
 
+/* COMMENTS */
 
 .commentsWrap {
     box-sizing: border-box;
@@ -363,13 +405,40 @@ img.deleteInteraction {
     cursor: pointer;
 }
 
-label.commentText {
+img.modifyInteraction {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.commentTextArea {
+    border: none;
+    width: 100%;
+    text-align: justify;
+    color: #6A040F;
+    font-size: 14px;
+    font-weight: normal;    
+    border: 1.5px dashed #6A040F;
+    outline: none;
+    resize: none;
+    height: auto;
+    font-family: Calibri, sans-serif;
+}
+
+.commentTextArea:disabled {
+    outline: none;
+    background-color: transparent;
+}
+
+.commentText {
+    border: none;
+    width: 100%;
     text-align: justify;
     color: #6A040F;
     font-size: 14px;
     font-weight: normal;    
 }
-
 
 .comment-box label {
     position: relative;
@@ -418,6 +487,93 @@ input.newCommentText::placeholder {
 .comment-box label:hover {
     color: #F48C06;
 }
+
+
+/* STAR RANKINGS */
+.starRankingsWrap {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.starRankings {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-top: 15px;
+    border: #6A040F 3px solid;
+    border-radius: 5px;
+    padding: 0px;   
+    margin-bottom: 5px;
+    max-height: 280px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.starRankings .starRanking {
+    border: 1px solid #6A040F;
+    padding: 5px 25px 5px 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+    color: #6A040F;
+    font-size: 16px;
+    font-weight: bolder;
+    margin-left: -1px;
+    margin-top: -1px;
+
+}
+
+.container-header-starRanking {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+label.usernameStarRanking {
+    color: #6A040F;
+    font-weight: bold;
+    font-size: 15px;
+    margin-left: 5px;
+}
+
+label.noStarRankings {
+    margin: 15px 0px;
+    display: block;
+    width: 100%;
+    color: #6A040F;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.starRankingStars {
+    cursor: default;
+    margin-top: -8px;
+    margin-left: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.starRankingStars span {
+    font-size: 18px;
+    color: #370617;
+    font-weight: bolder;
+    margin: 0px 2px;
+    opacity: 0.5;
+} 
+
+.starRankingStars span.selected {
+    color: #FFBA08;
+    opacity: 1;
+}
+
+
 
 
 img.delete {
