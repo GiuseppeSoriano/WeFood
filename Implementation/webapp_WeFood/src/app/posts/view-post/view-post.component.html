@@ -12,7 +12,6 @@
     
     <div class="recipeImage" (click)="showIngredients()" [ngClass]="{'invisible': comments_visible || starRankings_visible}">
         <img [ngClass]="{'visible': !ingredients}" src="data:image/jpeg;base64,{{ post.recipe.image }}" alt="Immagine ricetta" width="100px">
-        <div class="container-totalCalories"><div class="totalCalories" [ngClass]="{'visible': !ingredients}">{{ post.recipe.totalCalories }} <span>kcal</span></div></div>
         <label class="info" [ngClass]="{'visible': ingredients}">Ingredients</label>
         <ul class="ingredients" [ngClass]="{'visible': ingredients}">
             <li *ngFor="let ingredient of post.recipe.ingredients | keyvalue" class="ingredient">
@@ -27,6 +26,7 @@
             </span>
         </div>  
     </div>
+    <div [ngClass]="{'invisible': ingredients}" class="container-totalCalories"><div class="totalCalories" [ngClass]="{'visible': !ingredients}">{{ post.recipe.totalCalories }} <span>kcal</span></div></div>
 
     <div class="description">
         <label>{{ post.description }}</label>
@@ -67,7 +67,7 @@
                     <!-- <textarea [disabled]="!editingComment" class="commentTextArea" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'>{{comment.text}}</textarea> -->
                     
                     <!-- Giuse alla fine ho dovuto fare la cosa brutta... Domani quando sistemi qui chiamami che vediamo se si può risolvere in altro modo. Avrei bisogno in pratica di qualche funzione oninit di typescript ma non so come fare... -->
-                    <textarea class="commentTextArea" *ngIf="editingComment" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' onmouseover='this.style.height = "";this.style.height = this.scrollHeight + "px"'>{{comment.text}}</textarea>
+                    <textarea class="commentTextArea" *ngIf="editingComment" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' onmouseover='this.style.height = "";this.style.height = this.scrollHeight + "px"' [(ngModel)]="comment.text" >{{comment.text}}</textarea>
                     <label class="commentText" *ngIf="!editingComment">{{comment.text}}</label>
                 
                 </div>

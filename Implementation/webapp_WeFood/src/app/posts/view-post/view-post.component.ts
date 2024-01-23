@@ -17,30 +17,21 @@ import { RegisteredUserService } from 'src/app/services/registered_user_service/
   styleUrls: ['./view-post.component.css']
 })
 export class ViewPostComponent implements OnInit {
-editingComment: boolean = false;
-modifyComment(_t62: CommentInterface) {
-  this.editingComment = !this.editingComment;
-}
   comments_visible: boolean = false;
   starRankings_visible: boolean = false;
 
   newCommentText: string = '';
   selectedStar: number = 0;
   ingredients: boolean = false;
-
-  // comment1: Comment = new Comment("giuseppesoriano", "This is a comment", new Date());
-  // starRanking1: StarRanking = new StarRanking("giuseppesoriano", 4.5);
-  // image_string: string = "";
-  // recipe: RecipeInterface = new Recipe("Name of my recipe", this.image_string, ["Step 1", "Step 2"], new Map<string, number>([["Ingredient 1", 1], ["Ingredient 2", 2]]), 100);
-  // post: PostInterface = new Post("giuseppesoriano", "This is a description", new Date(), 4.5, [this.comment1], [this.starRanking1], this.recipe);
   
-  postDTO: PostDTO = new PostDTO("658572b7d312a33aeb784d22", "", "");
+//  postDTO: PostDTO = new PostDTO("658572b7d312a33aeb784d22", "", "");
+  @Input() postDTO: PostDTO = new PostDTO();
   post: PostInterface = new Post();
 
   ingredientsList: IngredientInterface[] = [];
   info: RegisteredUserInterface = new RegisteredUser();
 
-  @Output() closePopup: EventEmitter<void> = new EventEmitter();
+  @Output() closePost: EventEmitter<void> = new EventEmitter();
 
   constructor(private postService: PostService, private eRef:ElementRef, private commentService: CommentService, private starRankingService: StarRankingService, private userService: RegisteredUserService) { }
 
@@ -115,7 +106,7 @@ modifyComment(_t62: CommentInterface) {
   }
 
   close() {
-    this.closePopup.emit();
+    this.closePost.emit();
   }
 
   @HostListener('document:click', ['$event'])
@@ -154,4 +145,12 @@ modifyComment(_t62: CommentInterface) {
     //   }
     // });
   }
+
+  editingComment: boolean = false;
+
+  modifyComment(_t62: CommentInterface) {
+    this.editingComment = !this.editingComment;
+  }
+  
+
 }

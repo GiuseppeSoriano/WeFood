@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { RegisteredUser, RegisteredUserInterface } from '../models/registered-user.model';
 import { MostPopularCombinationOfIngredientsComponent } from '../buttons/most-popular-combination-of-ingredients/most-popular-combination-of-ingredients.component';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
-import { PostDTOInterface } from '../models/post-dto.model';
+import { PostDTO, PostDTOInterface } from '../models/post-dto.model';
 import { PostService } from '../services/post_service/post.service';
 
 @Component({
@@ -19,6 +19,11 @@ export class RegisteredUserFeedComponent implements OnInit {
   list_of_posts: PostDTOInterface[] = [];
   hours_var: number = 87600;
   limit_var: number = 30;
+
+  post_visible: boolean = false;
+  postDTO_to_be_viewed: PostDTOInterface = new PostDTO();
+
+  creatingPost: boolean = false;
   
   logout() {
     this.userService.logout();
@@ -62,5 +67,26 @@ export class RegisteredUserFeedComponent implements OnInit {
       }
     );
   }
+
+  viewPost(post: PostDTOInterface) {
+    setTimeout(() => {
+      document.body.style.overflow = 'hidden';
+    this.postDTO_to_be_viewed = post;
+    this.post_visible = true;
+    }, 100);
+  }
+
+  uploadPost() {
+    setTimeout(() => {
+      document.body.style.overflow = 'hidden';
+      this.creatingPost = true;
+    }, 100);
+  }
     
+  closePost() {
+    document.body.style.overflow = 'auto';
+    this.post_visible = false;
+    this.postDTO_to_be_viewed = new PostDTO();
+    this.creatingPost = false;
+  }
 }

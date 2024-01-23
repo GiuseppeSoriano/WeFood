@@ -25,6 +25,10 @@ import { UserPersonalPageComponent } from './user-personal-page/user-personal-pa
 import { ViewListOfUsersComponent } from './view-list-of-users/view-list-of-users.component';
 import { ViewPostComponent } from './posts/view-post/view-post.component';
 import { ModifyPersonalInformationComponent } from './modify-personal-information/modify-personal-information.component';
+import { BrowseMostRecentPostsByCaloriesComponent } from './buttons/browse-most-recent-posts-by-calories/browse-most-recent-posts-by-calories.component';
+import { FindPostByRecipeNameComponent } from './buttons/find-post-by-recipe-name/find-post-by-recipe-name.component';
+import { FindRecipeByIngredientsComponent } from './buttons/find-recipe-by-ingredients/find-recipe-by-ingredients.component';
+import { CaloriesAnalysisComponent } from './buttons/calories-analysis/calories-analysis.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +47,11 @@ import { ModifyPersonalInformationComponent } from './modify-personal-informatio
     UserPersonalPageComponent,
     ViewListOfUsersComponent,
     ViewPostComponent,
-    ModifyPersonalInformationComponent
+    ModifyPersonalInformationComponent,
+    BrowseMostRecentPostsByCaloriesComponent,
+    FindPostByRecipeNameComponent,
+    FindRecipeByIngredientsComponent,
+    CaloriesAnalysisComponent
   ],
   imports: [
     BrowserModule,

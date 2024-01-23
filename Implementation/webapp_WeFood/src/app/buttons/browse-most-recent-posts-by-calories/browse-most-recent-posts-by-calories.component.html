@@ -1,0 +1,18 @@
+<div>
+    <button (click)="toggleDropdown()">Browse most recent post by calories</button>
+    <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
+      <!-- <div>Insert the ingredient</div> -->
+      <!-- <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName"> -->
+      <div>
+        <label>Min value</label>
+        <span class="slider-label">{{min}}</span>
+        <input type="range" min="0" max="10000" class="slider" name="min" [(ngModel)]="min">
+        
+        <label>Max value</label>
+        <span class="slider-label">{{max}}</span>
+        <!--<input type="range" min="0" max="10000" step="3" class="slider" name="max" [(ngModel)]="max">-->
+        <input type="range" min="0" max="10000" class="slider" name="max" [(ngModel)]="max">
+      </div>
+      <button type="submit">SEARCH</button>
+    </div>
+</div>

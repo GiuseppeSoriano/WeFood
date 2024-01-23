@@ -1,5 +1,5 @@
 // upload-post.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { IngredientInterface } from 'src/app/models/ingredient.model';
 import { Post, PostInterface } from 'src/app/models/post.model';
 import { Recipe, RecipeInterface } from 'src/app/models/recipe.model';
@@ -19,6 +19,8 @@ INFO IN FONDO ALLA PAGINA
 })
 export class UploadPostComponent implements OnInit {
 
+  @Output() closePost: EventEmitter<void> = new EventEmitter();
+
   post: PostInterface = new Post();
   recipe: RecipeInterface = new Recipe();
 
@@ -33,17 +35,23 @@ export class UploadPostComponent implements OnInit {
 
   showList: boolean = false;      // USED TO HANDLE LIST VISIBILITY
   canCloseList: boolean = true;   // USED TO HANDLE LIST VISIBILITY
+  totalCalories: number = 0;
 
   setIngredientDetailed(ingredient: any) {
     this.ingredientDetailed = ingredient;
   }
-  newIngredientIsBeingInserted() {
-    this.showList=true;
+
+  addingIngredients: boolean = false;
+  addingSteps: boolean = false;
+
+  toogleSteps() {
+    this.addingSteps = !this.addingSteps;
+  }
+  toogleIngredients() {
+    this.addingIngredients = !this.addingIngredients;
   }
 
-  //uploader: FileUploader = new FileUploader({});
-
-  constructor(private postService: PostService, private ingredientService: IngredientService) {}
+  constructor(private eRef:ElementRef, private postService: PostService, private ingredientService: IngredientService) {}
 
   ngOnInit(): void {
     // Prevent the user from scrolling the page when the popup is open
@@ -71,6 +79,7 @@ export class UploadPostComponent implements OnInit {
 
 
   addIngredient(ingredientName: string) {
+    console.log(ingredientName);
     this.recipe.ingredients.set(ingredientName, 0);
     this.ingredientsRemaining = this.ingredientsRemaining.filter(ingredient => ingredient.name !== ingredientName);
     this.ingredientName = "";
@@ -82,46 +91,44 @@ export class UploadPostComponent implements OnInit {
     }, 300);
   }
 
-  removingIngredient: boolean = false;
 
   removeIngredient(ingredientName: string) {
-    this.removingIngredient = true;
+    this.canCloseList = false;
 
     this.recipe.ingredients.delete(ingredientName);
     this.ingredientsRemaining.push(this.ingredientsList.find(ingredient => ingredient.name === ingredientName)!);
     this.ingredientDetailed = null;
 
     setTimeout(() => {
-      this.removingIngredient = false;
+      this.canCloseList = true;
     }, 300);
+  }
+
+  updateTotalCalories(ingredientKey: string, newQuantity: number) {
+    this.recipe.ingredients.set(ingredientKey, newQuantity);
+    this.totalCalories = 0;
+    this.recipe.ingredients.forEach((value, key) => {
+      // Take calories from the ingredient list
+      let calories = this.ingredientsList.find(ingredient => ingredient.name === key)!.calories;
+      this.totalCalories += (value*calories/100);
+    });
+    this.totalCalories = this.totalCalories.toFixed(2) as unknown as number;
   }
 
   submitPost() {
     //Sistemare
-    alert(this.recipe.ingredients.size);
-
-  }
-
-
-  submitIngredient() {
-    console.log(!this.checkIngredientExists(this.ingredientName.toLowerCase()));
-    if (!this.checkIngredientExists(this.ingredientName.toLowerCase()) && this.quantity > 0 && this.ingredientName != "") {
-      // L'ingrediente non esiste ancora, aggiungilo alla lista
-  
-      // Aggiungi l'ingrediente alla ricetta
-      this.recipe.ingredients.set(this.ingredientName.toLowerCase(), this.quantity);
-  
-      // Pulisci i campi dopo l'aggiunta
-      this.ingredientName = "";
-      this.quantity = 0;
-    } else {
-      // L'ingrediente esiste già, gestisci come preferisci (ad esempio, mostra un messaggio di avviso)
-      alert("L'ingrediente esiste già nella lista o non è stato inseriro o la quantità è < 0.");
+    let error = false;
+    this.recipe.ingredients.forEach((value, key) => {
+      // Take calories from the ingredient list
+      if(value == 0){
+        error = true;
+      }
+    });
+    if(error){
+      alert("Insert quantity for each ingredient");
+      return;
     }
-  }
 
-  checkIngredientExists(ingredientName: string): boolean {
-    return this.recipe.ingredients.has(ingredientName);
   }
 
   onFileSelected(event:any) {
@@ -161,19 +168,23 @@ export class UploadPostComponent implements OnInit {
 
   removeStep(step: string) {
     // Trova l'indice del passo da rimuovere
+    this.canCloseList = false;
     this.recipe.steps = this.recipe.steps.filter(s => s !== step);
+    setTimeout(() => {
+      this.canCloseList = true;
+    }, 300);
   }
   
 
   close() {
+    this.closePost.emit();
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickout(event: any) {
+    // Close the popup if clicking outside the popup content
+    if (!this.eRef.nativeElement.contains(event.target) && this.canCloseList) {
+      this.close();
+    }
   }
 }
-
-/*
-Fare npm install ng2-file-upload
-così da poter utilizare l'image uploader
-togliere i commenti nei vari file per far funzionare l'uploader
-ritornare l'oggetto e gestire la grafica
-vedere altri piccoli dettagli
-*/
-

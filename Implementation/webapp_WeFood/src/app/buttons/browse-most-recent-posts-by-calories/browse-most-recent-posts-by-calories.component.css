@@ -1,0 +1,131 @@
+button {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 1px 0;
+    padding: 10px;
+    background-color: #6A040F; /* Colore di sfondo principale */
+    color: white; /* Colore del testo */
+    border: none; /* Nessun bordo */
+    border-radius: 5px; /* Bordo arrotondato */
+    font-size: 16px; /* Dimensione del font */
+    font-weight: bold; /* Grassetto */
+    text-transform: uppercase; /* Testo in maiuscolo */
+    cursor: pointer; /* Cambia il cursore in un puntatore */
+    transition: background-color 0.3s, transform 0.2s; /* Transizione fluida per hover e click */
+  }
+  
+  button:hover {
+    background-color: #9D0208; /* Cambia colore al passaggio del mouse */
+    transform: scale(1.01); /* Leggera scala su hover */
+  }
+  
+  button:active {
+    background-color: #F4845F; /* Colore quando il pulsante è premuto */
+    transform: scale(0.95); /* Riduci la scala quando cliccato */
+  }
+  
+  /* CONTENITORE DEL MENU A TENDINA */
+  .dropdown-container {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: #FFFCEB;
+    border-radius: 5px;
+    transition: 0.3s ease-in-out;
+    max-height: 0; /* Imposta l'altezza massima iniziale a 0 */
+  }
+  
+  /* STILE QUANDO IL MENU A TENDINA È VISIBILE */
+  .dropdown-visible {
+    /* padding: 5px; */
+    max-height: 200px; /* Regola questa altezza in base al contenuto del menu */
+    transition: 0.3s ease-in-out;
+  }
+  
+  /* INPUT ALL'INTERNO DEL MENU A TENDINA */
+  .dropdown-container button {
+    background-color: #F48C06;
+    color: #FFFFFF;
+    font-weight: bold;
+  }
+  
+  .dropdown-container div {
+    width: 100%;
+    box-sizing: border-box;
+    /* margin: 5px 0; */
+    padding: 8px;
+    border: 2px solid #FFFFFF; /* Bordi colorati */
+    background-color: #FFFCEB;
+    border-radius: 5px; /* Bordo arrotondato */
+    font-size: 14px; /* Dimensione del font */
+    font-weight: bold; /* Grassetto */
+    color: #9D0208;
+    text-align: center;
+    /* change placeholder color */
+  }
+
+  
+/* STILE MIN AND MAX*/
+
+  .dropdown-container label {
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 15px;
+    color: #370617;
+    font-weight: light;
+}
+
+.slider-label {
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 20px;
+    color: #6A040F;
+    font-weight: bold;
+}
+
+.slider {
+    /* removing default appearance */
+    -webkit-appearance: none;
+    appearance: none; 
+    /* creating a custom design */
+    max-width: 350px;
+    width: 50%;
+    cursor: pointer;
+    outline: none;
+    border-radius: 15px;
+    /*  overflow: hidden;  remove this line*/
+    
+    /* New additions */
+    height: 5px;
+    background: #9D0208;
+    margin-top: 8px;
+    margin-bottom: 15px;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none; 
+    /* creating a custom design */
+    height: 15px;
+    width: 15px;
+    background-color: #FAA307;
+    border-radius: 50%;
+    border: none;
+    transition: .2s ease-in-out;
+}
+
+/* Hover, active & focus Thumb: Webkit */
+.slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 8px rgba(255, 185, 8, 0.2)
+    
+}
+  
+.slider:active::-webkit-slider-thumb{
+    box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
+}
+
+.slider:focus::-webkit-slider-thumb{
+    box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
+}

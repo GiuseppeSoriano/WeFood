@@ -15,10 +15,14 @@ export class ModifyPersonalInformationComponent implements OnInit {
   @Output() closePopup: EventEmitter<void> = new EventEmitter();
 
   password: string = '';
-  confirmPassword: string = '';
+  newPassword: string = '';
+  confirmNewPassword: string = '';
   popupPassword: string = '';
   info: RegisteredUserInterface = new RegisteredUser();
   passwordsMatch: boolean = true;
+  changePassword: boolean = false;
+  response: boolean = false;
+  response_msg: string = "Test Message";
 
   constructor(private userService: RegisteredUserService, private eRef: ElementRef) {}
 
@@ -28,19 +32,30 @@ export class ModifyPersonalInformationComponent implements OnInit {
 
   close() {
     this.password = '';
-    this.confirmPassword = '';
+    this.newPassword = '';
+    this.confirmNewPassword = '';
     this.popupPassword = '';
     this.passwordsMatch = true;
     this.closePopup.emit();
   }
 
+  toggleNewPassword() {
+    this.newPassword = '';
+    this.confirmNewPassword = '';
+    this.changePassword = !this.changePassword;
+  }
+
   updateUserInfo() {
-    if (this.password !== this.confirmPassword) {
+    if (this.password !== this.confirmNewPassword) {
       this.passwordsMatch = false;
       return;
     }
 
-    // Raccolti i dati da inviare al server (username, name, surname, password)
+    // TESTTT
+    this.response = true;
+    this.response_msg = "Test Message";
+    return
+
     const updatedData = {
       username: this.info.username,
       name: this.info.name,

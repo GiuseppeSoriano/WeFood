@@ -118,7 +118,7 @@ div.recipeImage:hover img {
 
 
 div.container-totalCalories {
-    position: absolute;
+    position: relative;
     width: 390px;
     height: 0px;
     visibility: hidden;
@@ -126,7 +126,7 @@ div.container-totalCalories {
 
 div.totalCalories {
     position: relative;
-    bottom: 46px;
+    bottom: 43px;
     padding: 10px 8px;
     background-color: rgba(106, 4, 15, 0.8); /* Colore di sfondo del riquadro */
     border-radius: 0px; /* Rendi i bordi del riquadro arrotondati */
@@ -144,7 +144,7 @@ div.totalCalories span {
     font-weight: normal;
 }
   
-.recipeImage img:hover + div.container-totalCalories {
+.recipeImage:hover + div.container-totalCalories {
     visibility: visible;
 }   
 
@@ -152,6 +152,9 @@ div.totalCalories span {
     visibility: visible;
 }
 
+.container-totalCalories.invisible {
+    display: none;
+}
 
 .recipeImage .ingredients {
     visibility: hidden;
@@ -279,7 +282,7 @@ div.description {
 
 div.description label {
     text-align: justify;
-    color: #370617;
+    color: #6A040F;
     font-size: 15px;
     text-align: left;   
 }

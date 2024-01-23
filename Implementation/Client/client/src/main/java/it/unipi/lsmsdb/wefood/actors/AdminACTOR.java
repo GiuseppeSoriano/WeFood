@@ -330,12 +330,12 @@ public class AdminACTOR{
         System.out.println("-> createIngredient");
         System.out.println("-> banUser");
         System.out.println("-> unbanUser");
-        System.out.println("-> mostPopularCombinationOfIngredients");
-        System.out.println("-> findMostLeastUsedIngredients");
-        System.out.println("-> browseMostRecentTopRatedPosts");
-        System.out.println("-> browseMostRecentTopRatedPostsByIngredients");
-        System.out.println("-> browseMostRecentPostsByCalories");
-        System.out.println("-> findPostsByRecipeName");
+        System.out.println("-> mostPopularCombinationOfIngredients");           // IMPLEMENTED
+        System.out.println("-> findMostLeastUsedIngredients");                  // NO BUTTON
+        System.out.println("-> browseMostRecentTopRatedPosts");                 // IMPLEMENTED
+        System.out.println("-> browseMostRecentTopRatedPostsByIngredients");    // IMPLEMENTED
+        System.out.println("-> browseMostRecentPostsByCalories");               // IMPLEMENTED
+        System.out.println("-> findPostsByRecipeName");                         // IMPLEMENTED
         System.out.println("-> interactionsAnalysis");
         System.out.println("-> userInteractionsAnalysis");
         System.out.println("-> caloriesAnalysis");

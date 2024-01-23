@@ -4,6 +4,7 @@ import { PostService } from '../services/post_service/post.service';
 import { IngredientService } from '../services/ingredient_service/ingredient.service';
 import { PostDTOInterface } from '../models/post-dto.model';
 import { Router } from '@angular/router';
+import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -20,6 +21,8 @@ export class AdminDashboardComponent implements OnInit {
   limit_var: number = 30;
   recipeNameSearch: string = '';
   usernameSearch: string = '';
+  top_ingredients: string[] = [];
+  least_ingredients: string[] = [];
   newIngredient: { name: string, calories: number } = { name: '', calories: 0 };
 
   // info: AdminInterface = new Admin();
@@ -28,7 +31,7 @@ export class AdminDashboardComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
-  constructor(private router: Router, private adminService: AdminService, private postService: PostService, private ingredientService: IngredientService) {
+  constructor(private router: Router, private adminService: AdminService, private postService: PostService, private ingredientService: IngredientService, private userService: RegisteredUserService) {
     const navigation = this.router.getCurrentNavigation();
     // if(navigation){
     //   const state = navigation.extras.state as {
@@ -44,6 +47,36 @@ export class AdminDashboardComponent implements OnInit {
     }
     //this.getPosts();
     this.getStatistics();
+    this.getTopIngredients();
+    this.getLeastIngredients();
+  }
+  getLeastIngredients() {
+    this.ingredientService.findMostLeastUsedIngredients(true).subscribe(
+      data => {
+        // go to registered user feed
+        this.top_ingredients = data;
+      },
+      error => {
+        //        if (error.status === 401) {
+        // Gestisci l'errore 401 qui
+        alert('Error in loading page');
+        //        }
+      }
+    );
+  }
+  getTopIngredients() {
+    this.ingredientService.findMostLeastUsedIngredients(false).subscribe(
+      data => {
+        // go to registered user feed
+        this.least_ingredients = data;
+      },
+      error => {
+        //        if (error.status === 401) {
+        // Gestisci l'errore 401 qui
+        alert('Error in loading page');
+        //        }
+      }
+    );
   }
 
   getPosts(): void {
@@ -70,6 +103,20 @@ export class AdminDashboardComponent implements OnInit {
       data => {
         // go to registered user feed
         this.interactions = data;
+        this.interactionValues = {
+          "avgOfStarRanking": {
+            "IMAGE": this.interactions.get("IMAGEAvgOfStarRanking"),
+            "NOIMAGE": this.interactions.get("NOIMAGEAvgOfStarRanking")
+          },
+          "ratioOfComments": {
+            "IMAGE": this.interactions.get("IMAGEratioOfComments"),
+            "NOIMAGE": this.interactions.get("NOIMAGEratioOfComments")
+          },
+          "ratioOfStarRankings": {
+            "IMAGE": this.interactions.get("IMAGEratioOfStarRankings"),
+            "NOIMAGE": this.interactions.get("NOIMAGEratioOfStarRankings"),
+          }
+        };
       },
       error => {
         //        if (error.status === 401) {
@@ -125,7 +172,24 @@ export class AdminDashboardComponent implements OnInit {
       // Azzera il form dopo l'aggiunta
       this.newIngredient = { name: '', calories: 0 };
     } else {
-      alert('Inserisci un nome e un numero di calorie validi.');
+      alert('Invalid input.');
     }
   }
+
+  interactionKeys = ["avgOfStarRanking", "ratioOfComments", "ratioOfStarRankings"];
+  interactionValues: any = {
+    "avgOfStarRanking": {
+      "IMAGE": this.interactions.get("IMAGEAvgOfStarRanking"),
+      "NOIMAGE": this.interactions.get("NOIMAGEAvgOfStarRanking")
+    },
+    "ratioOfComments": {
+      "IMAGE": this.interactions.get("IMAGEratioOfComments"),
+      "NOIMAGE": this.interactions.get("NOIMAGEratioOfComments")
+    },
+    "ratioOfStarRankings": {
+      "IMAGE": this.interactions.get("IMAGEratioOfStarRankings"),
+      "NOIMAGE": this.interactions.get("NOIMAGEratioOfStarRankings"),
+    }
+  };
+
 }

@@ -1,27 +1,41 @@
 <div class="popup-overlay">
   <span class="close-btn" (click)="close()">&times;</span>
+  <label class="newPost">Upload New Post</label>
+
 
   <div class="recipeInfo">
     <input class="title" type="text" [(ngModel)]="post.recipe.name" placeholder="Recipe name">
   </div>
 
-  <div class="recipeImage">
+  <div class="recipeImage" *ngIf="!addingIngredients && !addingSteps">
     <input class="imageUpload" type="file" (change)="onFileSelected($event)" accept="image/*">
-    <img *ngIf="fileSetted()" src="{{ post.recipe.image }}" alt="Immagine ricetta">
+    <div class="previewIMG">
+      <img src="{{ post.recipe.image !== 'DEFAULT' ? post.recipe.image : '../../../../../assets/images/default_recipe.jpg' }}" alt="Recipe Image">
+    </div>
+    <div class="container-totalCalories"><div class="totalCalories">{{ totalCalories }} <span>kcal</span></div></div>
   </div>
 
-  <div class="popup-content">
-    <input [(ngModel)]="recipe.name" name="recipe name" type="text" placeholder="Recipe name" required>
-    <input [(ngModel)]="post.description" name="desc" type="text" placeholder="Description" required>
-  
+  <textarea *ngIf="!addingIngredients && !addingSteps" placeholder="Type your description" required class="description" [(ngModel)]="post.description"></textarea>
+
+  <div class="ingredientsANDsteps">
+    <button *ngIf="!addingSteps" class="toggle" (click)="toogleIngredients()">{{addingIngredients ? 'HIDE' : 'INGREDIENTS'}}</button>
+    <button *ngIf="!addingIngredients" class="toggle" (click)="toogleSteps()">{{addingSteps ? 'HIDE' : 'STEPS'}}</button>
+  </div>
+
+  <div *ngIf="addingIngredients" class="ingredientsWrapper">
     <div *ngIf="recipe.ingredients.size !== 0" class="listIngredientsAdded">
-      <span *ngFor="let ingredient of recipe.ingredients | keyvalue" class="ingredientsAdded">
-        {{ ingredient.key }}
-        <input [(ngModel)]="ingredient.value" name="quantity" type="number" required>
-        <span (click)="removeIngredient(ingredient.key)" class="remove">&times;</span>
-      </span>
+      <div *ngFor="let ingredient of recipe.ingredients | keyvalue" class="ingredient">
+        <label class="ingredientName">{{ingredient.key}}</label>
+        <div class="containerQ">
+          <div>
+            <input class="ingredientQuantity" [(ngModel)]="ingredient.value" value="ingredient.value" name="quantity" type="number" (change)="updateTotalCalories(ingredient.key, ingredient.value)" required>
+            <span class="ingredientUnit">grams</span>
+          </div>
+          <span (click)="removeIngredient(ingredient.key)" class="remove">&times;</span>
+        </div>
+      </div>
     </div>
-    <input class="newIngredient" type="text" placeholder="Add New Ingredient" name="ingredientName" [(ngModel)]="ingredientName" (click)="newIngredientIsBeingInserted()">
+    <input class="newIngredient" type="text" placeholder="Add New Ingredient" name="ingredientName" [(ngModel)]="ingredientName" (focus)="showList=true">
     <div *ngIf="showList" class="dropdownList">
       <span *ngFor="let ingredient of ingredientsRemaining | filterIngredient:ingredientName" 
           (mouseenter)="setIngredientDetailed(ingredient)"
@@ -34,18 +48,21 @@
         <span *ngIf="ingredientDetailed === ingredient" class="calories">{{ ingredient.calories }}<span> kcal/100g</span></span>
       </span>
     </div>
-
-    <div *ngIf="recipe.steps.length !== 0" class="listIngredientsAdded">
-      <span *ngFor="let item of recipe.steps" class="ingredientsAdded">
-        {{ item }}
-        <span (click)="removeStep(stepBeingInserted)" class="remove">&times;</span>
-      </span>
-    </div>
-    <input class="newIngredient" type="text" placeholder="Add New Steps" name="step" [(ngModel)]="stepBeingInserted" (keyup.enter)="addStep()">
-
   </div>
-  
-  <button (click)="submitPost()">SUBMIT POST</button>
+
+  <div *ngIf="addingSteps" class="ingredientsWrapper">
+    <div *ngIf="recipe.steps.length !== 0" class="listIngredientsAdded">
+      <div *ngFor="let item of recipe.steps" class="ingredientsAdded">
+        <div class="step">
+          <label class="stepText">{{ item }}</label>
+          <span (click)="removeStep(item)" class="remove">&times;</span>
+        </div>
+      </div>
+    </div>
+    <input *ngIf="!showList" class="newIngredient" type="text" placeholder="Add New Step" name="step" [(ngModel)]="stepBeingInserted" (keyup.enter)="addStep()"> 
+  </div>
+
+  <button class="submit" *ngIf="!addingIngredients && !addingSteps" (click)="submitPost()">SUBMIT POST</button>
 </div>
   
   

@@ -1,0 +1,40 @@
+<div>
+    <button (click)="toggleDropdown()">Find recipe by ingredients</button>
+    <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
+      <!-- <div>Insert the ingredient</div> -->
+      <div *ngIf="ingredients_chosen.length !== 0" class="listIngredientsAdded">
+        <span *ngFor="let ingredient of ingredients_chosen" class="ingredientsAdded">
+          {{ ingredient }}
+          <span (click)="removeIngredient(ingredient)" class="remove">&times;</span>
+        </span>
+      </div>
+      
+      <input class="newIngredient" type="text" placeholder="Add New Ingredient" name="ingredientName" [(ngModel)]="ingredientName" (click)="newIngredientIsBeingInserted()">
+      
+      <div *ngIf="showList" class="dropdownList">
+        <span *ngFor="let ingredient of ingredientsRemaining | filterIngredient:ingredientName" 
+             (mouseenter)="setIngredientDetailed(ingredient)"
+             (mouseleave)="setIngredientDetailed(null)"
+             (click)="addIngredient(ingredient.name)" 
+             class="listElement">
+          
+             {{ ingredient.name }}
+          
+          <span *ngIf="ingredientDetailed === ingredient" class="calories">{{ ingredient.calories }}<span> kcal/100g</span></span>
+        </span>
+      </div>
+
+      <!--
+      <div class="time-box">
+        <label>Hours</label>
+        <span class="slider-label">{{hours_var}}</span>
+        <input type="range" min="1" max="87600" class="slider" name="hours_var" [(ngModel)]="hours_var">
+        <label>Number of Posts</label>
+        <span class="slider-label">{{limit_var}}</span>
+        <input type="range" min="3" max="120" step="3" class="slider" name="limit_var" [(ngModel)]="limit_var">
+      </div>-->
+
+
+      <button type="submit">SEARCH</button>
+    </div>
+</div>

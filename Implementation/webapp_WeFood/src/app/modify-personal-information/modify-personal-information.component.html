@@ -1,37 +1,29 @@
 <!-- Nel tuo componente HTML -->
 <div class="popup-overlay">
-    <span class="close-btn" (click)="close()">&times;</span>
-    <label class="title">Personal Information</label>
+    <label class="close" (click)="close()">&times;</label>
 
-    <div class="popup-content">
-        <div>
-            <label for="username">Username:</label>
-            <input type="text" id="username" [(ngModel)]="info.username">
-        </div>
+    <label class="title">Update Personal Information</label>
+    
+    <form>
+        <label class="info">Name</label>
+        <input [(ngModel)]="info.name" name="name" type="text" placeholder="Name" required>
+        <label class="info">Surname</label>
+        <input [(ngModel)]="info.surname" name="surname" type="text" placeholder="Surname" required>
 
-        <div>
-            <label for="name">Name:</label>
-            <input type="text" id="name" [(ngModel)]="info.name">
-        </div>
-
-        <div>
-            <label for="surname">Surname:</label>
-            <input type="text" id="surname" [(ngModel)]="info.surname">
+        <div class="container-changePassword">
+            <button class="changePassword" (click)="toggleNewPassword()" *ngIf="!changePassword">CHANGE PASSWORD</button>
+            
+            <label class="info cancel" *ngIf="changePassword" (click)="toggleNewPassword()">CANCEL</label>
+            <input *ngIf="changePassword" [(ngModel)]="newPassword" name="password" type="password" placeholder="New Password" required>
+            <input *ngIf="changePassword" [(ngModel)]="confirmNewPassword" name="confirmPassword" type="password" placeholder="Confirm New Password" required>
+            <label class="checkPassword" [ngClass]="{'visible': newPassword !== confirmNewPassword}">Passwords do not match.</label>
         </div>
         
-        <div>
-            <input [(ngModel)]="password" name="password" type="password" placeholder="New Password">
-            <input [(ngModel)]="confirmPassword" name="confirmPassword" type="password" placeholder="Confirm New Password">
-            <label class="checkPassword" [ngClass]="{'visible': !passwordsMatch}">
-                Passwords do not match.
-            </label>
-        </div>
-        
-        <div>
-            <label for="popupPassword">Enter Password:</label>
-            <input type="password" id="popupPassword" [(ngModel)]="popupPassword" required>
-        </div>
+        <label class="info">Current Password</label>
+        <input [(ngModel)]="password" name="confirmPassword" type="password" placeholder="Enter Password" required>
 
-        <button (click)="updateUserInfo()">Update</button>
-    </div>
+        <label class="response" [ngClass]="{'visible': response}">{{response_msg}}</label>
+
+        <button type="submit" (click)="updateUserInfo()">UPDATE</button>
+    </form>
 </div>

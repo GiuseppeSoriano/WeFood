@@ -19,6 +19,7 @@
   </header>
 
   <main>
+    <div class="overlay" *ngIf="post_visible"></div>
     <div class="side left">
       <app-most-popular-combination-of-ingredients></app-most-popular-combination-of-ingredients>
       <app-find-users-by-ingredient-usage></app-find-users-by-ingredient-usage>
@@ -32,15 +33,19 @@
     </div>
     <div *ngIf="!isLoading" [ngClass]="{'noposts': list_of_posts.length === 0}" class="grid-container">
           <div class="grid-col" *ngFor="let item of list_of_posts">
-              <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
+              <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta" (click)="viewPost(item)">
               <div class="label">{{ item.recipeName }}</div>
           </div>
       <img *ngIf="list_of_posts.length === 0" src="../../assets/images/SadBread.png" alt="No Posts Found" class="noposts">
       <label *ngIf="list_of_posts.length === 0" class="noposts">No Posts Found</label>
   </div>    
     <div class="side right">
+      <button (click)="uploadPost()">UPLOAD POST</button>
     </div>    
   </main>
 </body>
 
 </html>
+
+<app-view-post *ngIf="post_visible" [postDTO]="postDTO_to_be_viewed" (closePost)="closePost()"></app-view-post>
+<app-upload-post *ngIf="creatingPost" (closePost)="closePost()"></app-upload-post>
