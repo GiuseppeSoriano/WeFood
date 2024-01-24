@@ -2,7 +2,7 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Outpu
 import { Comment, CommentInterface } from 'src/app/models/comment.model';
 import { Post, PostInterface } from 'src/app/models/post.model';
 import { Recipe, RecipeInterface } from 'src/app/models/recipe.model';
-import { StarRanking } from 'src/app/models/star-ranking.model';
+import { StarRanking, StarRankingInterface } from 'src/app/models/star-ranking.model';
 import { PostDTO } from 'src/app/models/post-dto.model';
 import { PostService } from 'src/app/services/post_service/post.service';
 import { IngredientInterface } from 'src/app/models/ingredient.model';
@@ -10,6 +10,7 @@ import { CommentService } from 'src/app/services/comment_service/comment.service
 import { StarRankingService } from 'src/app/services/star_ranking_service/star-ranking.service';
 import { RegisteredUser, RegisteredUserInterface } from 'src/app/models/registered-user.model';
 import { RegisteredUserService } from 'src/app/services/registered_user_service/registered-user.service';
+import { AdminService } from 'src/app/services/admin_service/admin.service';
 
 @Component({
   selector: 'app-view-post',
@@ -17,6 +18,11 @@ import { RegisteredUserService } from 'src/app/services/registered_user_service/
   styleUrls: ['./view-post.component.css']
 })
 export class ViewPostComponent implements OnInit {
+
+  canClose: boolean = true;
+
+  editingDescription: boolean = false;
+
   comments_visible: boolean = false;
   starRankings_visible: boolean = false;
 
@@ -24,7 +30,6 @@ export class ViewPostComponent implements OnInit {
   selectedStar: number = 0;
   ingredients: boolean = false;
   
-//  postDTO: PostDTO = new PostDTO("658572b7d312a33aeb784d22", "", "");
   @Input() postDTO: PostDTO = new PostDTO();
   post: PostInterface = new Post();
 
@@ -33,11 +38,21 @@ export class ViewPostComponent implements OnInit {
 
   @Output() closePost: EventEmitter<void> = new EventEmitter();
 
-  constructor(private postService: PostService, private eRef:ElementRef, private commentService: CommentService, private starRankingService: StarRankingService, private userService: RegisteredUserService) { }
+  personalVote: StarRankingInterface = new StarRanking();
+
+  constructor(private postService: PostService, private eRef:ElementRef, private commentService: CommentService, private starRankingService: StarRankingService, private userService: RegisteredUserService, private adminService: AdminService) { }
 
   ngOnInit(): void {
     this.postService.findPostByPostDTO(this.postDTO).subscribe((data: PostInterface) => {
       this.post = data;
+      // this.post.starRankings.find(v => v.username == this.getUser().username) ? this.personalVote = this.post.starRankings.find(v => v.username == this.getUser().username) : this.personalVote = new StarRanking();
+      for(let i = 0; i < this.post.starRankings.length; i++) {
+        if(this.post.starRankings[i].username == this.getUser().username) {
+          this.personalVote = this.post.starRankings[i];
+          this.selectedStar = this.personalVote.vote;
+          break;
+        }
+      }
     });
   }
 
@@ -51,58 +66,61 @@ export class ViewPostComponent implements OnInit {
 
   commentPost() {
     const newComment = new Comment(this.getUser().username, this.newCommentText, new Date());
-    this.post.comments.push(newComment);
-    this.newCommentText = '';  // Clear the input after submitting
-    //this.commentService.commentPost(this.post.getUser(), this.postDTO, newComment).subscribe((data: boolean) => {
-    //  if(data) {
-    //    this.post.comments.push(newComment);
-    //    this.newCommentText = '';  // Clear the input after submitting
-    //  } else {
-    //    alert("Error commenting post");
-    //    this.close();
-    //  }
-    //});
+    this.commentService.commentPost(this.getUser(), this.postDTO, newComment).subscribe((data: boolean) => {
+     if(data) {
+       this.post.comments.push(newComment);
+       this.newCommentText = '';  // Clear the input after submitting
+     } else {
+       alert("Error commenting post");
+       this.close();
+     }
+    });
   }
 
   deleteComment(comment: Comment) {
-    // Implementa la logica per eliminare il commento
-    this.post.comments = this.post.comments.filter(c => c !== comment);
-    //this.commentService.deleteComment(this.getUser(), this.postDTO, comment).subscribe((data: boolean) => {
-    //  if(data) {
-    //    this.post.comments = this.post.comments.filter(c => c !== comment);
-    //  } else {
-    //    alert("Error deleting comment");
-    //    this.close();
-    //  }
-    //});
+    this.commentService.deleteComment(this.getUser(), this.postDTO, comment).subscribe((data: boolean) => {
+     if(data) {
+       this.post.comments = this.post.comments.filter(c => c !== comment);
+     } else {
+       alert("Error deleting comment");
+       this.close();
+     }
+    });
+  }
+
+  canDeleteComment(comment: Comment){
+    return this.getUser().username == this.post.username || this.getUser().username == comment.username || this.adminService.info.username !== '';
   }
 
   votePost(star: number) {
     // Implement your logic to submit the star ranking
-    this.selectedStar = star;
-    const newVote = new StarRanking(this.getUser().username, this.selectedStar);
-    this.post.starRankings.push(newVote);
-    //this.starRankingService.votePost(this.post.getUser(), starRanking, this.postDTO).subscribe((data: boolean) => {
-    //  if(data) {
-    //    this.post.starRankings.push(newVote);
-    //  } else {
-    //    alert("Error voting post");
-    //    this.close();
-    //  }
-    //});
+    if(this.personalVote.vote !== 0)
+      return;
+    const starRanking = new StarRanking(this.getUser().username, star);
+    this.starRankingService.votePost(this.getUser(), starRanking, this.postDTO, this.post).subscribe((data: boolean) => {
+     if(data) {
+      this.personalVote = starRanking;
+      this.selectedStar = star;
+      this.post.starRankings.push(this.personalVote);
+     } else {
+       alert("Error voting post");
+       this.close();
+     }
+    });
   }
 
-  deleteVote(vote: StarRanking) {
+  deleteVote() {
     // Implementa la logica per eliminare il voto dell'utente corrente
-    this.post.starRankings = this.post.starRankings.filter(v => v !== vote);
-    //this.starRankingService.deleteVote(this.getUser(), vote, this.postDTO).subscribe((data: boolean) => {
-    //  if(data) {
-    //    this.post.starRankings = this.post.starRankings.filter(v => v !== vote);
-    //  } else {
-    //    alert("Error deleting vote");
-    //    this.close();
-    //  }
-    //});
+    this.starRankingService.deleteVote(this.getUser(), this.personalVote, this.postDTO, this.post).subscribe((data: boolean) => {
+     if(data) {
+      this.post.starRankings = this.post.starRankings.filter(v => v !== this.personalVote);
+      this.personalVote = new StarRanking();
+      this.selectedStar = 0;
+     } else {
+       alert("Error deleting vote");
+       this.close();
+     }
+    });
   }
 
   close() {
@@ -112,7 +130,7 @@ export class ViewPostComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
     // Close the popup if clicking outside the popup content
-    if (!this.eRef.nativeElement.contains(event.target)) {
+    if (!this.eRef.nativeElement.contains(event.target) && !this.canClose) {
       this.close();
     }
   }
@@ -131,26 +149,76 @@ export class ViewPostComponent implements OnInit {
   }
 
   canDelete() {
-    //return this.getUser().username == this.post.username;
-    return true && !this.comments_visible && !this.starRankings_visible;
+    return this.getUser().username == this.post.username && !this.comments_visible && !this.starRankings_visible;
   }
 
   deletePost() {
-    // this.postService.deletePost(this.post, this.postDTO, this.userService.info).subscribe((data: boolean) => {
-    //   if(data) {
-    //     this.close();
-    //   } else {
-    //     alert("Error deleting post");
-    //     this.close();
-    //   }
-    // });
+    this.postService.deletePost(this.post, this.postDTO, this.userService.info).subscribe((data: boolean) => {
+      if(data) {
+        this.close();
+      } else {
+        alert("Error deleting post");
+        this.close();
+      }
+    });
   }
 
-  editingComment: boolean = false;
+  startModifyDescription() {
+    this.canClose = false;
+    setTimeout(() => {
+      this.editingDescription = !this.editingDescription;
+      this.canClose = true;
+    }, 100);
+  }
 
-  modifyComment(_t62: CommentInterface) {
-    this.editingComment = !this.editingComment;
+  modifyDescription() {
+    this.canClose = false;
+    this.postService.modifyPost(this.post, this.postDTO, this.getUser()).subscribe((data: boolean) => {
+      if(data) {
+        // NOTHING
+      } else {
+        alert("Error modifying post");
+        this.canClose = true;
+        this.close();
+      }
+    }
+    );
+    setTimeout(() => {
+      this.editingDescription = !this.editingDescription;
+      this.canClose = true;
+    }, 100);
+  }
+
+  editingComment: CommentInterface = new Comment();
+
+  startModifyComment(comment: CommentInterface) {
+    this.canClose = false;
+    setTimeout(() => {
+      this.editingComment = comment;
+      this.canClose = true;
+    }, 100);
+  }
+
+  modifyComment(comment: CommentInterface) {
+    this.canClose = false;
+
+    this.commentService.updateComment(this.getUser(), this.postDTO, comment).subscribe((data: boolean) => {
+      if(data) {
+        this.editingComment = new Comment();
+      } else {
+        alert("Error modifying comment");
+        this.close();
+      }
+    });
+
+    setTimeout(() => {
+      this.editingComment = new Comment();
+      this.canClose = true;
+    }, 100);
   }
   
+  isCommentBeingModified(comment: CommentInterface) {
+    return this.editingComment == comment;
+  }
 
 }

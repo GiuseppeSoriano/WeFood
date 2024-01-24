@@ -32,6 +32,7 @@ export class RegisteredUserService {
     return this.http.post<RegisteredUserInterface>('http://localhost:8080/registereduser/login', { username, password }).subscribe(
       data => {
         this.setCredentials(data);
+        console.log(this.info.id);
       },
       error => {
         if (error.status === 401) {
@@ -63,7 +64,7 @@ export class RegisteredUserService {
 
   followUser(userToFollow_var: RegisteredUserInterface) {
     const requestData = {
-      registeredUserDTO: new RegisteredUserDTO(this.info._id, this.info.username),
+      registeredUserDTO: new RegisteredUserDTO(this.info.id, this.info.username),
       usernameToFollow: userToFollow_var
     };
     return this.http.post<boolean>('http://localhost:8080/registereduser/followUser', requestData)
@@ -74,7 +75,7 @@ export class RegisteredUserService {
 
   unfollowUser(userToUnfollow_var: RegisteredUserInterface) {
     const requestData = {
-      registeredUserDTO: new RegisteredUserDTO(this.info._id, this.info.username),
+      registeredUserDTO: new RegisteredUserDTO(this.info.id, this.info.username),
       usernameToFollow: userToUnfollow_var
     };
     return this.http.post<boolean>('http://localhost:8080/registereduser/unfollowUser', requestData)
@@ -84,7 +85,7 @@ export class RegisteredUserService {
   }
 
   findFriends() {
-    const registeredUserDTO = new RegisteredUserDTO(this.info._id, this.info.username);
+    const registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username);
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFriends', registeredUserDTO)
       .pipe(
         catchError(this.handleError)
@@ -92,7 +93,7 @@ export class RegisteredUserService {
   }
 
   findFollowers() {
-    const registeredUserDTO = new RegisteredUserDTO(this.info._id, this.info.username);
+    const registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username);
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFollowers', registeredUserDTO)
       .pipe(
         catchError(this.handleError)
@@ -100,7 +101,7 @@ export class RegisteredUserService {
   }
 
   findFollowed() {
-    const registeredUserDTO = new RegisteredUserDTO(this.info._id, this.info.username);
+    const registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username);
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFollowed', registeredUserDTO)
       .pipe(
         catchError(this.handleError)
@@ -108,7 +109,7 @@ export class RegisteredUserService {
   }
 
   findUsersToFollowBasedOnUserFriends() {
-    const registeredUserDTO = new RegisteredUserDTO(this.info._id, this.info.username);
+    const registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username);
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findUsersToFollowBasedOnUserFriends', registeredUserDTO)
       .pipe(
         catchError(this.handleError)

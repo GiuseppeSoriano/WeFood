@@ -38,7 +38,7 @@ button {
   /* STILE QUANDO IL MENU A TENDINA È VISIBILE */
   .dropdown-visible {
     /* padding: 5px; */
-    max-height: 200px; /* Regola questa altezza in base al contenuto del menu */
+    max-height: 400px; /* Regola questa altezza in base al contenuto del menu */
     transition: 0.3s ease-in-out;
   }
   

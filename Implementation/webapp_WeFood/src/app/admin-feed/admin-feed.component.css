@@ -4,12 +4,12 @@ body {
     margin: 100px 0 0;
     padding: 0;
     font-family: Calibri, sans-serif;
-
-}
-
-/* HEADER */
-
-header {
+  
+  }
+  
+  /* HEADER */
+  
+  header {
     background-color: #6A040F;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: fixed;
@@ -18,51 +18,49 @@ header {
     top: 0;
     z-index: 1000; 
     left: 0;
-}
-
-/* NAVBAR */
-
-nav {
+  }
+  
+  /* NAVBAR */
+  
+  nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 50px;
     height: 55px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.logo label {
+  }
+  
+  .logo label {
     position: relative;
     top: -12px;
     color: #FFFFFF;
-    font-size: 26px;
+    font-size: 30px;
     font-weight: bold;
     padding-right: 5px;
     transition: 0.2s;
-}
-
-.logo label:hover {
+  }
+  
+  .logo label:hover {
     cursor: pointer;
-    font-size: 30px;
+    font-size: 35px;
     transition: 0.2s;
     padding-left: 0px;
-}
-
-.logo img {
+  }
+  
+  .logo img {
     position: relative;
-    top: 15px;
-    width: 45px;
-    height: 45px;
-}
-
-.menu {
+    top: 12px;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .menu {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.menu button {
+  }
+  
+  .menu button {
     position: relative;
     background-color: transparent;
     color: white;
@@ -75,60 +73,26 @@ nav {
     transition: 0.05s;
     border: 3px solid;
     border-color: transparent;
-}
-
-
-.homeButton {
-    margin-right: 50px;
-    position: relative;
-    background-color: transparent;
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.05s;
+  }
+  
+  
+  .menu button:hover {
     border: 3px solid;
-    border-color: transparent;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.homeButton:hover {
-    border: 3px solid;
-    border-color: #FFBA08;
+    border-color: #FFCD00;
     transition: 0.05s;
-}
-
-.homeButton img {
-    position: relative;
-    width: 45px;
-    margin-right: 12px;
-}
-
-
-.menu button:hover {
-    border: 3px solid;
-    border-color: #FFBA08;
-    transition: 0.05s;
-}
-
-
-
-/* MAIN */
-
-main {
+  }
+  
+  /* MAIN */
+  
+  main {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
     width: 100%;
-}
-
-div.overlay {
+  }
+  
+  div.overlay {
     z-index: 1;
     position: fixed;
     padding: 0;
@@ -138,121 +102,134 @@ div.overlay {
     width: 100%;
     height: 100%;
     background-color: rgba(3, 7, 30, 0.5); 
-}
-
-
-/* SIDEBAR */
-
-.side {
+  }
+  
+  /* SIDEBAR */
+  
+  .side {
     flex: 1;
-}
-
-.side.left {
-    min-height: 500px;
+  }
+  
+  .side.left {
     margin-left: 0;
     top: 100px;
     position: sticky;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-}
-
-/* INPUT */
-
-
-/* SLIDER */
-
-.side.left label {
-    position: relative;
-    display: block;
+    align-items: stretch;
+    padding: 0 10px;
+  }
+  
+  button {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 1px 0;
+    padding: 10px;
+    background-color: #370617; /* Colore di sfondo principale */
+    color: white; /* Colore del testo */
+    border: none; /* Nessun bordo */
+    border-radius: 5px; /* Bordo arrotondato */
+    font-size: 16px; /* Dimensione del font */
+    font-weight: bold; /* Grassetto */
+    text-transform: uppercase; /* Testo in maiuscolo */
+    cursor: pointer; /* Cambia il cursore in un puntatore */
+    transition: background-color 0.3s, transform 0.2s; /* Transizione fluida per hover e click */
+  }
+  
+  button:hover {
+    background-color: #370617; /* Cambia colore al passaggio del mouse */
+    transform: scale(1.01); /* Leggera scala su hover */
+  }
+  
+  button:active {
+    background-color: #F4845F; /* Colore quando il pulsante è premuto */
+    transform: scale(0.95); /* Riduci la scala quando cliccato */
+  }
+  
+  /* CONTENITORE DEL MENU A TENDINA */
+  .dropdown-container {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: #FFFCEB;
+    border-radius: 5px;
+    transition: 0.3s ease-in-out;
+    max-height: 0; /* Imposta l'altezza massima iniziale a 0 */
+  }
+  
+  /* STILE QUANDO IL MENU A TENDINA È VISIBILE */
+  .dropdown-visible {
+    /* padding: 5px; */
+    max-height: 200px; /* Regola questa altezza in base al contenuto del menu */
+    transition: 0.3s ease-in-out;
+  }
+  
+  /* INPUT ALL'INTERNO DEL MENU A TENDINA */
+  .dropdown-container input {
+    width: 100%;
+    box-sizing: border-box;
+    /* margin: 5px 0; */
+    padding: 8px;
+    border: 2px solid #FFFFFF; /* Bordi colorati */
+    background-color: #FFFCEB;
+    border-radius: 5px; /* Bordo arrotondato */
+    font-size: 14px; /* Dimensione del font */
+    font-weight: bold; /* Grassetto */
+    color: #F25C54;
+    /* change placeholder color */
+  }
+  .dropdown-container input::placeholder {
+    color: #F25C54;
+    opacity: 0.7; /* Firefox */
     text-align: center;
-    font-size: 15px;
-    color: #370617;
-    font-weight: light;
-}
-
-.slider-label {
+  }
+  
+  .dropdown-container input:focus {
+    color: #F25C54;
+    border: #FFCD00 2px solid;
+    outline: none;
+    opacity: 0.7; /* Firefox */
+    /* text-align: center; */
+  }
+  /**/
+  
+  
+  /* SLIDER */
+  
+  .slider-label {
     position: relative;
     display: block;
     text-align: center;
     font-size: 20px;
-    color: #6A040F;
-    font-weight: bold;
-}
-
-.slider {
-    /* removing default appearance */
+    color: #999;
+    font-weight: 400;
+  }
+  .slider {
+    width: 400px;
+    height: 15px;
     -webkit-appearance: none;
-    appearance: none; 
-    /* creating a custom design */
-    max-width: 350px;
-    width: 50%;
-    cursor: pointer;
+    background: #111;
     outline: none;
     border-radius: 15px;
-    /*  overflow: hidden;  remove this line*/
-    
-    /* New additions */
-    height: 5px;
-    background: #9D0208;
-    margin-top: 8px;
-    margin-bottom: 15px;
-}
-
-.slider::-webkit-slider-thumb {
+    overflow: hidden;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 1);
+  }
+  .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    appearance: none; 
-    /* creating a custom design */
-    height: 15px;
     width: 15px;
-    background-color: #FAA307;
+    height: 15px;
     border-radius: 50%;
-    border: none;
-    transition: .2s ease-in-out;
-}
-
-/* Hover, active & focus Thumb: Webkit */
-.slider::-webkit-slider-thumb:hover {
-    box-shadow: 0 0 0 8px rgba(255, 185, 8, 0.2)
-    
-}
-  
-.slider:active::-webkit-slider-thumb{
-    box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
-}
-
-.slider:focus::-webkit-slider-thumb{
-    box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
-}
-
-/* BUTTON */
-
-.side button {
-    padding: 12px 0;
-    max-width: 350px;
-    width: 50%;
-    margin-top: 20px;
-    background-color: #6A040F;
-    color: white;
-    font-weight: bolder;
-    font-size: 15px;
-    border: none;
-    border-radius: 5px;
+    background: #00fd0a;
     cursor: pointer;
-    transition: 0.2s;
-}
-
-.side button:hover {
-    background-color: #9D0208;
-    transition: 0.2s;
-    transform: scale(1.05); /* Leggera scala su hover */
-}
-
-
-/* FEED VIEW*/
-
-.grid-container {
+    border: 4px solid #333;
+    box-shadow: -407px 0 0 400px #00fd0a;
+  }
+  
+  
+  /* FEED VIEW*/
+  
+  .grid-container {
     flex-direction: 4.67;
     width: 70%;
     display: grid;
@@ -261,21 +238,21 @@ div.overlay {
     padding: 10px; /* Padding attorno alla griglia */
     background-color: white; /* Colore di sfondo simile a quello di Instagram */
     max-width: 800px; /* Larghezza massima della griglia */
-}
-
-.grid-container.noposts {
+  }
+  
+  .grid-container.noposts {
     grid-template-columns: repeat(1, 1fr);
-}
-
-.grid-col {
+  }
+  
+  .grid-col {
     position: relative;
     overflow: hidden; /* Nasconde le parti dell'immagine che sforano */
     border-radius: 5px;
     background-color: white;
     height: 200px; /* Altezza fissa per ogni colonna */
-}
-
-.label {
+  }
+  
+  .label {
     visibility: hidden;
     position: absolute;
     bottom: 0px;
@@ -289,34 +266,34 @@ div.overlay {
     text-align: center;
     cursor: pointer;
     box-sizing: border-box;
-
-}
-
-img:hover + .label {
+  
+  }
+  
+  img:hover + .label {
     visibility: visible;
-}
-
-.label:hover {
+  }
+  
+  .label:hover {
     visibility: visible;
-}
-
-
-img {
+  }
+  
+  
+  img {
     width: 100%;
     min-height: 100%; /* Assicura che l'altezza dell'immagine copra la colonna */
     object-fit: cover; /* Mantiene le proporzioni mentre copre l'area della colonna */
     object-position: center; /* Mantiene il centro dell'immagine visibile */
     transition: transform 0.3s ease;
     cursor: pointer;
-}
-
-.grid-col:hover img {
+  }
+  
+  .grid-col:hover img {
     transform: scale(1.1);
-}
-
-/* LOADING */
-
-.loading-container {
+  }
+  
+  /* LOADING */
+  
+  .loading-container {
     flex:4.67;
     width: 70%;
     display: grid;
@@ -324,9 +301,9 @@ img {
     grid-gap: 10px; /* Spazio tra le colonne */
     padding: 10px; /* Padding attorno alla griglia */
     max-width: 800px; /* Larghezza massima della griglia */
-}
-
-.loading {
+  }
+  
+  .loading {
     border: 7px solid #FAA307;
     border-radius: 50%;
     border-top: 7px solid #6A040F;
@@ -340,26 +317,26 @@ img {
     bottom: 0;
     left: 0;
     right: 0;
-}
-
-@keyframes spin {
+  }
+  
+  @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-
-/* NO POSTS IMAGE */
-img.noposts {
+  }
+  
+  
+  /* NO POSTS IMAGE */
+  img.noposts {
     margin: auto;
     position: relative;
     display: block;
     width: 350px;
     top: 70px;
     cursor: default;
-}
-
-/* NO POSTS LABEL */
-label.noposts{
+  }
+  
+  /* NO POSTS LABEL */
+  label.noposts{
     position: relative;
     display: block;
     width: 100%;
@@ -369,73 +346,44 @@ label.noposts{
     left: 20px;
     color: #6A040F;
     cursor: default;
-}
-
-
-.username {
-    font-size: 18px;
-    margin-bottom: 5px;
-    cursor: pointer;
-}
-
-.nav-links {
-    display: flex;
-    gap: 10px;
-    margin-top: 5px;
-}
-
-.link {
-    cursor: pointer;
-}
-
-/* MOST USED INGREDIENTS */
-
-.most-used-ingredients {
-    width: 100%;
+  }
+  
+  .user-info {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
-  }
-  
-  .most-used-ingredients span {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #370617;
-  }
-  
-  .ingredient-list {
-    max-width: 400px;
-    display: flex;
-    width: 70%;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-  }
-  
-  .ingredient-list span {
-    text-align: center;
-    width: 100%;
-    border-radius: 5px;
-    display: block;
-    font-size: 16px;
-    padding: 10px;
-    margin-bottom: 5px;
-    font-weight: bold;
-    background-color: #370617;
     color: white;
+    padding: 10px;
+    margin-bottom: 10px;
   }
   
-  .ingredient-list span.gold {
-    background-color: #FAA307;
+  .side.right{
+    margin-right: 0;
+    top: 100px;
+    position: sticky;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10px;
   }
   
-  .ingredient-list span.silver {
-    background-color: #9D0208;
+  img.uploadPost {
+    width: 50%;
+    height: 50%;
+    min-width: 100px;
+    max-width: 190px;
+    border-radius: 20px;
+    margin: auto;
+    border: 6px solid #6A040F;
+    margin-top: 250px;
+    transition: 0.2s;
   }
   
-  .ingredient-list span.bronze {
-    background-color: #6A040F;
+  img.uploadPost:hover {
+    transform: scale(1.1);
+    transition: 0.2s;
   }
+  
   

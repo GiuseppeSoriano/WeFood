@@ -26,20 +26,40 @@
 
   <main>
     <div class="side left">
+
+      <button (click)="openIngredientCreation()">Create Ingredient</button>
+      <button (click)="goToAdminFeed()">FEED</button>
+      <button>FIND USER</button>
+
+      <div class="popup-overlay" *ngIf="ingredientCreation">
+        <label class="close" (click)="closeIngredientCreation()">&times;</label>
+    
+        <label class="title">Create Ingredient</label>
+        
+        <form>
+        
+            <label class="info">Ingredient Name</label>
+            <input [(ngModel)]="newIngredient.name" name="ingredient_name" type="text" placeholder="Ingredient Name" required>
+            <label class="info">Calories</label>
+            <input [(ngModel)]="newIngredient.calories" name="calories" type="text" placeholder="Calories" required>
+    
+            <button type="submit" (click)="createIngredient()">CREATE</button>
+        </form>
+      </div>
+
+      <!--
       <app-most-popular-combination-of-ingredients></app-most-popular-combination-of-ingredients>
       <app-browse-most-recent-top-rated-posts></app-browse-most-recent-top-rated-posts>
       <app-browse-most-recent-top-rated-post-by-ingredients></app-browse-most-recent-top-rated-post-by-ingredients>
       <app-browse-most-recent-posts-by-calories></app-browse-most-recent-posts-by-calories>
       <app-find-recipe-by-ingredients></app-find-recipe-by-ingredients>
+      <app-find-post-by-recipe-name></app-find-post-by-recipe-name>
       <app-calories-analysis></app-calories-analysis>
-      <div class="recipe-info">
-        <input type="text" placeholder="Find by recipe name" [(ngModel)]="recipeNameSearch">
-        <button (click)="searchRecipe()">Find Post</button>
-      </div>
       <div class="user-info">
         <input type="text" placeholder="Find by username" [(ngModel)]="usernameSearch">
       </div>
         <button (click)="searchUser()">Find User</button>
+      -->
     </div>
 
    <!-- <div *ngIf="isLoading" class="loading-container">
@@ -56,13 +76,14 @@
     </div>
     -->
 
+    <!--
     <div class="interaction-list">
       <h2>Interaction Analysis</h2>
       
-      <!-- <ng-container > -->
+      <!-- <ng-container > 
         <div class="interaction-group" *ngFor="let key of interactionKeys">
           <p class="group-title">{{ key }}</p>
-          <!--<div>{{key}}</div>-->
+          <!--<div>{{key}}</div>
           
           <div *ngFor="let interactionKey of interactionValues[key] | keyvalue">
             <div class="bar-container">
@@ -76,39 +97,37 @@
             </div>
           </div>
         </div>
-      <!-- </ng-container> -->
+      <!-- </ng-container>
+    </div> -->  
+
+    <div class="interactionChart">
+      <span>Interaction Analysis</span>
+      <canvas #myChart class="chart"></canvas>
     </div>
-  
+    
 
     <div class="side right">
+      
       <div class="most-used-ingredients">
-        <h2>Most used ingredients</h2>
-        <ol class="ingredient-list">
-          <li *ngFor="let ingredient of top_ingredients | keyvalue; let i = index" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
+        <span>Most Used Ingredients</span>
+        <div class="ingredient-list">
+          <span *ngFor="let ingredient of top_ingredients | keyvalue; let i = index" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
             {{ingredient.value}}
-          </li>
-        </ol>
+          </span>
+        </div>
       </div>
+      
       <div class="least-used-ingredients">
-        <h2>Least used ingredients</h2>
-        <ol class="ingredient-list">
-          <li *ngFor="let ingredient of least_ingredients | keyvalue">
+        <span>Least Used Ingredients</span>
+        <div class="ingredient-list">
+          <span *ngFor="let ingredient of least_ingredients | keyvalue">
             {{ingredient.value}}
-          </li>
-        </ol>
+          </span>
+        </div>
       </div>
     </div>
 
   </main>
 </body>
-
-<footer>
-  <div class="ingredient-form">
-    <h2>Create Ingredient</h2>
-    <input type="text" placeholder="Nome dell'ingrediente" [(ngModel)]="newIngredient.name">
-    <input type="number" placeholder="Calorie" [(ngModel)]="newIngredient.calories">
-    <button (click)="createIngredient()">Create Ingredient</button>
-  </div>
-</footer>
 
 <html>

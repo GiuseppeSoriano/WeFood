@@ -1,6 +1,7 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { Ingredient, IngredientInterface } from 'src/app/models/ingredient.model';
 import { IngredientService } from 'src/app/services/ingredient_service/ingredient.service';
+import { PostService } from 'src/app/services/post_service/post.service';
 
 @Component({
   selector: 'app-browse-most-recent-top-rated-post-by-ingredients',
@@ -28,7 +29,7 @@ export class BrowseMostRecentTopRatedPostByIngredientsComponent implements OnIni
   }
 
 
-  constructor(private eRef: ElementRef, private ingredientService: IngredientService) { }
+  constructor(private eRef: ElementRef, private ingredientService: IngredientService, private postService: PostService) { }
 
   ngOnInit(): void {
     this.ingredientsList = this.ingredientService.getAllIngredients();
@@ -51,6 +52,44 @@ export class BrowseMostRecentTopRatedPostByIngredientsComponent implements OnIni
         }
       }
     );*/
+  }
+
+  @Output() sendPosts = new EventEmitter<any>();
+  @Output() loadPosts = new EventEmitter<any>();
+  
+  onExecute() {
+    // Prepara i dati da inviare
+    this.loadPosts.emit();
+    if(this.ingredients_chosen.length > 0) {
+      this.postService.browseMostRecentTopRatedPostsByIngredients(this.ingredients_chosen, this.hours_var, this.limit_var).subscribe(
+        (response) => {
+          const dataToEmit = {
+            posts: response
+          };
+          // Emetti l'evento con i dati
+          this.sendPosts.emit(dataToEmit);
+            },
+        (error) => {
+          console.log(error);
+          this.loadPosts.emit();
+        }
+      );
+    }
+    else{
+      this.postService.browseMostRecentTopRatedPosts(this.hours_var, this.limit_var).subscribe(
+        (response) => {
+          const dataToEmit = {
+            posts: response
+          };
+          // Emetti l'evento con i dati
+          this.sendPosts.emit(dataToEmit);
+            },
+        (error) => {
+          console.log(error);
+          this.loadPosts.emit();
+        }
+      );
+    }
   }
 
   activeDropdownIndex: boolean = false;

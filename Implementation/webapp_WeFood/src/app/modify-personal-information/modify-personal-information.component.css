@@ -112,6 +112,10 @@ transition: 0.2s;
 transform: scale(1.05); /* Leggera scala su hover */
 }
 
+.popup-overlay button[type="submit"]:disabled {
+    opacity: 0.5;
+}
+
 .popup-overlay label.info {
 margin-top: 10px;
 margin-left: 3px;

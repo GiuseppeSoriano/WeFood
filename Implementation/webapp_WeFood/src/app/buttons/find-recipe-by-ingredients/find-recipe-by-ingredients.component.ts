@@ -1,6 +1,7 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { IngredientInterface } from 'src/app/models/ingredient.model';
 import { IngredientService } from 'src/app/services/ingredient_service/ingredient.service';
+import { PostService } from 'src/app/services/post_service/post.service';
 
 @Component({
   selector: 'app-find-recipe-by-ingredients',
@@ -28,29 +29,11 @@ export class FindRecipeByIngredientsComponent implements OnInit {
   }
 
 
-  constructor(private eRef: ElementRef, private ingredientService: IngredientService) { }
+  constructor(private eRef: ElementRef, private ingredientService: IngredientService, private postService: PostService) { }
 
   ngOnInit(): void {
     this.ingredientsList = this.ingredientService.getAllIngredients();
     this.ingredientsRemaining = this.ingredientsList;
-  }
-
-  execute() {
-    this.showList = false;
-/*    this.ingredientService.mostPopularCombinationOfIngredients(this.ingredientName).subscribe(
-      data => {
-        // console.log(data);
-        // this.suggestions = ["No suggestions available"];
-        // if (data.length > 0)
-        //   this.suggestions = data;
-      },
-      error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
-        }
-      }
-    );*/
   }
 
   activeDropdownIndex: boolean = false;
@@ -116,4 +99,24 @@ export class FindRecipeByIngredientsComponent implements OnInit {
     }, 300);
   }
 
+  @Output() sendPosts = new EventEmitter<any>();
+  @Output() loadPosts = new EventEmitter<any>();
+  
+  onExecute() {
+    // Prepara i dati da inviare
+    this.loadPosts.emit();
+    this.postService.findRecipeByIngredients(this.ingredients_chosen).subscribe(
+      (response) => {
+        const dataToEmit = {
+          posts: response
+        };
+        // Emetti l'evento con i dati
+        this.sendPosts.emit(dataToEmit);
+          },
+      (error) => {
+        console.log(error);
+        this.loadPosts.emit();
+      }
+    );
+  }
 }

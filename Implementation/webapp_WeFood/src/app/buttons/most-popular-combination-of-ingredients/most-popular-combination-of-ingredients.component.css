@@ -13,12 +13,12 @@ button {
   cursor: pointer; /* Cambia il cursore in un puntatore */
   transition: background-color 0.3s, transform 0.2s; /* Transizione fluida per hover e click */
 }
-
+  
 button:hover {
   background-color: #9D0208; /* Cambia colore al passaggio del mouse */
   transform: scale(1.01); /* Leggera scala su hover */
 }
-
+  
 button:active {
   background-color: #F4845F; /* Colore quando il pulsante è premuto */
   transform: scale(0.95); /* Riduci la scala quando cliccato */
@@ -38,8 +38,8 @@ button:active {
 /* STILE QUANDO IL MENU A TENDINA È VISIBILE */
 .dropdown-visible {
   /* padding: 5px; */
-  max-height: 230px; /* Regola questa altezza in base al contenuto del menu */
-  transition: 0.3s ease-in-out;
+  max-height: 500px; /* Regola questa altezza in base al contenuto del menu */
+  transition: 0.75s ease-in-out;
 }
 
 /* INPUT ALL'INTERNO DEL MENU A TENDINA */
@@ -49,7 +49,7 @@ button:active {
   font-weight: bold;
 }
 
-.dropdown-container input {
+.dropdown-container .time-box {
   width: 100%;
   box-sizing: border-box;
   /* margin: 5px 0; */
@@ -59,48 +59,192 @@ button:active {
   border-radius: 5px; /* Bordo arrotondato */
   font-size: 14px; /* Dimensione del font */
   font-weight: bold; /* Grassetto */
-  color: #6A040F;
-  /* change placeholder color */
-}
-.dropdown-container input::placeholder {
-  color: #6A040F;
-  opacity: 0.7; /* Firefox */
-  text-align: center;
-}
-
-.dropdown-container input:focus {
-  color: #6A040F;
-  border: #FFCD00 2px solid;
-  outline: none;
-  opacity: 0.7; /* Firefox */
-  background-color: transparent;
-  /* text-align: center; */
-}
-
-.dropdown-list {
-  max-height: 160px; /* Imposta l'altezza massima */
-  overflow-y: auto; /* Abilita lo scroll verticale se l'elenco è più lungo dell'altezza massima */
-  margin: 0;
-  padding: 0;
-
-  width: 100%;
-  box-sizing: border-box;
-  background-color: #FFFCEB;
-  border-radius: 5px; /* Bordo arrotondato */
-  font-size: 14px; /* Dimensione del font */
-  font-weight: bold; /* Grassetto */
   color: #9D0208;
   text-align: center;
+  /* change placeholder color */
+}
 
+
+/* INPUT TO ADD A NEW INGREDIENT */
+input.newIngredient {
+  margin-top: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 15px;
+  background-color: #6A040F;
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 16px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  color: white;
+  /* change placeholder color */
+}
+input.newIngredient::placeholder {
+  color: #FFFFFF;
+  opacity: 0.95; 
+  text-align: center;
+}
+
+input.newIngredient:focus {
+  outline: none;
+  border-bottom: 3px solid #FAA307;
+}
+
+
+/*listIngredientsAdded*/
+.listIngredientsAdded {
+  margin-top: 8px;
+  max-height: 150px;
+  overflow-y: auto; /* Abilita lo scroll verticale se l'elenco è più lungo dell'altezza massima */
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 5px; /* Bordo arrotondato */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: #FFFFFF;
+  border: 2px solid #9D0208;
+}
+
+span.ingredientsAdded {
+  margin: 0;
+  padding: 0px 15px;
+  font-size: 18px;
+  text-align: left;
+  display: flex;;
+  justify-content: space-between;
+  align-items: center;
+  color: #6A040F;
+  font-weight: bold;
+  border-bottom: 1px solid #9D0208;
+}
+
+
+span.remove {
+  position: relative;
+  font-size: 30px;
+  right: 0px;
+  cursor: pointer;
+  font-weight: bold; 
+  color: #6A040F;
+  transition: 0.2s;
+}
+
+span.remove:hover {
+  transition: 0.2s;
+  color: #F48C06;
+}
+
+
+/* STYLE INGREDIENT LIST */
+.dropdownList {
+  margin-top: 8px;
+  max-height: 150px;
+  overflow-y: auto; /* Abilita lo scroll verticale se l'elenco è più lungo dell'altezza massima */
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 5px; /* Bordo arrotondato */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: #FFFFFF;
+  border: 2px solid #9D0208;
+}
+
+span.listElement{
+  margin: 0;
+  padding: 10px 15px;
+  font-size: 18px;
+  text-align: left;
+  display: flex;;
+  justify-content: space-between;
+  align-items: center;
+  color: #6A040F;
+  font-weight: bold;
+  border-bottom: 1px solid #9D0208;
   cursor: pointer;
 }
 
-.listElement{
-  margin: 0;
-  height: 30px;
+span.calories {
+  position: relative;
+  font-size: 18px;
+  right: 0px;
+  font-weight: bold; 
+  color: #F48C06;
 }
 
-.listSpacer{
-  margin: 0;
-  height: 6px;
+span.calories span{
+  font-size: 13px;
+  color: #6A040F;
+  font-weight: bold;
 }
+
+
+
+  
+/* STILE HOURS AND LIMIT*/
+
+.dropdown-container label {
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 15px;
+    color: #6A040F;
+    font-weight: light;
+}
+
+.slider-label {
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 20px;
+    color: #6A040F;
+    font-weight: bold;
+}
+
+.slider {
+    /* removing default appearance */
+    -webkit-appearance: none;
+    appearance: none; 
+    /* creating a custom design */
+    max-width: 350px;
+    width: 50%;
+    cursor: pointer;
+    outline: none;
+    border-radius: 15px;
+    /*  overflow: hidden;  remove this line*/
+    
+    /* New additions */
+    height: 5px;
+    background: #9D0208;
+    margin-top: 8px;
+    margin-bottom: 15px;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none; 
+    /* creating a custom design */
+    height: 15px;
+    width: 15px;
+    background-color: #FAA307;
+    border-radius: 50%;
+    border: none;
+    transition: .2s ease-in-out;
+}
+
+/* Hover, active & focus Thumb: Webkit */
+.slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 8px rgba(255, 185, 8, 0.2)
+    
+}
+  
+.slider:active::-webkit-slider-thumb{
+    box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
+}
+
+.slider:focus::-webkit-slider-thumb{
+    box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
+}
+

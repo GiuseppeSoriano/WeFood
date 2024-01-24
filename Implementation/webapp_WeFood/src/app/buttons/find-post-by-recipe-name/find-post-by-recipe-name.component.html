@@ -1,1 +1,11 @@
-<p>find-post-by-recipe-name works!</p>
+<div>
+    <button (click)="toggleDropdown()">Find post by recipe name</button>
+    <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
+      <!-- <div>Insert the ingredient</div> -->
+      <!-- <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName"> -->
+      <div>
+        <input type="text" placeholder="Find by recipe name" [(ngModel)]="recipeNameSearch">
+      </div>
+      <button type="submit" (click)="onExecute()">SEARCH</button>
+    </div>
+</div>

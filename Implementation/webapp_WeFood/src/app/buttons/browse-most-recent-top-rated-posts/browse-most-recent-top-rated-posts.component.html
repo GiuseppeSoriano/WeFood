@@ -1,5 +1,5 @@
 <div>
-    <button (click)="toggleDropdown()">Browse most recent top rated posts</button>
+    <button (click)="toggleDropdown()">Most recent top rated posts</button>
     <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
       <!-- <div>Insert the ingredient</div> -->
       <!-- <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName"> -->
@@ -12,6 +12,6 @@
         <span class="slider-label">{{limit_var}}</span>
         <input type="range" min="3" max="120" step="3" class="slider" name="limit_var" [(ngModel)]="limit_var">
       </div>
-      <button type="submit">SEARCH</button>
+      <button type="submit" (click)="onExecute()">SEARCH</button>
     </div>
 </div>

@@ -1,4 +1,5 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
+import { PostService } from 'src/app/services/post_service/post.service';
 
 @Component({
   selector: 'app-browse-most-recent-top-rated-posts',
@@ -8,7 +9,7 @@ import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 export class BrowseMostRecentTopRatedPostsComponent implements OnInit {
   hours_var: number = 87600;
   limit_var: number = 30;
-  constructor(private eRef: ElementRef) { }
+  constructor(private eRef: ElementRef, private postService: PostService) { }
 
   ngOnInit(): void {
   }
@@ -32,4 +33,25 @@ export class BrowseMostRecentTopRatedPostsComponent implements OnInit {
     }
   }
 
+  @Output() sendPosts = new EventEmitter<any>();
+  @Output() loadPosts = new EventEmitter<any>();
+  
+  onExecute() {
+    // Prepara i dati da inviare
+    this.loadPosts.emit();
+    this.postService.browseMostRecentTopRatedPosts(this.hours_var, this.limit_var).subscribe(
+      (response) => {
+        const dataToEmit = {
+          posts: response
+        };
+        // Emetti l'evento con i dati
+        this.sendPosts.emit(dataToEmit);
+          },
+      (error) => {
+        console.log(error);
+        this.loadPosts.emit();
+      }
+    );
+
+  }
 }

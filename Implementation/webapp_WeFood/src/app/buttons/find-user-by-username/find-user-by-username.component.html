@@ -1,0 +1,9 @@
+<div>
+    <button (click)="toggleDropdown()">Find user by username</button>
+    <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
+      <div>
+        <input type="text" placeholder="Find by username" [(ngModel)]="usernameSearch">
+        </div>
+      <button (click)="searchUser()">Find User</button>
+    </div>
+</div>

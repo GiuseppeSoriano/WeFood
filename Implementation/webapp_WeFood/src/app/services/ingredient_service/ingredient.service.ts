@@ -38,7 +38,7 @@ export class IngredientService {
   }
 
   findNewIngredientsBasedOnFriendsUsage(info: RegisteredUserInterface) {
-    const registeredUserDTO = new RegisteredUserDTO(info._id, info.username);
+    const registeredUserDTO = new RegisteredUserDTO(info.id, info.username);
     return this.http.post<string[]>('http://localhost:8080/ingredient/findNewIngredientsBasedOnFriendsUsage', registeredUserDTO)
       .pipe(
         catchError(this.handleError)
@@ -46,7 +46,7 @@ export class IngredientService {
   }
 
   findMostUsedIngredientsByUser(info: RegisteredUserInterface) {
-    const registeredUserDTO = new RegisteredUserDTO(info._id, info.username);
+    const registeredUserDTO = new RegisteredUserDTO(info.id, info.username);
     return this.http.post<string[]>('http://localhost:8080/ingredient/findMostUsedIngredientsByUser', registeredUserDTO)
       .pipe(
         catchError(this.handleError)

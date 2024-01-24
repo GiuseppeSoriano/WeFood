@@ -29,6 +29,8 @@ import { BrowseMostRecentPostsByCaloriesComponent } from './buttons/browse-most-
 import { FindPostByRecipeNameComponent } from './buttons/find-post-by-recipe-name/find-post-by-recipe-name.component';
 import { FindRecipeByIngredientsComponent } from './buttons/find-recipe-by-ingredients/find-recipe-by-ingredients.component';
 import { CaloriesAnalysisComponent } from './buttons/calories-analysis/calories-analysis.component';
+import { AdminFeedComponent } from './admin-feed/admin-feed.component';
+import { FindUserByUsernameComponent } from './buttons/find-user-by-username/find-user-by-username.component';
 
 @NgModule({
   declarations: [
@@ -51,7 +53,9 @@ import { CaloriesAnalysisComponent } from './buttons/calories-analysis/calories-
     BrowseMostRecentPostsByCaloriesComponent,
     FindPostByRecipeNameComponent,
     FindRecipeByIngredientsComponent,
-    CaloriesAnalysisComponent
+    CaloriesAnalysisComponent,
+    AdminFeedComponent,
+    FindUserByUsernameComponent
   ],
   imports: [
     BrowserModule,

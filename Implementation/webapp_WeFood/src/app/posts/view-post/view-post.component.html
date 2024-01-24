@@ -6,7 +6,7 @@
     
     <div class="recipeInfo">
         <label class="title">{{ post.recipe.name }}</label>
-        <label class="avgStarRanking"><img src="../../../assets/images/avgStarRanking.png">{{ post.avgStarRanking }}</label>
+        <label *ngIf="post.avgStarRanking !== -1" class="avgStarRanking"><img src="../../../assets/images/avgStarRanking.png">{{ post.avgStarRanking }}</label>
     </div>
 
     
@@ -29,13 +29,20 @@
     <div [ngClass]="{'invisible': ingredients}" class="container-totalCalories"><div class="totalCalories" [ngClass]="{'visible': !ingredients}">{{ post.recipe.totalCalories }} <span>kcal</span></div></div>
 
     <div class="description">
-        <label>{{ post.description }}</label>
+        <label *ngIf="!editingDescription">{{ post.description }}</label>
+        <textarea class="descriptionTextArea" *ngIf="editingDescription" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' onmouseover='this.style.height = "";this.style.height = this.scrollHeight + "px"' [(ngModel)]="post.description" >{{ post.description }}</textarea>
+        <img *ngIf="!editingDescription && post.username === getUser().username" class="modifyInteraction" src="../../../assets/images/pencil.png" (click)="startModifyDescription()">
+        <img *ngIf="editingDescription  && post.username === getUser().username" class="modifyInteraction" src="../../../assets/images/check.png" (click)="modifyDescription()">
     </div>
 
     <!-- Star ranking section -->
-    <div class="star-ranking" *ngIf="!comments_visible">
-        <span *ngFor="let star of [1, 2, 3, 4, 5]" (click)="votePost(star)" [class.selected]="star <= selectedStar">&#9733;</span>
+    <div class="container-star-ranking">
+        <div class="star-ranking" *ngIf="!comments_visible" [ngClass]="{'nohover': selectedStar !== 0}">
+            <span [ngClass]="{'hover': selectedStar === 0}" *ngFor="let star of [1, 2, 3, 4, 5]" (click)="votePost(star)" [class.selected]="star <= selectedStar">&#9733;</span>
+        </div>
+        <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="(!comments_visible) && (personalVote.vote != 0)" (click)="deleteVote()">
     </div>
+
 
 
     <div class="interactions">
@@ -57,18 +64,14 @@
                     <div class="container-header-comment">
                         <label class="usernameComment">{{ comment.username }} <label class="commentTimestamp"> | {{getTimeStamp(comment.timestamp)}}</label></label>
                         <div>
-                            <!-- BISOGNA AGGIUNGERE LOGICA CHE CONTROLLI SE EFFETTIVAMENTE L'UTENTE CHE HA FATTO IL COMMENTO E' L'UTENTE LOGGATO -->
-                            <img *ngIf="!editingComment" class="modifyInteraction" src="../../../assets/images/pencil.png" (click)="modifyComment(comment)">
-                            <img *ngIf="editingComment" class="modifyInteraction" src="../../../assets/images/check.png" (click)="modifyComment(comment)">
-                            <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="true" (click)="deleteComment(comment)">
+                            <img *ngIf="!isCommentBeingModified(comment)" class="modifyInteraction" src="../../../assets/images/pencil.png" (click)="startModifyComment(comment)">
+                            <img *ngIf="isCommentBeingModified(comment)" class="modifyInteraction" src="../../../assets/images/check.png" (click)="modifyComment(comment)">
+                            <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="canDeleteComment(comment)" (click)="deleteComment(comment)">
                         </div>
                     </div>
-                    <!-- comment.username === getUser().username -->
-                    <!-- <textarea [disabled]="!editingComment" class="commentTextArea" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'>{{comment.text}}</textarea> -->
-                    
-                    <!-- Giuse alla fine ho dovuto fare la cosa brutta... Domani quando sistemi qui chiamami che vediamo se si può risolvere in altro modo. Avrei bisogno in pratica di qualche funzione oninit di typescript ma non so come fare... -->
-                    <textarea class="commentTextArea" *ngIf="editingComment" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' onmouseover='this.style.height = "";this.style.height = this.scrollHeight + "px"' [(ngModel)]="comment.text" >{{comment.text}}</textarea>
-                    <label class="commentText" *ngIf="!editingComment">{{comment.text}}</label>
+
+                    <textarea class="commentTextArea" *ngIf="isCommentBeingModified(comment)" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' onmouseover='this.style.height = "";this.style.height = this.scrollHeight + "px"' [(ngModel)]="comment.text" >{{comment.text}}</textarea>
+                    <label class="commentText" *ngIf="!isCommentBeingModified(comment)">{{comment.text}}</label>
                 
                 </div>
             </div>
@@ -91,7 +94,6 @@
                 <div class="starRanking" *ngFor="let vote of post.starRankings">
                     <div class="container-header-starRanking">
                         <label class="usernameStarRanking">{{vote.username}}</label> 
-                        <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="true" (click)="deleteVote(vote)">
                     </div>
                     <div class="starRankingStars">
                         <span *ngFor="let star of [1, 2, 3, 4, 5]" [class.selected]="star <= vote.vote">&#9733;</span>

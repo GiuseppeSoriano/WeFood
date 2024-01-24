@@ -1,8 +1,9 @@
 // Nel tuo componente TypeScript
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
 import { RegisteredUserDTO } from '../models/registered-user-dto.model';
 import { RegisteredUser, RegisteredUserInterface } from '../models/registered-user.model';
+import * as bcrypt from 'bcryptjs';
 
 @Component({
   selector: 'app-modify-personal-information',
@@ -15,19 +16,26 @@ export class ModifyPersonalInformationComponent implements OnInit {
   @Output() closePopup: EventEmitter<void> = new EventEmitter();
 
   password: string = '';
+  popupPassword: string = '';
+  changePassword: boolean = false;
+
+  newName: string = '';
+  newSurname: string = '';
+  currentPassword: string = '';
   newPassword: string = '';
   confirmNewPassword: string = '';
-  popupPassword: string = '';
-  info: RegisteredUserInterface = new RegisteredUser();
-  passwordsMatch: boolean = true;
-  changePassword: boolean = false;
+
   response: boolean = false;
   response_msg: string = "Test Message";
+
+  canClose: boolean = true;
 
   constructor(private userService: RegisteredUserService, private eRef: ElementRef) {}
 
   ngOnInit(): void {
     // Chiamata a getUser() o altro codice iniziale se necessario
+    this.newName = this.userService.info.name;
+    this.newSurname = this.userService.info.surname;
   }
 
   close() {
@@ -35,45 +43,66 @@ export class ModifyPersonalInformationComponent implements OnInit {
     this.newPassword = '';
     this.confirmNewPassword = '';
     this.popupPassword = '';
-    this.passwordsMatch = true;
     this.closePopup.emit();
   }
 
   toggleNewPassword() {
-    this.newPassword = '';
-    this.confirmNewPassword = '';
-    this.changePassword = !this.changePassword;
+    this.canClose = false;
+    setTimeout(() => {
+      this.newPassword = '';
+      this.confirmNewPassword = '';
+      this.changePassword = !this.changePassword;
+      this.canClose = true;  
+    }, 100);
   }
 
   updateUserInfo() {
-    if (this.password !== this.confirmNewPassword) {
-      this.passwordsMatch = false;
+    if (this.newPassword !== this.confirmNewPassword) {
       return;
+    }  
+
+    bcrypt.compare(this.currentPassword, this.userService.info.password, (err, res) => {
+      if (res) {
+        const newCredentials: RegisteredUserInterface = {
+          id: this.userService.info.id,
+          username: this.userService.info.username,
+          name: this.newName,
+          surname: this.newSurname,
+          password: this.newPassword == '' ? this.currentPassword : this.newPassword
+        };    
+    
+        console.log(this.userService.info.id);
+    
+        this.userService.modifyPersonalInformation(newCredentials)
+          .subscribe(response => {
+            if(response){
+              this.response = true;
+              this.response_msg = "Update successful!";
+              this.userService.info = newCredentials;
+            }
+            else{
+              this.response = true;
+              this.response_msg = "Update failed. Please try again.";
+            }
+          }, error => {
+            alert('Error contacting the server. Please try again.');
+          });
+        
+      } else {
+        this.response = true;
+        this.response_msg = "Wrong password";
+        return;
+      }
+    }
+    );
+
     }
 
-    // TESTTT
-    this.response = true;
-    this.response_msg = "Test Message";
-    return
-
-    const updatedData = {
-      username: this.info.username,
-      name: this.info.name,
-      surname: this.info.surname,
-      password: this.password
-    };
-
-    alert(updatedData.username + ", " + updatedData.password + ", " + this.popupPassword);
-
-    /*
-    // Chiamata alla tua API per aggiornare le informazioni utente
-    this.userService.updateUserInfo(updatedData)
-      .subscribe(response => {
-        alert('Update successful!');
+    @HostListener('document:click', ['$event'])
+    clickout(event: any) {
+      // Close the popup if clicking outside the popup content
+      if (!this.eRef.nativeElement.contains(event.target) && this.canClose) {
         this.close();
-      }, error => {
-        alert('Update failed. Please check your password and try again.');
-      });
-    */  
+      }
     }
 }

@@ -12,6 +12,7 @@ import { UploadPostComponent } from './posts/upload-post/upload-post.component';
 import { UserPersonalPageComponent } from './user-personal-page/user-personal-page.component';
 import { ViewPostComponent } from './posts/view-post/view-post.component';
 import { ModifyPersonalInformationComponent } from './modify-personal-information/modify-personal-information.component';
+import { AdminFeedComponent } from './admin-feed/admin-feed.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -26,6 +27,7 @@ const routes: Routes = [
   { path: 'user-personal-page', component: UserPersonalPageComponent },
   { path: 'view-post', component: ViewPostComponent},
   { path: 'modify-personal-information', component: ModifyPersonalInformationComponent },
+  { path: 'admin-feed', component: AdminFeedComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { PostDTOInterface } from 'src/app/models/post-dto.model';
+import { PostInterface } from 'src/app/models/post.model';
 import { RegisteredUserInterface } from 'src/app/models/registered-user.model';
 import { StarRankingInterface } from 'src/app/models/star-ranking.model';
 
@@ -12,11 +13,12 @@ export class StarRankingService {
 
   constructor(private http: HttpClient) { }
 
-  votePost(info: RegisteredUserInterface, starRanking: StarRankingInterface, postDTO: PostDTOInterface) {
+  votePost(info: RegisteredUserInterface, starRanking: StarRankingInterface, postDTO: PostDTOInterface, post: PostInterface) {
     const requestData = {
       user: info,
       starRanking: starRanking,
-      postDTO: postDTO
+      postDTO: postDTO,
+      post: post
     };
     return this.http.post<boolean>('http://localhost:8080/starranking/create', requestData)
       .pipe(
@@ -24,11 +26,12 @@ export class StarRankingService {
       );
   }
 
-  deleteVote(info: RegisteredUserInterface, starRanking: StarRankingInterface, postDTO: PostDTOInterface) {
+  deleteVote(info: RegisteredUserInterface, starRanking: StarRankingInterface, postDTO: PostDTOInterface, post: PostInterface) {
     const requestData = {
       user: info,
       starRanking: starRanking,
-      postDTO: postDTO
+      postDTO: postDTO,
+      post: post
     };
     return this.http.post<boolean>('http://localhost:8080/starranking/delete', requestData)
       .pipe(

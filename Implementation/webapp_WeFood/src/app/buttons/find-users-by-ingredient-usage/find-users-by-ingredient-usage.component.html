@@ -1,25 +1,23 @@
 <div>
-  <button (click)="toggleDropdown()">Find users that most used an ingredient</button>
+  <button (click)="toggleDropdown()">Find users who used an ingredient the most</button>
   <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
-    <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName" (click)="showList=true">
+    <input class="newIngredient" type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName" (click)="newIngredientIsBeingInserted()">
     
-    <div *ngIf="showList" class="dropdown-list">
-      <div class="listSpacer"></div>
-      <div *ngFor="let ingredient of ingredientsList | filterIngredient:ingredientName" 
+    <div *ngIf="showList" class="dropdownList">
+      <span *ngFor="let ingredient of ingredientsList | filterIngredient:ingredientName" 
            (mouseenter)="setIngredientDetailed(ingredient)"
            (mouseleave)="setIngredientDetailed(null)"
            (click)="setIngredient(ingredient.name)" 
            class="listElement">
         {{ ingredient.name }}
-        <span *ngIf="ingredientDetailed === ingredient"> ({{ ingredient.calories }} kcal/100g)</span>
-      </div>
+        <span *ngIf="ingredientDetailed === ingredient" class="calories"> ({{ ingredient.calories }}<span>kcal/100g)</span></span>
+    </span>
     </div>
     
     <button type="submit" (click)="execute()">SEARCH</button>
 
-    <div *ngIf="suggestions !== []" class="dropdown-list">
-      <div class="listSpacer"></div>
-      <div *ngFor="let suggestion of suggestions" class="listElement">{{ suggestion.username }}</div>
+    <div *ngIf="suggestions.length !== 0" class="dropdownList">
+      <span *ngFor="let suggestion of suggestions" class="listElement">{{ suggestion.username }}</span>
     </div>
   </div>
 </div>

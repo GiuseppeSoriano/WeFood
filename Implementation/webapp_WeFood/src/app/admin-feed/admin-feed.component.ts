@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { RegisteredUser, RegisteredUserInterface } from '../models/registered-user.model';
-import { MostPopularCombinationOfIngredientsComponent } from '../buttons/most-popular-combination-of-ingredients/most-popular-combination-of-ingredients.component';
-import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
 import { PostDTO, PostDTOInterface } from '../models/post-dto.model';
+import { Router } from '@angular/router';
 import { PostService } from '../services/post_service/post.service';
+import { AdminService } from '../services/admin_service/admin.service';
 
 @Component({
-  selector: 'app-registered-user-feed',
-  templateUrl: './registered-user-feed.component.html',
-  styleUrls: ['./registered-user-feed.component.css']
+  selector: 'app-admin-feed',
+  templateUrl: './admin-feed.component.html',
+  styleUrls: ['./admin-feed.component.css']
 })
-export class RegisteredUserFeedComponent implements OnInit {
+export class AdminFeedComponent implements OnInit {
+
+
   // info: RegisteredUserInterface = new RegisteredUser();
   isLoading = true; 
   recipeName: string = "";
@@ -22,19 +22,17 @@ export class RegisteredUserFeedComponent implements OnInit {
 
   post_visible: boolean = false;
   postDTO_to_be_viewed: PostDTOInterface = new PostDTO();
-
-  creatingPost: boolean = false;
   
   logout() {
-    this.userService.logout();
+    this.adminService.logout();
     this.router.navigate(['/home']);
   }
-    
-  goToPersonalPage() {
-    this.router.navigate(['/user-personal-page']);
+
+  goToDashboard() {
+    this.router.navigate(['/admin-dashboard']);
   }
   
-  constructor(private router:Router, private postService: PostService, private userService: RegisteredUserService) {
+  constructor(private router:Router, private postService: PostService, private adminService: AdminService) {
     // const navigation = this.router.getCurrentNavigation();
     // if(navigation){
     //   const state = navigation.extras.state as {
@@ -45,7 +43,7 @@ export class RegisteredUserFeedComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if(this.userService.info.username == ""){
+    if(this.adminService.info.username == ""){
       this.router.navigate(['/home']);
     }
     this.getPosts();
@@ -75,23 +73,11 @@ export class RegisteredUserFeedComponent implements OnInit {
     this.post_visible = true;
     }, 100);
   }
-
-  uploadPost() {
-    setTimeout(() => {
-      document.body.style.overflow = 'hidden';
-      this.creatingPost = true;
-    }, 100);
-  }
     
   closePost() {
     document.body.style.overflow = 'auto';
     this.post_visible = false;
     this.postDTO_to_be_viewed = new PostDTO();
-    this.creatingPost = false;
   }
 
-  updatePosts(event: any) {
-    this.list_of_posts = event.posts;
-    this.isLoading = false;
-  }
 }

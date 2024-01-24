@@ -30,12 +30,12 @@ export class FindUsersByIngredientUsageComponent implements OnInit {
     console.log(this.ingredientName);
     this.showList = false;
     if(!this.ingredientsList.some(ingredient => ingredient.name === this.ingredientName)) {
-      this.suggestions = [{_id: "", username: "Insert a valid ingredient"}];
+      this.suggestions = [{id: "", username: "Insert a valid ingredient"}];
       return;
     }
     this.registeredUserService.findUsersByIngredientUsage(this.ingredientName).subscribe(
       data => {
-        this.suggestions = [{_id: "", username: "No suggestions available"}];
+        this.suggestions = [{id: "", username: "No suggestions available"}];
         if (data.length > 0)
           this.suggestions = data;
       },
@@ -48,6 +48,11 @@ export class FindUsersByIngredientUsageComponent implements OnInit {
     );
   }
 
+  newIngredientIsBeingInserted() {
+    this.showList=true;
+    this.suggestions = [];
+  }
+  
   setIngredientDetailed(ingredient: any) {
     this.ingredientDetailed = ingredient;
   }
@@ -86,26 +91,26 @@ export class FindUsersByIngredientUsageComponent implements OnInit {
   }
 
   setIngredient(ingredientName: string) {
+    this.canCloseList = false;
     this.ingredientName = ingredientName;
     this.showList = false;
     this.ingredientDetailed = null;
-    this.canCloseList = false;
-        setTimeout(() => {
-          this.canCloseList = true;
-        }, 1000);
+    setTimeout(() => {
+      this.canCloseList = true;
+    }, 1000);
   }
 
   /* USED TO RETURN OUTPUT TO REIGSTERED USER FEED COMPONENT */
 
-  @Output() findUsersByIngredientUsage = new EventEmitter<any>();
+  // @Output() findUsersByIngredientUsage = new EventEmitter<any>();
 
-  onExecute() {
-    // Prepara i dati da inviare
-    const dataToEmit = {
-      ingredientName: this.ingredientName
-    };
-    // Emetti l'evento con i dati
-    this.findUsersByIngredientUsage.emit(dataToEmit);
-  }
+  // onExecute() {
+  //   // Prepara i dati da inviare
+  //   const dataToEmit = {
+  //     ingredientName: this.ingredientName
+  //   };
+  //   // Emetti l'evento con i dati
+  //   this.findUsersByIngredientUsage.emit(dataToEmit);
+  // }
 
 }

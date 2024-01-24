@@ -1,5 +1,7 @@
 package it.unipi.lsmsdb.wefood.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +14,11 @@ public class Recipe {
 
     private Double totalCalories;
 
-    public Recipe(String name, String image, List<String> steps, Map<String, Double> ingredients, Double totalCalories) {
+    public Recipe(@JsonProperty("name") String name,
+                  @JsonProperty("image") String image,
+                  @JsonProperty("steps") List<String> steps,
+                  @JsonProperty("ingredients") Map<String, Double> ingredients,
+                  @JsonProperty("totalCalories") Double totalCalories) {
         this.name = name;
         this.image = image;
         this.steps = steps;

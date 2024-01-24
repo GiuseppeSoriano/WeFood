@@ -612,7 +612,6 @@ public class RegisteredUserACTOR {
 
         System.out.println("-> logout");
 
-        System.out.println("-> findUsersByIngredientUsage");                    // IMPLEMENTED
         System.out.println("-> mostPopularCombinationOfIngredients");           // IMPLEMENTED
         System.out.println("-> findNewIngredientsBasedOnFriendsUsage");
         System.out.println("-> browseMostRecentTopRatedPosts");
@@ -621,6 +620,7 @@ public class RegisteredUserACTOR {
         System.out.println("-> findPostByRecipeName");
         System.out.println("-> findRecipeByIngredients");
 
+        System.out.println("-> findUsersByIngredientUsage");                    // IMPLEMENTED
         System.out.println("-> findMostUsedIngredientByUser");                  // FA VEDERE NELLA PAGINA DELL'UTENTE
         System.out.println("-> averageTotalCaloriesByUser");
         System.out.println("-> uploadPost");

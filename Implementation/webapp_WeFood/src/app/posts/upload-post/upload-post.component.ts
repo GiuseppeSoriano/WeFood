@@ -1,10 +1,12 @@
 // upload-post.component.ts
 import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { IngredientInterface } from 'src/app/models/ingredient.model';
+import { PostDTO } from 'src/app/models/post-dto.model';
 import { Post, PostInterface } from 'src/app/models/post.model';
 import { Recipe, RecipeInterface } from 'src/app/models/recipe.model';
 import { IngredientService } from 'src/app/services/ingredient_service/ingredient.service';
 import { PostService } from 'src/app/services/post_service/post.service';
+import { RegisteredUserService } from 'src/app/services/registered_user_service/registered-user.service';
 //import { FileUploader, FileItem } from 'ng2-file-upload';
 
 /*
@@ -22,7 +24,7 @@ export class UploadPostComponent implements OnInit {
   @Output() closePost: EventEmitter<void> = new EventEmitter();
 
   post: PostInterface = new Post();
-  recipe: RecipeInterface = new Recipe();
+  // recipe: RecipeInterface = new Recipe();
 
   stepBeingInserted: string = "";
 
@@ -35,7 +37,6 @@ export class UploadPostComponent implements OnInit {
 
   showList: boolean = false;      // USED TO HANDLE LIST VISIBILITY
   canCloseList: boolean = true;   // USED TO HANDLE LIST VISIBILITY
-  totalCalories: number = 0;
 
   setIngredientDetailed(ingredient: any) {
     this.ingredientDetailed = ingredient;
@@ -51,7 +52,7 @@ export class UploadPostComponent implements OnInit {
     this.addingIngredients = !this.addingIngredients;
   }
 
-  constructor(private eRef:ElementRef, private postService: PostService, private ingredientService: IngredientService) {}
+  constructor(private eRef:ElementRef, private postService: PostService, private ingredientService: IngredientService, private userService: RegisteredUserService) {}
 
   ngOnInit(): void {
     // Prevent the user from scrolling the page when the popup is open
@@ -80,7 +81,7 @@ export class UploadPostComponent implements OnInit {
 
   addIngredient(ingredientName: string) {
     console.log(ingredientName);
-    this.recipe.ingredients.set(ingredientName, 0);
+    this.post.recipe.ingredients.set(ingredientName, 0);
     this.ingredientsRemaining = this.ingredientsRemaining.filter(ingredient => ingredient.name !== ingredientName);
     this.ingredientName = "";
     this.showList = false;
@@ -91,13 +92,13 @@ export class UploadPostComponent implements OnInit {
     }, 300);
   }
 
-
   removeIngredient(ingredientName: string) {
     this.canCloseList = false;
 
-    this.recipe.ingredients.delete(ingredientName);
+    this.post.recipe.ingredients.delete(ingredientName);
     this.ingredientsRemaining.push(this.ingredientsList.find(ingredient => ingredient.name === ingredientName)!);
     this.ingredientDetailed = null;
+    this.updateTotalCalories("", 0);
 
     setTimeout(() => {
       this.canCloseList = true;
@@ -105,21 +106,20 @@ export class UploadPostComponent implements OnInit {
   }
 
   updateTotalCalories(ingredientKey: string, newQuantity: number) {
-    this.recipe.ingredients.set(ingredientKey, newQuantity);
-    this.totalCalories = 0;
-    this.recipe.ingredients.forEach((value, key) => {
+    if(ingredientKey !== "") 
+      this.post.recipe.ingredients.set(ingredientKey, newQuantity);
+    this.post.recipe.totalCalories = 0;
+    this.post.recipe.ingredients.forEach((value, key) => {
       // Take calories from the ingredient list
       let calories = this.ingredientsList.find(ingredient => ingredient.name === key)!.calories;
-      this.totalCalories += (value*calories/100);
+      this.post.recipe.totalCalories += (value*calories/100);
     });
-    this.totalCalories = this.totalCalories.toFixed(2) as unknown as number;
+    this.post.recipe.totalCalories = this.post.recipe.totalCalories.toFixed(2) as unknown as number;
   }
 
   submitPost() {
-    //Sistemare
     let error = false;
-    this.recipe.ingredients.forEach((value, key) => {
-      // Take calories from the ingredient list
+    this.post.recipe.ingredients.forEach((value, key) => {
       if(value == 0){
         error = true;
       }
@@ -128,8 +128,37 @@ export class UploadPostComponent implements OnInit {
       alert("Insert quantity for each ingredient");
       return;
     }
+    if(this.post.recipe.steps.length == 0){
+      alert("Insert at least one step");
+      return;
+    }
+    if(this.post.recipe.ingredients.size == 0){
+      alert("Insert at least one ingredient");
+      return;
+    }
+    if(this.post.recipe.name == ""){
+      alert("Insert a name for the recipe");
+      return;
+    } 
+    if(this.post.description == ""){
+      alert("Insert a description for the post");
+      return;
+    }
 
-  }
+    // print ingredients
+    for(let [key, value] of this.post.recipe.ingredients) {
+      console.log(key + " " + value);
+    }
+    
+    this.postService.uploadPost(this.post, new PostDTO(), this.userService.info).subscribe((data: boolean) => {
+        if(data) {
+          this.close();
+        } else {
+          alert("Error uploading post");
+          this.close();
+        }
+    });
+  }  
 
   onFileSelected(event:any) {
     if (event.target.files && event.target.files[0]) {
@@ -161,7 +190,7 @@ export class UploadPostComponent implements OnInit {
   addStep() {
     // Aggiungi il passo alla lista se non è vuoto
     if (this.stepBeingInserted !== "") {
-      this.recipe.steps.push(this.stepBeingInserted);
+      this.post.recipe.steps.push(this.stepBeingInserted);
       this.stepBeingInserted = "";
     }
   }
@@ -169,7 +198,7 @@ export class UploadPostComponent implements OnInit {
   removeStep(step: string) {
     // Trova l'indice del passo da rimuovere
     this.canCloseList = false;
-    this.recipe.steps = this.recipe.steps.filter(s => s !== step);
+    this.post.recipe.steps = this.post.recipe.steps.filter(s => s !== step);
     setTimeout(() => {
       this.canCloseList = true;
     }, 300);

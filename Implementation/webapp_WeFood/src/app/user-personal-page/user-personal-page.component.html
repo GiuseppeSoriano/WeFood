@@ -19,39 +19,71 @@
     </nav>
   </header>
 
-  <!-- <div *ngIf="!isLoading" [ngClass]="{'noposts': list_of_posts.length === 0}" class="grid-container">
-        <div class="grid-col" *ngFor="let item of list_of_posts">
-            <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
-            <div class="label">{{ item.recipeName }}</div>
-        </div>
-    <img *ngIf="list_of_posts.length === 0" src="../../assets/images/SadBread.png" alt="No Posts Found" class="noposts">
-    <label *ngIf="list_of_posts.length === 0" class="noposts">No Posts Found</label>
-    </div> -->
+  <!-- find most least ingredient by user -->
+  <div class="side right">
+      
+    <div class="most-used-ingredients">
+      <span>Most Used Ingredients</span>
+      <div class="ingredient-list">
+        <span *ngFor="let ingredient of top_ingredients | keyvalue; let i = index" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
+          {{ingredient.value}}
+        </span>
+      </div>
+    </div>
 
-    <main>
-      <div class="side left">
+    <!-- find users by ingredients usage -->
+    <div class="suggested-by-ingredients">
+      <span>Most Used Ingredients</span>
+      <div class="suggested-list">
+        <!--<span *ngFor="let user of seggested_by_ingredients" > {{user_by_ingredients.username}} </span>-->
       </div>
-      <div *ngIf="isLoading" class="loading-container">
-          <div class="loading"></div>
+    </div>
+    <!-- avgTotalCalByUser -->
+    <div class="avg-calories">
+      <span>Average total calories consumed</span>
+      <div class="average">
+        <!--<span> {{user_calories}} </span>-->
       </div>
-      <div *ngIf="!isLoading" [ngClass]="{'noposts': list_of_posts.length === 0}" class="grid-container">
-          <!-- <div class="grid-row"> -->
-              <div class="grid-col" *ngFor="let item of list_of_posts">
-                  <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
-                  <div class="label">{{ item.recipeName }}</div>
-              </div>
-          <!-- </div> -->
-          <img *ngIf="list_of_posts.length === 0" src="../../assets/images/SadBread.png" alt="No Posts Found" class="noposts">
-          <label *ngIf="list_of_posts.length === 0" class="noposts">No Posts Found</label>
-      </div>    
-      <div class="side"></div>    
+    </div>
+    <!-- deleteUser da mettere nella personal information -->
+    <!-- find users to follow based on user friends -->
+    <div class="suggested-by-friends">
+      <span>Suggestion based on friends</span>
+      <div class="suggested-list">
+        <!--<span *ngFor="let user of seggested_by_friends" > {{user_by_friends.username}} </span>-->
+      </div>
+    </div>
+    <!-- find most followed users -->
+    <div class="suggested-by-followers">
+      <span>Most followed users</span>
+      <div class="suggested-list">
+        <!--<span *ngFor="let users of top_followed; let i = index" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
+        </span>-->
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="overlay" *ngIf="post_visible || modifyPersonalInfoPopup || showUsersPopup"></div>
+    <div class="side left">
+    </div>
+    <div *ngIf="isLoading" class="loading-container">
+        <div class="loading"></div>
+    </div>
+    <div *ngIf="!isLoading" [ngClass]="{'noposts': list_of_posts.length === 0}" class="grid-container">
+      <div class="grid-col" *ngFor="let item of list_of_posts">
+        <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta" (click)="viewPost(item)">
+        <div class="label">{{ item.recipeName }}</div>
+      </div>
+      <img *ngIf="list_of_posts.length === 0" src="../../assets/images/SadBread.png" alt="No Posts Found" class="noposts">
+      <label *ngIf="list_of_posts.length === 0" class="noposts">No Posts Found</label>
+    </div>    
+    <div class="side"></div>    
   </main>
 </body>
 
 </html>
 
-<app-view-list-of-users *ngIf="showUsersPopup" 
-                   [users]="users" 
-                   (close)="closePopup()" 
-                   (closePopup)="closePopup()">
-</app-view-list-of-users>
+<app-view-list-of-users *ngIf="showUsersPopup" [users]="users" (closePopup)="closePopup()"></app-view-list-of-users>
+<app-view-post *ngIf="post_visible" [postDTO]="postDTO_to_be_viewed" (closePost)="closePost()"></app-view-post>
+<app-modify-personal-information *ngIf="modifyPersonalInfoPopup" (closePopup)="closePopup()"></app-modify-personal-information>

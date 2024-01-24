@@ -1,4 +1,3 @@
-<!-- Nel tuo componente HTML -->
 <div class="popup-overlay">
     <label class="close" (click)="close()">&times;</label>
 
@@ -6,9 +5,9 @@
     
     <form>
         <label class="info">Name</label>
-        <input [(ngModel)]="info.name" name="name" type="text" placeholder="Name" required>
+        <input [(ngModel)]="newName" name="name" type="text" placeholder="Name" required>
         <label class="info">Surname</label>
-        <input [(ngModel)]="info.surname" name="surname" type="text" placeholder="Surname" required>
+        <input [(ngModel)]="newSurname" name="surname" type="text" placeholder="Surname" required>
 
         <div class="container-changePassword">
             <button class="changePassword" (click)="toggleNewPassword()" *ngIf="!changePassword">CHANGE PASSWORD</button>
@@ -20,10 +19,10 @@
         </div>
         
         <label class="info">Current Password</label>
-        <input [(ngModel)]="password" name="confirmPassword" type="password" placeholder="Enter Password" required>
+        <input [(ngModel)]="currentPassword" name="confirmPassword" type="password" placeholder="Enter Password" (click)="response=false" required>
 
         <label class="response" [ngClass]="{'visible': response}">{{response_msg}}</label>
 
-        <button type="submit" (click)="updateUserInfo()">UPDATE</button>
+        <button type="submit" [disabled]="newPassword !== confirmNewPassword" (click)="updateUserInfo()">UPDATE</button>
     </form>
 </div>

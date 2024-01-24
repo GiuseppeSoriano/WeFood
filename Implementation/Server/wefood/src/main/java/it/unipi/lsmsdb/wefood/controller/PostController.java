@@ -33,6 +33,7 @@ public class PostController {
     @PostMapping("/uploadPost")
     public ResponseEntity<Boolean> uploadPost(@RequestBody PostRequestDTO request){
         // IMAGE
+        System.out.println(request.getPost().getRecipe().getIngredients());
         Post post = request.getPost();
         post.getRecipe().setImage(recipeImageService.storePostImage(post));
         return ResponseEntity.ok(postService.uploadPost(post, request.getUser()));

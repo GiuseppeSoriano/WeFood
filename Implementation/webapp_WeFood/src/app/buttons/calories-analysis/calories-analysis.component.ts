@@ -75,18 +75,21 @@ export class CaloriesAnalysisComponent implements OnInit {
   }
 
   search(recipeNameSearch: string) {
-    this.postService.caloriesAnalysis(recipeNameSearch).subscribe(
-      data => {
-          this.result = data;
-      },
-      error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('No recipes where found');
+    if(this.recipeNameSearch == "") {
+      alert('No recipes was inserted');
+    } else {
+      this.postService.caloriesAnalysis(recipeNameSearch).subscribe(
+        data => {
+            this.result = data;
+        },
+        error => {
+          if (error.status === 401) {
+            // Gestisci l'errore 401 qui
+            alert('No recipes where found');
+          }
         }
-      }
-    );
-    alert(this.result);
+      );
+    }
   }
 
 }

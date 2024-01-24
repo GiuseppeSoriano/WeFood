@@ -1,9 +1,8 @@
 <div>
-    <button (click)="execute()">Find new ingredients based on friends usage</button>
+    <button (click)="execute()">New ingredients based on friends usage</button>
     <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
-      <div *ngIf="suggestions !== []" class="dropdown-list">
-        <div class="listSpacer"></div>
-        <div *ngFor="let suggestion of suggestions" class="listElement">{{ suggestion }}</div>
+      <div *ngIf="suggestions.length !== 0" class="dropdownList">
+        <span *ngFor="let suggestion of suggestions" class="listElement">{{ suggestion }}</span>
       </div>
     </div>
 </div>

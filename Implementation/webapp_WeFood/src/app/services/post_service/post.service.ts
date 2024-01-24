@@ -14,11 +14,14 @@ export class PostService {
   constructor(private http: HttpClient, private userService: RegisteredUserService) { }
 
   uploadPost(post: PostInterface, postDTO: PostDTOInterface, info: RegisteredUserInterface) {
+    const postCopy = JSON.parse(JSON.stringify(post));
+    // Converte il Map in un oggetto semplice
+    postCopy.recipe.ingredients = Object.fromEntries(post.recipe.ingredients);
     const requestData = {
-      post: post,
-      postDTO: postDTO,
-      user: info
-    };
+        post: postCopy,
+        postDTO: postDTO,
+        user: info
+      };
     return this.http.post<boolean>('http://localhost:8080/post/uploadPost', requestData)
       .pipe(
         catchError(this.handleError)

@@ -1,10 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+// admin-dashboard.component.ts
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { AdminService } from '../services/admin_service/admin.service';
 import { PostService } from '../services/post_service/post.service';
 import { IngredientService } from '../services/ingredient_service/ingredient.service';
 import { PostDTOInterface } from '../models/post-dto.model';
 import { Router } from '@angular/router';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
+
+// Importa Chart.js
+import { Chart } from 'chart.js/auto';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -13,17 +17,19 @@ import { RegisteredUserService } from '../services/registered_user_service/regis
 })
 export class AdminDashboardComponent implements OnInit {
 
-  isLoading = false; 
+  isLoading = false;
   list_of_posts: PostDTOInterface[] = [];
-  interactions: Map<string, number> = new Map<string, number>;
-  filteredPosts: PostDTOInterface[] = []; // Aggiunta dell'array filtrato
+  //interactions: Map<string, number> = new Map<string, number>();
+  filteredPosts: PostDTOInterface[] = [];
   hours_var: number = 87600;
   limit_var: number = 30;
-  recipeNameSearch: string = '';
-  usernameSearch: string = '';
   top_ingredients: string[] = [];
   least_ingredients: string[] = [];
   newIngredient: { name: string, calories: number } = { name: '', calories: 0 };
+  interactionValues: any = {};
+  interactionKeys: string[] = [];
+  chart: any;
+  ingredientCreation: boolean = false;
 
   // info: AdminInterface = new Admin();
   logout() {
@@ -31,69 +37,41 @@ export class AdminDashboardComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
-  constructor(private router: Router, private adminService: AdminService, private postService: PostService, private ingredientService: IngredientService, private userService: RegisteredUserService) {
-    const navigation = this.router.getCurrentNavigation();
-    // if(navigation){
-    //   const state = navigation.extras.state as {
-    //     Admin: AdminInterface
-    //   };
-    //   this.info = state.Admin;
-    // }
-  }
+  constructor(
+    private router: Router,
+    private adminService: AdminService,
+    private postService: PostService,
+    private ingredientService: IngredientService,
+    private userService: RegisteredUserService
+  ) {}
 
   ngOnInit(): void {
     if (this.adminService.info.username == "") {
       this.router.navigate(['/home']);
     }
-    //this.getPosts();
-    this.getStatistics();
     this.getTopIngredients();
     this.getLeastIngredients();
+    this.getStatistics();
   }
+
   getLeastIngredients() {
     this.ingredientService.findMostLeastUsedIngredients(true).subscribe(
       data => {
-        // go to registered user feed
         this.top_ingredients = data;
       },
       error => {
-        //        if (error.status === 401) {
-        // Gestisci l'errore 401 qui
         alert('Error in loading page');
-        //        }
-      }
-    );
-  }
-  getTopIngredients() {
-    this.ingredientService.findMostLeastUsedIngredients(false).subscribe(
-      data => {
-        // go to registered user feed
-        this.least_ingredients = data;
-      },
-      error => {
-        //        if (error.status === 401) {
-        // Gestisci l'errore 401 qui
-        alert('Error in loading page');
-        //        }
       }
     );
   }
 
-  getPosts(): void {
-    this.isLoading = true;
-    this.postService.browseMostRecentTopRatedPosts(this.hours_var, this.limit_var).subscribe(
+  getTopIngredients() {
+    this.ingredientService.findMostLeastUsedIngredients(false).subscribe(
       data => {
-        // go to registered user feed
-        this.list_of_posts = data;
-        this.filteredPosts = this.list_of_posts;
-        //this.filterPosts(); // Chiamare il metodo di filtro dopo aver ottenuto i post
-        this.isLoading = false;
+        this.least_ingredients = data;
       },
       error => {
-        //        if (error.status === 401) {
-        // Gestisci l'errore 401 qui
         alert('Error in loading page');
-        //        }
       }
     );
   }
@@ -101,82 +79,115 @@ export class AdminDashboardComponent implements OnInit {
   getStatistics(): void {
     this.postService.interactionsAnalysis().subscribe(
       data => {
-        // go to registered user feed
-        this.interactions = data;
+        data = new Map(Object.entries(data));
+        // console.log(data);
         this.interactionValues = {
           "avgOfStarRanking": {
-            "IMAGE": this.interactions.get("IMAGEAvgOfStarRanking"),
-            "NOIMAGE": this.interactions.get("NOIMAGEAvgOfStarRanking")
+            "IMAGE": data.get("IMAGEavgOfAvgStarRanking"),
+            "NOIMAGE": data.get("NOIMAGEavgOfAvgStarRanking")
           },
           "ratioOfComments": {
-            "IMAGE": this.interactions.get("IMAGEratioOfComments"),
-            "NOIMAGE": this.interactions.get("NOIMAGEratioOfComments")
+            "IMAGE": data.get("IMAGEratioOfComments"),
+            "NOIMAGE": data.get("NOIMAGEratioOfComments")
           },
           "ratioOfStarRankings": {
-            "IMAGE": this.interactions.get("IMAGEratioOfStarRankings"),
-            "NOIMAGE": this.interactions.get("NOIMAGEratioOfStarRankings"),
+            "IMAGE": data.get("IMAGEratioOfStarRankings"),
+            "NOIMAGE": data.get("NOIMAGEratioOfStarRankings"),
           }
         };
+        this.interactionKeys = Object.keys(this.interactionValues);
+        // console.log(this.interactionValues);
+        this.createChart();
       },
       error => {
-        //        if (error.status === 401) {
-        // Gestisci l'errore 401 qui
         alert('Error in loading page');
-        //        }
       }
     );
   }
 
-  // Metodo per filtrare i post
-  /*
-  filterPosts() {
-    this.filteredPosts = this.list_of_posts.filter(item =>
-      item.recipeName.toLowerCase().includes(this.recipeNameSearch.toLowerCase()) &&
-      item.username.toLowerCase().includes(this.usernameSearch.toLowerCase())
-    );
-  }
-  */
+  @ViewChild('myChart') chartRef: ElementRef | undefined;
 
-  // Chiamato quando il valore della barra di ricerca per RecipeName cambia
-  searchRecipe() {
-    alert(this.recipeNameSearch);
-    this.isLoading = true;
-    this.postService.findPostsByRecipeName(this.recipeNameSearch).subscribe(
-      data => {
-        // go to registered user feed
-        this.list_of_posts = data;
-        this.filteredPosts = this.list_of_posts;
-        //this.filterPosts(); // Chiamare il metodo di filtro dopo aver ottenuto i post
-        this.isLoading = false;
-      },
-      error => {
-        //        if (error.status === 401) {
-        // Gestisci l'errore 401 qui
-        alert('Error in loading page');
-        //        }
+  createChart(): void {
+      if (this.chartRef) {
+        const ctx = this.chartRef.nativeElement.getContext('2d');
+        if (ctx.canvas) {
+          this.chart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: this.interactionKeys,
+            datasets: [
+              {
+                label: 'IMAGE',
+                backgroundColor: 'rgba(157, 2, 8, 0.7)',
+                borderColor: 'rgba(157, 2, 8, 1)',
+                borderWidth: 1,
+                data: this.interactionKeys.map(key => this.interactionValues[key]['IMAGE'])
+              },
+              {
+                label: 'NOIMAGE',
+                backgroundColor: 'rgba(250, 163, 7, 0.7)',
+                borderColor: 'rgba(250, 163, 7, 1)',
+                borderWidth: 1,
+                data: this.interactionKeys.map(key => this.interactionValues[key]['NOIMAGE'])
+              }
+            ]
+          },
+          options: {
+            scales: {
+              x: {
+                ticks: {
+                  color: 'rgb(55, 6, 23)', // Change the font color of the x-axis labels
+                  font: {
+                    weight: 'bold' // You can also set other font properties here
+                  }
+                }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  color: 'rgb(55, 6, 23)', // Change the font color of the y-axis labels
+                  font: {
+                    weight: 'bold' // You can also set other font properties here
+                  }
+                }
+              }              
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: 'rgb(55, 6, 23)', // Change the font color of the legend labels
+                }
+              }
+            }
+          }
+        });
       }
-    );
+    }
   }
 
-  // Chiamato quando il valore della barra di ricerca per Username cambia
-  searchUser() {
-    alert(this.usernameSearch);
-    
-  }
 
-  // Metodo per aggiungere un ingrediente
   createIngredient(): void {
     if (this.newIngredient.name && this.newIngredient.calories > 0) {
-      // Puoi implementare la chiamata al servizio per aggiungere l'ingrediente qui
       alert(`Ingrediente aggiunto:\nNome: ${this.newIngredient.name}\nCalorie: ${this.newIngredient.calories}`);
-      // Azzera il form dopo l'aggiunta
       this.newIngredient = { name: '', calories: 0 };
     } else {
       alert('Invalid input.');
     }
   }
 
-  interactionKeys = ["avgOfStarRanking", "ratioOfComments", "ratioOfStarRankings"];
+
+  openIngredientCreation() {
+    this.ingredientCreation = true;
+  } 
+  closeIngredientCreation() {
+    this.ingredientCreation = false;
+  }
+
+  goToAdminFeed() {
+    this.router.navigate(['/admin-feed']);
+  }
+
+  /*
   interactionValues: any = {
     "avgOfStarRanking": {
       "IMAGE": this.interactions.get("IMAGEAvgOfStarRanking"),
@@ -191,5 +202,7 @@ export class AdminDashboardComponent implements OnInit {
       "NOIMAGE": this.interactions.get("NOIMAGEratioOfStarRankings"),
     }
   };
-
+  
+  interactionKeys = ["avgOfStarRanking", "ratioOfComments", "ratioOfStarRankings"];
+  */
 }

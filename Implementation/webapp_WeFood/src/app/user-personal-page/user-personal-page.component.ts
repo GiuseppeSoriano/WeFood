@@ -2,8 +2,9 @@ import { Component, Input, OnInit } from '@angular/core';
 import { RegisteredUser, RegisteredUserInterface } from '../models/registered-user.model';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
 import { Router } from '@angular/router';
-import { PostDTOInterface } from '../models/post-dto.model';
+import { PostDTO, PostDTOInterface } from '../models/post-dto.model';
 import { RegisteredUserDTOInterface } from '../models/registered-user-dto.model';
+import { IngredientService } from '../services/ingredient_service/ingredient.service';
 
 @Component({
   selector: 'app-user-personal-page',
@@ -16,25 +17,46 @@ export class UserPersonalPageComponent implements OnInit {
   showUsersPopup: boolean = false;
   canBeClosed = false;
   
-  constructor(private router: Router, private userService: RegisteredUserService) { }
+  constructor(private router: Router, private userService: RegisteredUserService, private ingredientService: IngredientService) { }
   isLoading: boolean = false;
   list_of_posts: PostDTOInterface[] = [];
 
   info_updated: RegisteredUserInterface = new RegisteredUser();
+
+  modifyPersonalInfoPopup: boolean = false;
+
+  top_ingredients: string[] = [];
+  
+  post_visible: boolean = false;
+  @Input() postDTO_to_be_viewed: PostDTOInterface = new PostDTO();
   
   ngOnInit(): void {
     this.getPosts();
+    this.getTopIngredients();
+    console.log(this.top_ingredients);
   }
 
   getUser() {
     return this.userService.info;
   }
 
-  openPopup() {
-    this.showUsersPopup = true;
+  getTopIngredients() {
+    this.ingredientService.findMostUsedIngredientsByUser(this.getUser()).subscribe(
+      data => {
+        this.top_ingredients = data;
+      },
+      error => {
+        alert('Error in loading page');
+      }
+    );
+  }
+
+  private openPopup() {
+    this.canBeClosed = false;
     setTimeout(() => {
+      this.showUsersPopup = true;
       this.canBeClosed = true;
-    }, 300);
+    }, 100);
   }
 
   closePopup() {
@@ -44,7 +66,14 @@ export class UserPersonalPageComponent implements OnInit {
 
       this.canBeClosed = false;
       this.showUsersPopup = false;
+      this.modifyPersonalInfoPopup = false;
+      this.post_visible = false;
     }
+  }
+
+  closePost() {
+    this.closePopup();
+    this.getPosts();
   }
 
   goToHomePage() {
@@ -96,20 +125,6 @@ export class UserPersonalPageComponent implements OnInit {
     );
   }
 
-  modifyPersonalInfo() {
-    // this.userService.modifyPersonalInformation(this.info_updated).subscribe(
-    //   data => {
-    //     alert(data);
-    //   },
-    //   error => {
-    //     if (error.status === 401) {
-    //       // Gestisci l'errore 401 qui
-    //       alert('Wrong username or password');
-    //     }
-    //   }
-    // );
-  }
-
   showSelectedPost() {
     // Implementa la logica per visualizzare i post selezionati
   }
@@ -123,10 +138,7 @@ export class UserPersonalPageComponent implements OnInit {
         this.isLoading = false;
       },
       error => {
-//        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Error in loading page');
-//        }
+        alert('Error in loading page');
       }
     );
   }
@@ -134,6 +146,25 @@ export class UserPersonalPageComponent implements OnInit {
   logout() {
     this.userService.logout();
     this.router.navigate(['/home']);
+  }
+
+  viewPost(post: PostDTOInterface) {
+    this.canBeClosed = false;
+    setTimeout(() => {
+      document.body.style.overflow = 'hidden';
+      this.postDTO_to_be_viewed = post;
+      this.post_visible = true;
+      this.canBeClosed = true;
+    }, 100);
+  }
+
+  modifyPersonalInfo() {
+    this.canBeClosed = false;
+    setTimeout(() => {
+      document.body.style.overflow = 'hidden';
+      this.modifyPersonalInfoPopup = true;
+      this.canBeClosed = true;
+    }, 100);
   }
 
 }

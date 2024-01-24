@@ -1,11 +1,11 @@
 <div>
-    <button (click)="toggleDropdown()">Calories Analysis</button>
-    <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
-      <!-- <div>Insert the ingredient</div> -->
-      <!-- <input type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName"> -->
-      <div>
-        <input type="text" placeholder="Find by RecipeName" [(ngModel)]="recipeNameSearch">
-      </div>
+  <button (click)="toggleDropdown()">Calories Analysis</button>
+  <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
+    <div>
+      <input type="text" placeholder="Find by RecipeName" [(ngModel)]="recipeNameSearch">
       <button type="submit" (click)="search(recipeNameSearch)">SEARCH</button>
+      <span class="result" *ngIf="result>0">{{ result }} <span>kcal</span></span>
     </div>
+  </div>
 </div>
+

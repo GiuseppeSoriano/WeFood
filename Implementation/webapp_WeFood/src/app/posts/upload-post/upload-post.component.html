@@ -12,7 +12,7 @@
     <div class="previewIMG">
       <img src="{{ post.recipe.image !== 'DEFAULT' ? post.recipe.image : '../../../../../assets/images/default_recipe.jpg' }}" alt="Recipe Image">
     </div>
-    <div class="container-totalCalories"><div class="totalCalories">{{ totalCalories }} <span>kcal</span></div></div>
+    <div class="container-totalCalories"><div class="totalCalories">{{ post.recipe.totalCalories }} <span>kcal</span></div></div>
   </div>
 
   <textarea *ngIf="!addingIngredients && !addingSteps" placeholder="Type your description" required class="description" [(ngModel)]="post.description"></textarea>
@@ -23,8 +23,8 @@
   </div>
 
   <div *ngIf="addingIngredients" class="ingredientsWrapper">
-    <div *ngIf="recipe.ingredients.size !== 0" class="listIngredientsAdded">
-      <div *ngFor="let ingredient of recipe.ingredients | keyvalue" class="ingredient">
+    <div *ngIf="post.recipe.ingredients.size !== 0" class="listIngredientsAdded">
+      <div *ngFor="let ingredient of post.recipe.ingredients | keyvalue" class="ingredient">
         <label class="ingredientName">{{ingredient.key}}</label>
         <div class="containerQ">
           <div>
@@ -51,8 +51,8 @@
   </div>
 
   <div *ngIf="addingSteps" class="ingredientsWrapper">
-    <div *ngIf="recipe.steps.length !== 0" class="listIngredientsAdded">
-      <div *ngFor="let item of recipe.steps" class="ingredientsAdded">
+    <div *ngIf="post.recipe.steps.length !== 0" class="listIngredientsAdded">
+      <div *ngFor="let item of post.recipe.steps" class="ingredientsAdded">
         <div class="step">
           <label class="stepText">{{ item }}</label>
           <span (click)="removeStep(item)" class="remove">&times;</span>

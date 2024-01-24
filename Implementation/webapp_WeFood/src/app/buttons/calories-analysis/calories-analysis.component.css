@@ -180,8 +180,49 @@ button {
     font-weight: bold;
   }
   
-  
-  
+
+.dropdown-container input {
+  width: 100%;
+  box-sizing: border-box;
+  /* margin: 5px 0; */
+  padding: 8px;
+  border: 2px solid #FFFFFF; /* Bordi colorati */
+  background-color: #FFFCEB;
+  border-radius: 5px; /* Bordo arrotondato */
+  font-size: 14px; /* Dimensione del font */
+  font-weight: bold; /* Grassetto */
+  color: #6A040F;
+  /* change placeholder color */
+  margin-bottom: 5px;
+}
+.dropdown-container input::placeholder {
+  color: #6A040F;
+  opacity: 0.7; /* Firefox */
+  text-align: center;
+}
+
+.dropdown-container input:focus {
+  color: #6A040F;
+  border: #FFCD00 2px solid;
+  outline: none;
+  opacity: 0.7; /* Firefox */
+  background-color: transparent;
+  /* text-align: center; */
+}
+
+span.result {
+  margin: 8px 0;
+  width: 100%;
+  display: block;
+  text-align: center;
+  font-size: 17px;
+  color: #6A040F;
+  font-weight: bold;
+}
+
+span.result span {
+  font-weight: normal;
+}
 
  /* STILE HOURS AND LIMIT */
   
@@ -248,4 +289,34 @@ button {
       box-shadow: 0 0 0 12px rgba(255, 185, 8, 0.2)
   }
   
+
+
+/* Style for the unit (kCal) */
+.dropdown-container .unit {
+  font-size: 14px;
+  color: #6A040F;
+  margin-left: 5px; /* Add some space between the result number and unit */
+}
+
+/* Center the kCal text */
+.dropdown-container .kcal-text {
+  font-size: 14px;
+  color: #6A040F;
+  margin-left: 5px; /* Adjust margin if needed */
+  text-align: center;
+}
+
+/* INPUT ALL'INTERNO DEL MENU A TENDINA */
+.dropdown-container div {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 2px solid #FFFFFF;
+  background-color: #FFFCEB;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #9D0208;
+  text-align: center;
+}
   

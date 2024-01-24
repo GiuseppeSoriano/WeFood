@@ -63,7 +63,7 @@ public class CommentMongoDB implements CommentMongoDBInterface {
                        "}, {" + //
                             "$pull: {" + //
                                 "comments: {" + //
-                                    "idUser: " + user.editedGetId() + "," + //
+                                    "username: \"" + comment.getUsername() + "\"," + //
                                     "timestamp: " + comment.getTimestamp().getTime() + //
                                 "}" + //
                             "}" + //

@@ -271,29 +271,69 @@ label.timestamp {
 
 
 div.description {
-    margin: 5px 8px 0;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 5px 0px 0px;
+    padding: 0px 3px 0px 6px;
     display: flex;
-    flex-direction: column;
-    justify-content: left;
-    align-items: left;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
     max-height: 70px;
-    overflow-y: auto;
 }
 
 div.description label {
+    display: block;
+    max-height: 70px;
+    overflow-y: auto;
     text-align: justify;
     color: #6A040F;
     font-size: 15px;
     text-align: left;   
 }
 
+.descriptionTextArea {
+    overflow-y: auto;
+    max-height: 70px;
+    border: none;
+    width: 100%;
+    text-align: justify;
+    color: #6A040F;
+    font-size: 15px;
+    font-weight: normal;    
+    border: 1.5px dashed #6A040F;
+    outline: none;
+    resize: none;
+    height: auto;
+    font-family: Calibri, sans-serif;
+}
+
+.descriptionTextArea:disabled {
+    outline: none;
+    background-color: transparent;
+}
+
+
+.container-star-ranking {
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
 
 .star-ranking {
-    margin-top: 5px;
+    padding-bottom: 2px;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    margin-right: 8px;
+}
+
+.star-ranking.nohover:hover, .star-ranking.nohover:hover span {
+    cursor: default;
 }
 
 .star-ranking span {
@@ -306,8 +346,9 @@ div.description label {
 
 
 /* Star Ranking Effect HOVER */
-.star-ranking span:has(~ span:hover), .star-ranking span:hover {
+.star-ranking span.hover:has(~ span.hover:hover), .star-ranking span.hover:hover {
     color: #FFBA08;
+    cursor: pointer;
 }
 
 
@@ -322,7 +363,6 @@ div.interactions{
     display: flex;
     flex-direction: row;
     justify-items: center;
-
 }
 
 button.toggle {
