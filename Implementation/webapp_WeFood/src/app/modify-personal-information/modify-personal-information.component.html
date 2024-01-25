@@ -1,9 +1,9 @@
-<div class="popup-overlay">
+<div class="popup-overlay" [ngClass]="{'delete': deletingAccount}">
     <label class="close" (click)="close()">&times;</label>
 
-    <label class="title">Update Personal Information</label>
+    <label class="title"> {{deletingAccount ? "Are you Sure?" : "Update Personal Information" }}</label>
     
-    <form>
+    <form *ngIf="!deletingAccount">
         <label class="info">Name</label>
         <input [(ngModel)]="newName" name="name" type="text" placeholder="Name" required>
         <label class="info">Surname</label>
@@ -24,5 +24,15 @@
         <label class="response" [ngClass]="{'visible': response}">{{response_msg}}</label>
 
         <button type="submit" [disabled]="newPassword !== confirmNewPassword" (click)="updateUserInfo()">UPDATE</button>
+
+        
     </form>
+
+    <label *ngIf="!deletingAccount" class="delete-account" (click)="deleteAccount()">DELETE ACCOUNT</label>
+    <img *ngIf="deletingAccount" class="delete" src="../../assets/images/SadBread.png" alt="sad">
+    <div class="container-delete-label" *ngIf="deletingAccount">
+        <label class="info cancel" (click)="cancelDeleteAccount()">NO</label>
+        <label class="info cancel" (click)="deleteRegisteredUser()">YES</label>
+    </div>
+
 </div>

@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { IngredientInterface } from 'src/app/models/ingredient.model';
-import { RegisteredUserDTO } from 'src/app/models/registered-user-dto.model';
+import { RegisteredUserDTO, RegisteredUserDTOInterface } from 'src/app/models/registered-user-dto.model';
 import { RegisteredUserInterface } from 'src/app/models/registered-user.model';
 
 @Injectable({
@@ -45,8 +45,7 @@ export class IngredientService {
       );
   }
 
-  findMostUsedIngredientsByUser(info: RegisteredUserInterface) {
-    const registeredUserDTO = new RegisteredUserDTO(info.id, info.username);
+  findMostUsedIngredientsByUser(registeredUserDTO: RegisteredUserDTOInterface) {
     return this.http.post<string[]>('http://localhost:8080/ingredient/findMostUsedIngredientsByUser', registeredUserDTO)
       .pipe(
         catchError(this.handleError)

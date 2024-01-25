@@ -130,9 +130,17 @@ div.overlay {
   align-items: center;
 }
 
-.side.left > button {
-  margin-bottom: 15px;
+.container-button {
   width: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+}
+
+.container-button > button {
+  margin-bottom: 15px;
+  width: 100%;
   box-sizing: border-box;
   padding: 15px 0;
   background-color: #6A040F; /* Colore di sfondo principale */
@@ -146,12 +154,12 @@ div.overlay {
   transition: background-color 0.3s, transform 0.2s; /* Transizione fluida per hover e click */
 }
 
-.side.left > button:hover {
+.container-button > button:hover {
   background-color: #9D0208; /* Cambia colore al passaggio del mouse */
   transform: scale(1.1); /* Leggera scala su hover */
 }
 
-.side.left > button:active {
+.container-button > button:active {
   background-color: #D00000; /* Colore quando il pulsante è premuto */
   transform: scale(0.95); /* Riduci la scala quando cliccato */
 }
@@ -490,6 +498,7 @@ label.noposts{
 
 
 .interactionChart {
+  margin-top: 80px;
   flex: 2;
   width: 40%;
   display: flex;
@@ -512,8 +521,6 @@ label.noposts{
 canvas.chart {
   width: 100%;
   max-width: 700px;
-  max-height: 700px;
-  height: auto;
 }
 
 .popup-overlay {
@@ -694,4 +701,60 @@ visibility: hidden;
 .popup-overlay label.checkPassword.visible {
 visibility: visible;
 }
- 
+
+.suggest-most-followed-users {
+  margin-top: 60px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.suggest-most-followed-users span {
+  font-size: 21px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #370617;
+}
+
+.suggested-list {
+  max-width: 400px;
+  display: flex;
+  width: 60%;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.suggested-list span {
+  text-align: center;
+  width: 100%;
+  border-radius: 5px;
+  display: block;
+  font-size: 16px;
+  padding: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  background-color: #370617;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.suggested-list span:hover {
+  transform: scale(1.05);
+}
+
+
+.suggested-list span.gold {
+  background-color: #FAA307;
+}
+
+.suggested-list span.silver {
+  background-color: #9D0208;
+}
+
+.suggested-list span.bronze {
+  background-color: #6A040F;
+}

@@ -1,6 +1,7 @@
 package it.unipi.lsmsdb.wefood.controller;
 
 import it.unipi.lsmsdb.wefood.apidto.LoginRequestDTO;
+import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.model.Ingredient;
 import it.unipi.lsmsdb.wefood.service.IngredientService;
 import it.unipi.lsmsdb.wefood.service.RegisteredUserService;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.unipi.lsmsdb.wefood.service.AdminService;
 import it.unipi.lsmsdb.wefood.model.Admin;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -49,6 +52,9 @@ public class AdminController {
         return ResponseEntity.ok(registeredUserService.unbanUser(request));
     }
 
-
+    @PostMapping("/findBannedUsers")
+    public ResponseEntity<List<RegisteredUserDTO>> findBannedUsers(){
+        return ResponseEntity.ok(adminService.findBannedUsers());
+    }
 
 }

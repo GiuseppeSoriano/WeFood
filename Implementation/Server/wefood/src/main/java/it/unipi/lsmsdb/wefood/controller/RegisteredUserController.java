@@ -38,6 +38,8 @@ public class RegisteredUserController {
             // Return a 404 error if no user is found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+        if (result.getPosts().size() >= 60)
+            result.setPosts(result.getPosts().subList(0, 60));
         result.setPosts(recipeImageService.postDTOconverter(result.getPosts()));
         return ResponseEntity.ok(result);
     }

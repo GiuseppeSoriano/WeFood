@@ -1,8 +1,12 @@
 package it.unipi.lsmsdb.wefood.repository.mongodb;
 
+import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.model.Admin;
+import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.repository.base.BaseMongoDB;
 import it.unipi.lsmsdb.wefood.repository.interfaces.AdminMongoDBInterface;
+
+import java.util.ArrayList;
 import java.util.List;
 import org.bson.Document;
 
@@ -40,6 +44,32 @@ public class AdminMongoDB implements AdminMongoDBInterface {
             }
 
         }
-    };
+    }
+
+    public List<RegisteredUserDTO> findBannedUsers() {
+        String query = "db.User.find({" +
+                "  deleted: true," +
+                "  name: { $exists: true }" +
+                "});";
+        List<Document> results = BaseMongoDB.executeQuery(query);
+        if(results.isEmpty()){
+            // There are no banned users
+            return null;
+        }
+        else{
+            // It exists a banned user/users
+            List<Document> result = BaseMongoDB.executeQuery(query);
+            List<RegisteredUserDTO> registeredUsers = new ArrayList<RegisteredUserDTO>();
+
+            for(Document document : result) {
+                registeredUsers.add(new RegisteredUserDTO(
+                        document.getString("_id"),
+                        document.getString("username")
+                ));
+            }
+
+            return registeredUsers;
+        }
+    }
     
 }

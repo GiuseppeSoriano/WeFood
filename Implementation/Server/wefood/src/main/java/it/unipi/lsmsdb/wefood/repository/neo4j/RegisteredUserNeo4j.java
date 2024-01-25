@@ -102,7 +102,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
                        "WHERE (u2)-[:FOLLOWS]->(u1)\r\n" + //
                        "AND NOT (u1)-[:FOLLOWS]->(u3)\r\n" + //
                        "RETURN u3\r\n" +
-                       "LIMIT 10";
+                       "LIMIT 15";
         List<Record> results = BaseNeo4j.executeQuery(query);
         List<RegisteredUserDTO> suggestedUsers = new ArrayList<RegisteredUserDTO>();
         for(Record result: results){
@@ -132,7 +132,7 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         String query = "MATCH (u:User)-[r:USED]->(i:Ingredient {name: '" + ingredientName + "'})\r\n" + //
                        "RETURN u, i, r.times AS times\r\n" + //
                        "ORDER BY times DESC\r\n" + //
-                       "LIMIT 10";
+                       "LIMIT 15";
         List<Record> results = BaseNeo4j.executeQuery(query);
         List<RegisteredUserDTO> suggestedUsers = new ArrayList<RegisteredUserDTO>();
         for(Record result: results){

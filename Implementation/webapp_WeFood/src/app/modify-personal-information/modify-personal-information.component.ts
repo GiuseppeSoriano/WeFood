@@ -12,12 +12,14 @@ import * as bcrypt from 'bcryptjs';
 })
 export class ModifyPersonalInformationComponent implements OnInit {
 
+
   @Input() users: RegisteredUserDTO[] = [];
   @Output() closePopup: EventEmitter<void> = new EventEmitter();
 
   password: string = '';
   popupPassword: string = '';
   changePassword: boolean = false;
+  deletingAccount: boolean = false;
 
   newName: string = '';
   newSurname: string = '';
@@ -44,6 +46,23 @@ export class ModifyPersonalInformationComponent implements OnInit {
     this.confirmNewPassword = '';
     this.popupPassword = '';
     this.closePopup.emit();
+  }
+
+  deleteRegisteredUser() {
+    // Fare logout e mandare query al server
+    alert("User deleted!");
+  }
+
+  cancelDeleteAccount() {
+    setTimeout(() => {
+      this.deletingAccount = false;
+    }, 50);
+  }
+
+  deleteAccount() {
+    setTimeout(() => {
+      this.deletingAccount = true;
+    }, 50);
   }
 
   toggleNewPassword() {

@@ -56,6 +56,11 @@ export class ViewPostComponent implements OnInit {
     });
   }
 
+
+  checkIfAdmin () : boolean {
+    return this.adminService.info.username !== '';
+  }
+
   showIngredients() {
     this.ingredients = !this.ingredients;
   }

@@ -36,7 +36,7 @@
     </div>
 
     <!-- Star ranking section -->
-    <div class="container-star-ranking">
+    <div class="container-star-ranking" *ngIf="!checkIfAdmin()">
         <div class="star-ranking" *ngIf="!comments_visible" [ngClass]="{'nohover': selectedStar !== 0}">
             <span [ngClass]="{'hover': selectedStar === 0}" *ngFor="let star of [1, 2, 3, 4, 5]" (click)="votePost(star)" [class.selected]="star <= selectedStar">&#9733;</span>
         </div>
@@ -78,10 +78,11 @@
 
         </div>
 
-        <div class="comment-box">
+        <div class="comment-box" *ngIf="!checkIfAdmin()">
             <input class="newCommentText" [(ngModel)]="newCommentText" placeholder="Add a Comment">
             <label (click)="commentPost()">&#x279C;</label>
         </div>
+
     </div>
 
     <div class="starRankingsWrap" *ngIf="starRankings_visible">

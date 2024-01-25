@@ -38,7 +38,8 @@
 }
 
 .item {
-    margin-bottom: 10px;
+    margin-bottom: 17px;
+    cursor: pointer;
 }
 
 .close-btn {

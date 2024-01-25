@@ -219,7 +219,7 @@ public class PostMongoDB implements PostMongoDBInterface{
     }
 
     public List<PostDTO> findPostsByRecipeName(String recipeName) {
-        String query = "db.Post.find( { \"recipe.name\": { $regex: \"" + recipeName + "\", $options: \"i\" } }, {\"recipe.name\":1, \"recipe.image\":1} ).limit(10)";
+        String query = "db.Post.find( { \"recipe.name\": { $regex: \"" + recipeName + "\", $options: \"i\" } }, {\"recipe.name\":1, \"recipe.image\":1} ).limit(15)";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
         List<PostDTO> posts = new ArrayList<PostDTO>();

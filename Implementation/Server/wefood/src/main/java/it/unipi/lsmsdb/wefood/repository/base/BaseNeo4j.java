@@ -57,7 +57,7 @@ public abstract class BaseNeo4j {
         String query = "MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)\r\n" + //
                 "WHERE i.name IN " + "[\"Salt\"]" + "\r\n" + //
                 "RETURN r \r\n" + //
-                "LIMIT 10";
+                "LIMIT 15";
         List<Record> results = BaseNeo4j.executeQuery(query);
         if (results.isEmpty()) {
 

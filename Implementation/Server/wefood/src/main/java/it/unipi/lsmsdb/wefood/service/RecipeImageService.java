@@ -69,7 +69,7 @@ public class RecipeImageService {
             return encodedImage;
         }
         catch(IOException e){
-            System.out.println("IOException in getWebImage: " + e);
+            // System.out.println("IOException in getWebImage: " + e);
             // We try to return the default one before giving up
             return getLocalImage("DEFAULT");
         }
@@ -115,7 +115,8 @@ public class RecipeImageService {
 
     public List<PostDTO> postDTOconverter(List<PostDTO> posts) {
         // if string starts with "http" 
-
+        if(posts == null)
+            return null;
         for (PostDTO postDTO : posts) {
             if(postDTO.getImage().startsWith("http"))
                 postDTO.setImage(getWebImage(postDTO.getImage()));

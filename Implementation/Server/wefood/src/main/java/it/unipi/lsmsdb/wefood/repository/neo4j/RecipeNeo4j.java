@@ -49,24 +49,23 @@ public class RecipeNeo4j implements RecipeNeo4jInterface {
     }
 
     public List<PostDTO> findRecipeByIngredients(List<String> ingredientNames) throws IllegalStateException, Neo4jException {
-        String query = "MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)\r\n" + //
-                       "WHERE i.name IN " + ingredientNamesToString(ingredientNames) + "\r\n" + //
-                       "RETURN r \r\n" + //
-                       "LIMIT 10";
+        String query = "MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)\n" +
+                        "WHERE i.name IN" + ingredientNamesToString(ingredientNames) + "\n" +
+                        "WITH r, COLLECT(i.name) AS ingredients\n" +
+                        "WHERE ALL(ingredient IN " + ingredientNamesToString(ingredientNames) + "\n" +
+                        "          WHERE ingredient IN ingredients)\n" +
+                        "RETURN r\n" +
+                        "LIMIT 15\n";
         List<Record> results = BaseNeo4j.executeQuery(query);
-        if (results.isEmpty()) {
-            return null;
-        } else {
-            List<PostDTO> recipes = new ArrayList<PostDTO>();
-            for(Record recipe_record: results){
-                Node recipeNode = recipe_record.get("r").asNode();
-                // Ottieni il campo image se esiste, altrimenti imposta un valore di default
-                String image = recipeNode.containsKey("image") ? recipeNode.get("image").asString() : "DEFAULT";
-                PostDTO recipe_to_insert = new PostDTO(recipe_record.get("r").get("_id").asString(), image, recipe_record.get("r").get("name").asString());
-                recipes.add(recipe_to_insert);
-            }
-            return recipes;
+        List<PostDTO> recipes = new ArrayList<PostDTO>();
+        for(Record recipe_record: results){
+            Node recipeNode = recipe_record.get("r").asNode();
+            // Ottieni il campo image se esiste, altrimenti imposta un valore di default
+            String image = recipeNode.containsKey("image") ? recipeNode.get("image").asString() : "DEFAULT";
+            PostDTO recipe_to_insert = new PostDTO(recipe_record.get("r").get("_id").asString(), image, recipe_record.get("r").get("name").asString());
+            recipes.add(recipe_to_insert);
         }
+        return recipes;
     }
 
     public boolean createRecipeIngredientsRelationship(PostDTO postDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {

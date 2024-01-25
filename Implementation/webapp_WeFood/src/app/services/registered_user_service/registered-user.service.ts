@@ -10,6 +10,7 @@ import { RegisteredUser, RegisteredUserInterface } from 'src/app/models/register
 })
 export class RegisteredUserService {
   info: RegisteredUserInterface = new RegisteredUser();
+  usersFollowed: RegisteredUserDTOInterface[] = [];
 
   constructor(private http: HttpClient) {
     this.loadUserCredentials();
@@ -19,6 +20,10 @@ export class RegisteredUserService {
     const savedInfo = localStorage.getItem('userCredentials');
     if (savedInfo) {
       this.info = JSON.parse(savedInfo);
+    }
+    const savedFollowed = localStorage.getItem('userFollowed');
+    if (savedFollowed) {
+      this.usersFollowed = JSON.parse(savedFollowed);
     }
   }
 
@@ -32,6 +37,7 @@ export class RegisteredUserService {
     return this.http.post<RegisteredUserInterface>('http://localhost:8080/registereduser/login', { username, password }).subscribe(
       data => {
         this.setCredentials(data);
+        this.retrieveFollowed();
         console.log(this.info.id);
       },
       error => {
@@ -84,24 +90,34 @@ export class RegisteredUserService {
       );
   }
 
-  findFriends() {
-    const registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username);
+  findFriends(registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username)) {
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFriends', registeredUserDTO)
       .pipe(
         catchError(this.handleError)
       );
   }
 
-  findFollowers() {
-    const registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username);
+  findFollowers(registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username)) {
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFollowers', registeredUserDTO)
       .pipe(
         catchError(this.handleError)
       );
   }
 
-  findFollowed() {
-    const registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username);
+  retrieveFollowed(registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username)) {
+    this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFollowed', registeredUserDTO).subscribe(
+      data => {
+        this.usersFollowed = data;
+        localStorage.setItem('userFollows', JSON.stringify(data));
+      },
+      error => {
+        alert('Error in loading followed');
+      }
+    );
+
+  }
+
+  findFollowed(registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username)) {
     return this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFollowed', registeredUserDTO)
       .pipe(
         catchError(this.handleError)

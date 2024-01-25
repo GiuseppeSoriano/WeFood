@@ -73,7 +73,7 @@ public abstract class BaseMongoDB {
                         ")"
         ),
         FIND(
-                "db.Post.find({ timestamp: { $gte: 1389712493188 } }).sort({avgStarRanking:-1}).limit(10)"
+                "db.Post.find({ timestamp: { $gte: 1389712493188 } }).sort({avgStarRanking:-1}).limit(15)"
         ),
         AGGREGATE(
                 "db.Ingredient.aggregate([\n" +

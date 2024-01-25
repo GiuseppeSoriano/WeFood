@@ -5,12 +5,13 @@
   <header>
     <nav>
       <div class="logo">
-        <label (click)="modifyPersonalInfo()"> {{ getUser().username }}
+        <label> {{ userPage.username }}
           <img src="../../assets/images/icon.png" alt="Logo WeFood">
         </label>
       </div>
       <div class="menu">
-        <button class="homeButton" (click)="goToHomePage()"><img src="../../assets/images/home.png">FEED</button>
+        <button *ngIf="isUser()" class="homeButton" (click)="goToHomePage()"><img src="../../assets/images/home.png">FEED</button>
+        <button *ngIf="isAdmin()" class="homeButton" (click)="goToDashboard()">DASHBOARD</button>
         <button id="friendsButton" (click)="showFriends()">FRIENDS</button>
         <button id="followersButton" (click)="showFollowers()">FOLLOWERS</button>
         <button id="followedButton" (click)="showFollowed()">FOLLOWED</button>
@@ -34,7 +35,6 @@
         </div>
       </div>
 
-       <!-- avgTotalCalByUser -->
       <div class="avg-calories">
         <label>Average Total Calories</label>
         <span class="average"> {{avgTotalCalories.toFixed(2)}} <span>kcal</span></span>
@@ -58,7 +58,7 @@
     
     <div class="side right">
 
-      <!-- find users to follow based on user's friends -->
+      <!-- find users to follow based on user's friends
       <div class="suggest-by-friends">
         <span>You may know</span>
         <div class="container-suggested">
@@ -66,17 +66,17 @@
             <span *ngFor="let user of usersToFollowBasedOnFriends" > {{user.username}} </span>
           </div>
         </div>
-      </div>
+      </div>-->
       
-      <!-- find most followed users -->
+      <!-- find most followed users
       <div class="suggest-most-followed-users">
         <span>Most Followed Users</span>
         <div class="suggested-list">
-          <span *ngFor="let user of mostFollowed; let i = index" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2" (click)="goToUserPage(user)">
+          <span *ngFor="let user of mostFollowed; let i = index" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
             {{user.username}}
           </span>
         </div>
-      </div>
+      </div>-->
 
     </div>    
   
@@ -88,3 +88,4 @@
 <app-view-list-of-users *ngIf="showUsersPopup" [users]="users" (closePopup)="closePopup()"></app-view-list-of-users>
 <app-view-post *ngIf="post_visible" [postDTO]="postDTO_to_be_viewed" (closePost)="closePost()"></app-view-post>
 <app-modify-personal-information *ngIf="modifyPersonalInfoPopup" (closePopup)="closePopup()"></app-modify-personal-information>
+

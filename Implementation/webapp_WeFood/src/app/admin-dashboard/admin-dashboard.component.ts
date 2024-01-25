@@ -9,6 +9,7 @@ import { RegisteredUserService } from '../services/registered_user_service/regis
 
 // Importa Chart.js
 import { Chart } from 'chart.js/auto';
+import { RegisteredUserDTOInterface } from '../models/registered-user-dto.model';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -30,6 +31,7 @@ export class AdminDashboardComponent implements OnInit {
   interactionKeys: string[] = [];
   chart: any;
   ingredientCreation: boolean = false;
+  mostFollowed: RegisteredUserDTOInterface[] = [];
 
   // info: AdminInterface = new Admin();
   logout() {
@@ -52,6 +54,18 @@ export class AdminDashboardComponent implements OnInit {
     this.getTopIngredients();
     this.getLeastIngredients();
     this.getStatistics();
+    this.getMostFollowed();
+  }
+
+  getMostFollowed() {
+    this.userService.findMostFollowedUsers().subscribe(
+      data => {
+        this.mostFollowed = data;
+      },
+      error => {
+        alert('Error in loading most followed users');
+      }
+    );
   }
 
   getLeastIngredients() {

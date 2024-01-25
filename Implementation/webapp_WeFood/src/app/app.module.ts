@@ -31,6 +31,7 @@ import { FindRecipeByIngredientsComponent } from './buttons/find-recipe-by-ingre
 import { CaloriesAnalysisComponent } from './buttons/calories-analysis/calories-analysis.component';
 import { AdminFeedComponent } from './admin-feed/admin-feed.component';
 import { FindUserByUsernameComponent } from './buttons/find-user-by-username/find-user-by-username.component';
+import { UserPageComponent } from './user-page/user-page.component';
 
 @NgModule({
   declarations: [
@@ -55,7 +56,8 @@ import { FindUserByUsernameComponent } from './buttons/find-user-by-username/fin
     FindRecipeByIngredientsComponent,
     CaloriesAnalysisComponent,
     AdminFeedComponent,
-    FindUserByUsernameComponent
+    FindUserByUsernameComponent,
+    UserPageComponent
   ],
   imports: [
     BrowserModule,

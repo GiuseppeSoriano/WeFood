@@ -104,6 +104,10 @@ export class FindRecipeByIngredientsComponent implements OnInit {
   
   onExecute() {
     // Prepara i dati da inviare
+    if(this.ingredients_chosen.length == 0) {
+      alert("Please select at least one ingredient");
+      return;
+    }
     this.loadPosts.emit();
     this.postService.findRecipeByIngredients(this.ingredients_chosen).subscribe(
       (response) => {
