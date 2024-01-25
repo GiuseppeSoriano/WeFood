@@ -1071,10 +1071,11 @@ Reading operations are:
 7. `Find Most Recent Posts by minCalories and maxCalories`;
 8. `Find Post by Recipe name`;
 9. `Find Post by _id`;
-10. `Find Users Followed by a User`;
-11. `Find Followers of a User`;
-12. `Find Friends of a User`: a User's friends are the Users that follow him/her and that he/she follows;
-13. `Find Recipes by set of ingredients`;
+10. `Find Banned Users`;
+11. `Find Users Followed by a User`;
+12. `Find Followers of a User`;
+13. `Find Friends of a User`: a User's friends are the Users that follow him/her and that he/she follows;
+14. `Find Recipes by set of ingredients`;
 
 
 **MongoDB**
@@ -1188,33 +1189,43 @@ Reading operations are:
     })
 ```
 
+10. `Find Banned Users`:
+```javascript
+    db.User.find({
+        deleted: true,
+        name: { $exists: true }
+    })
+```
 
 **Neo4j**
 
-10. `Find Users Followed by a User`:
+11.  `Find Users Followed by a User`:
 ```javascript
     MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)
     RETURN u2
 ```
 
-11. `Find Followers of a User`:
+12.  `Find Followers of a User`:
 ```javascript
     MATCH (u1:User)-[:FOLLOWS]->(u2:User {username: String})
     RETURN u1
 ```
 
-12. `Find Friends of a User`:
+13.  `Find Friends of a User`:
 ```javascript
     MATCH (u1:User {username: String})-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u1)
     RETURN u2
 ```
 
-13. `Find Recipes by set of ingredients`:
+14.  `Find Recipes by set of ingredients`:
 ```javascript
     MATCH (r:Recipe)-[:CONTAINS]->(i:Ingredient)
     WHERE i.name IN [String, ...]
+    WITH r, COLLECT(i.name) AS ingredients
+    WHERE ALL(ingredient IN [String, ...]
+              WHERE ingredient IN ingredients)
     RETURN r
-    LIMIT 10
+    LIMIT 15
 ```
 
 
@@ -1333,7 +1344,7 @@ Deletions not allowed:
     }, {
         $pull: {
             comments: {
-                idUser: ObjectId("..."),
+                username: String,
                 timestamp: Timestamp
             }
         }
@@ -1838,19 +1849,31 @@ CREATE TEXT INDEX user_index FOR (u:User) ON (u.username);
 ## 7.3. Consistency, Availability and Partition Tolerance
 The trio of properties highlighted in the title represents the fundamental characteristics of a distributed system. However, as the *CAP theorem* states, achieving all three simultaneously in a functional system is deemed impossible. Aligned with the predetermined Non-Functional Requirements (Section **2.2.**), it becomes necessary to prioritize the *Availability* and *Partition Tolerance* of the system, allowing for a measured relaxation in *Consistency constraints*. This strategic approach allows to the primary system actors, the Users, to persist in utilizing the application even if certain displayed information is *not entirely up-to-date*. In practical terms, this might translate to scenarios such as not immediately viewing the latest Recipes (e.g., during a network partition) or encountering non-updated suggestions after the upload of a new Recipe (e.g., if Neo4j is temporarily down). Nevertheless, Users are assured of *eventually* accessing the most recent information. The timeline for this "eventually" remains uncertain, as consistency updates may employ diverse approaches, and in the event of significant faults, human operator intervention may be necessary.
 
-This is the main idea behind the design of the system. Consequently, the intentional alignment of the design with the intersection of Availability and Partition Tolerance in the CAP theorem places considerable emphasis on achieving eventual consistency. The subsequent paragraph will delve into a detailed discussion of the system's consistency management, focusing particularly on the *Inter-Database consistency*.
+This is the main idea behind the design of the system. Consequently, the intentional alignment of the design with the intersection of Availability and Partition Tolerance in the CAP theorem places considerable emphasis on achieving eventual consistency. The subsequent paragraphs will delve into a detailed discussion of the system's consistency management, focusing particularly on the *Intra-Database* and *Inter-Database* consistency.
 
-Intra-database:
-Osservazioni fatte sull'intra-database consistency. nominando anche vote-post 
-Post-collection prima.
+## 7.4. Intra-Database Consistency
+Ensuring consistency within a database is crucial for maintaining the integrity of stored data, particularly in cases of *redundancies*, as evident in the *WeFood* Database Model. MongoDB demands particular attention for the management of redundancy updates, while Neo4j, lacking redundancies among nodes, requires careful consideration only for *inter-database consistency*, that will be discussed later on.
 
-## 7.4. Inter-Database Consistency
-Besides of ensuring *intra-database consistency* within a single database for *redundancy* updates, a trickier concern involves maintaining consistency between different databases. Two types of consistency are guaranteed, depending on the nature of the operation performed.
+Turning attention to MongoDB collections, a deliberate decision has been made to prioritize updating the Post collection *first*, in scenarios involving multiple operations for redundancy updates. This choice is justified by the need to *consistently update* the Post collection to avoid compromising the User experience, especially if subsequent operations encounter issues. For instance:
 
-- For operations deemed particularly delicate, **Strict Consistency** is ensured. (An example) is *User Registration*, where ensuring the correctness of setup before Users can utilize the application takes precedence. Similarly, all operations executed by the Admin are handled with strict consistency, prioritizing the assurance that everything went well over a quick response. In such cases, strict consistency entails rolling back the databases to the previous state if an operation fails. The scheme in Figure \ref{fig:strict_consistency} is adopted, where the operation is first executed in MongoDB. If it fails, no modifications are made, and a `False` response is returned. If successful, the same operation is performed in Neo4j, with the user experiencing a *little delay*. If an issue arises, MongoDB is rolled back to maintain consistency between the two databases, resulting in a `False` return. If all goes well, a `True` return signifies successful execution, ensuring consistency.
+- Creation or Deletion of a Post: the Post collection is updated first, followed by the update of redundancy in the User collection;
 
-Tutte le operazioni che prevedono la gestione della consistenza effettuate da actor diversi da registered user sono gestite in strict consitency.
-Aggiungere fatto che admin fa solo create ingredient
+- Deletion of a User Account: after removing all Posts associated with the User in the Post collection, the User collection is updated by eliminating all the non-personal information.
+
+When ranking a Post, the entire process is contained within the Post collection. Specifically, when a User adds a new vote to a Post, a *practical approximation *is employed to update the `avgStarRanking` field. Instead of re-evaluating all elements in the `starRankings` array, the server follows this sequence:
+
+1. when the User views the post, the server has already transmitted all star rankings;
+
+2. upon receiving the new vote and the Post with all star rankings, the server first adds the new star ranking to the `starRankings` array field in the Post collection;
+
+3. subsequently, the server calculates the updated average star ranking by considering the User's provided copy of the starRankings array, along with the new vote;
+
+1. the `avgStarRanking` field is then directly updated on the Post collection.
+
+While recognizing that this approach may result in a temporarily stale `avgStarRanking` due to the local client copy *and* potential votes occurring after the User viewed the Post, it is understood that this discrepancy is more likely during the initial wave of votes but diminishes over time. As time progresses, the `avgStarRanking` is expected to *converge* to the correct value, ensuring accuracy as the upload time recedes into the past. This same approach applies to the deletion of a vote, with the understanding that the observations regarding the staleness of `avgStarRanking` remain pertinent.
+
+## 7.5. Inter-Database Consistency
+A more complex issue than the previous one arises when it comes to maintaining consistency across different databases. The type of consistency guaranteed depends on the nature of the operation being executed.
 
 \begin{figure}
     \centering
@@ -1859,20 +1882,31 @@ Aggiungere fatto che admin fa solo create ingredient
     \label{fig:strict_consistency}
 \end{figure}
 
-Non fare such ma nominare i casi.
-
-- Conversely, when main social network operations are performed by Users, such as uploading or deleting a Post<!--(or even deleting a User account)-->, the primary focus, as specified in the Non-Functional Requirements, is on providing high availability and a quick response over strict consistency constraints. In these cases, the necessary is to return control as swiftly as possible to the User. Although strict consistency is not guaranteed, availability takes precedence. **Eventual Consistency** is adopted in such scenarios (Figure \ref{fig:eventual_consistency}). The operation begins in MongoDB, and if it fails, no further action is taken. If MongoDB operation succeeds, an immediate `True` response is given, as waiting is unnecessary. Subsequently, a Thread is initiated to asynchronously handle consistency with Neo4j. Given that no critical information is stored in Neo4j, Users can continue using the application even if the two databases are temporarily inconsistent. If the Thread encounters issues, no action is taken, prioritizing system availability over consistency. A log message or automatic trigger can be scheduled for future consistency recovery. Users can seamlessly use the application, and if Neo4j is down, they can still access features unrelated to Neo4j. Human operators, notified by log messages, are responsible for rectifying the situation if necessary. If both MongoDB and Neo4j operations succeed, no further intervention is required.
+\begin{enumerate}
+    \item For \textit{operations necessitating inter-database consistency and performed by actors other than Registered Users} (i.e. the primary actors of the system), \textbf{strict consistency} is implemented. This includes:
+        \begin{itemize}
+            \item \textit{Registration of an Unregistered User}: prioritizing the verification of the setup's accuracy precedes the User's ability to utilize the application;
+            \item \textit{Creation of an Ingredient by the Admin}: the emphasis lies on confirming the success of the process rather than providing a swift response.
+        \end{itemize}
+    In cases of strict consistency, the databases are rolled back to their previous state if an operation fails. The depicted scheme (Figure \ref{fig:strict_consistency}) involves executing the operation first in MongoDB. If unsuccessful, no modifications are made, and a \texttt{False} response is returned. Upon success, the same operation is performed in Neo4j, introducing a minor delay for the User. If issues arise, MongoDB is rolled back to maintain consistency between the two databases, resulting in a \texttt{False} return. Successful execution yields a \texttt{True} return, signifying consistency between the databases.
+    \item Conversely, when dealing with Registered Users who require high availability and quick responses, even delicate operations demanding inter-database consistency are managed with \textbf{eventual consistency}. These operations include:
+        \begin{itemize}
+            \item \textit{Uploading or Deleting a Post};
+            \item \textit{Deleting a Registered User Account}.
+        \end{itemize}
+    Eventual consistency (Figure \ref{fig:eventual_consistency}) is then employed in these scenarios. The operation begins in MongoDB, and if unsuccessful, no further action is taken before returning \texttt{False}. If MongoDB operation succeeds, an immediate \texttt{True} response is provided, eliminating the need for waiting. Subsequently, a Thread is initiated to handle consistency asynchronously with Neo4j. Since no critical information is stored in Neo4j, Users can continue using the application even if the two databases are temporarily inconsistent. If the Thread encounters issues, no action is taken, prioritizing system availability over consistency. Log messages or automatic triggers can be scheduled for future consistency recovery. Users can seamlessly use the application, and if Neo4j is down, they can still access features unrelated to Neo4j. Human operators, notified by log messages, are responsible for rectifying the situation if necessary. If both MongoDB and Neo4j operations succeed, no further intervention is required.
+\end{enumerate}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\textwidth]{Resources/"eventual_consistency.jpg"}
     \caption{Eventual Consistency scheme.}
     \label{fig:eventual_consistency}
-\end{figure}  
+\end{figure} 
 
 ---
 
-aggiungere link githyb e rendere pubblico il repository
+aggiungere link github e rendere pubblico il repository
 + inserire credenziali utente e admin in manuale utente
 
 \newpage
@@ -1981,8 +2015,7 @@ With these components structured correctly, the updateOne method proceeds to exe
 When the executeQuery method identifies a `deleteOne` operation, it shifts its focus to handling the `operationDoc`, which in this case contains the criteria for selecting the document to be deleted. This conversion is achieved by parsing the string into a Document object. 
 With the deletion criteria correctly formatted, the deleteOne method executes the delete operation using the MongoDB Java driver. The result of this operation is a `DeleteResult` object, which provides information about the outcome (the number of documents deleted).
 
-
-#### Models
+#### 8.1.1.2. Models
 
 More details on the classes and their attributes are as follows.
 
@@ -2049,6 +2082,33 @@ private static final String MONGODB_DATABASE = "WeFood";
 Here in the server try to describe also the Driver that we have implemented.
 
 ### 8.1.2. Client
+
+For the Client implementation, the project was build using HTML, CSS and TypeScript.
+HTML, or HyperText Markup Language, is the standard markup language for creating web pages.
+
+CSS, or Cascading Style Sheets, complements HTML by providing styling and layout.
+
+Now, let's move on to AngularJS. AngularJS is a JavaScript framework developed by Google, designed to make both the development and testing of web applications easier. It extends HTML with new attributes and binds data to HTML with expressions, making it a powerful tool for creating dynamic and interactive user interfaces.
+
+In AngularJS, our application is organized into various components. Components are the building blocks of the user interface, each encapsulating a specific part of the application's functionality.
+
+Additionally, AngularJS employs services, which are reusable, injectable objects that perform specific functions across the application. Services are ideal for encapsulating shared functionality, such as data retrieval or business logic, and promoting modularity in our codebase.
+
+Implementation Example for Login-Home and Home Functionalities:
+
+The central component in this implementation is the HomeComponent, serving as the foundational element of the home page. Its corresponding template, home.component.html, delineates the page structure, encompassing a navigation bar, a central content area, and a footer. Noteworthy is the seamless integration of the LoggingPopupComponent, a critical component responsible for user authentication.
+
+When a user initiates the "LOGIN" button in the navigation bar, the openPopup() method within the HomeComponent sets the showLoginPopup property to true. This action triggers the rendering of the LoggingPopupComponent through the *ngIf directive in the template. The popup is not merely a static UI element; it actively facilitates user authentication.
+
+The LoggingPopupComponent is intricately linked with the RegisteredUserService. Upon a successful login attempt, this component emits the closePopup event. Subsequently, the HomeComponent responds by capturing this event, interpreting it as a signal to close the popup, and simultaneously redirecting the user to the registered user feed.
+
+In the background, the PostService assumes a pivotal role, managing a range of post-related functionalities. From uploading and modifying posts to deletion operations, this service communicates with the backend server via HTTP requests. The browseMostRecentTopRatedPosts method stands out, fetching posts based on parameters such as recency and popularity, thereby addressing the dynamic content requirements of the application.
+
+Adding another layer of complexity is the browse-most-recent-top-rated-post-by-ingredients component. This specialized component, along with its template (browse-most-recent-top-rated-post-by-ingredients.component.html), offers users a dedicated space for post filtering based on ingredient names. It includes input fields for dynamic entry and sliders to fine-tune temporal and post limit criteria.
+
+While navigating the application's source code, a consistent theme of managing asynchronous operations becomes apparent. The isLoading property in HomeComponent ensures a seamless transition by displaying a loading spinner during data retrieval. Thoughtful error handling mechanisms are implemented to safeguard the user experience against unforeseen issues.
+
+Reflecting on the unit tests, especially those for the BrowseMostRecentTopRatedPostByIngredientsComponent, underscores a commitment to quality assurance. These tests serve as vigilant checks, validating the successful creation of components and reinforcing the application's reliability.
 
 In the client we can find actor classes, which inside have the main shell with all the commands for the users. 
 Also we have methods wich guides the user through the steps to complete an operation an this methods also call the classes found in httprequest. The latters sends an http request to the server and if the status code is 200 (ok), a conversion from the response body to the desired object is perfomed. This objects can be found in model, dto, or apidto. The print of the object is done at the end inside the method called before by the Printer or Java print (System.out.println).
