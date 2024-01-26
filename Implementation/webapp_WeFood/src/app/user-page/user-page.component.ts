@@ -15,14 +15,15 @@ import { AdminService } from '../services/admin_service/admin.service';
   styleUrls: ['./user-page.component.css']
 })
 export class UserPageComponent implements OnInit {
-
   
+
   @Input() users: RegisteredUserDTOInterface[] = [];
   showUsersPopup: boolean = false;
   canBeClosed = false;
   avgTotalCalories: number = 0;
   usersToFollowBasedOnFriends: RegisteredUserDTOInterface[] = [];
   mostFollowed: RegisteredUserDTOInterface[] = [];
+  labelUsers: string = "";
 
   userPage: RegisteredUserPageInterface;
 
@@ -50,6 +51,7 @@ export class UserPageComponent implements OnInit {
   @Input() postDTO_to_be_viewed: PostDTOInterface = new PostDTO();
   
   ngOnInit(): void {
+    document.body.style.overflow = 'auto';
     this.getPosts();
     this.getTopIngredients();
     this.getAvgTotalCalories();
@@ -129,8 +131,18 @@ export class UserPageComponent implements OnInit {
   }
 
   closePost() {
-    this.closePopup();
-    this.getPosts();
+    if(this.adminService.info.username !== "") {
+      const navigationExtras = {
+        state: {
+          username: this.userPage.username  
+        }
+      };
+      this.router.navigate(['/user-page-loading'], navigationExtras);
+    }
+    else{
+      this.closePopup();
+      this.getPosts();
+    }
   }
 
   goToHomePage() {
@@ -145,6 +157,7 @@ export class UserPageComponent implements OnInit {
     this.userService.findFollowers(new RegisteredUserDTO(this.userPage.id, this.userPage.username)).subscribe(
       data => {
         this.users = data;
+        this.labelUsers = "Followers";
         this.openPopup();
       },
       error => {
@@ -160,6 +173,7 @@ export class UserPageComponent implements OnInit {
     this.userService.findFollowed(new RegisteredUserDTO(this.userPage.id, this.userPage.username)).subscribe(
       data => {
         this.users = data;
+        this.labelUsers = "Followed";
         this.openPopup();
       },
       error => {
@@ -175,6 +189,7 @@ export class UserPageComponent implements OnInit {
     this.userService.findFriends(new RegisteredUserDTO(this.userPage.id, this.userPage.username)).subscribe(
       data => {
         this.users = data;
+        this.labelUsers = "Friends";
         this.openPopup();
       },
       error => {
@@ -186,6 +201,10 @@ export class UserPageComponent implements OnInit {
     );
   }
 
+  goToPersonalPage() {
+    this.router.navigate(['/user-personal-page']);
+  }
+  
   showSelectedPost() {
     // Implementa la logica per visualizzare i post selezionati
   }
@@ -218,5 +237,22 @@ export class UserPageComponent implements OnInit {
     }, 100);
   }
 
+  isBanned() {
+    for(let i = 0; i < this.adminService.usersBanned.length ; i++) {
+      if(this.adminService.usersBanned[i].username == this.userPage.username ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  isFollowed() {
+    for(let i = 0; i < this.userService.usersFollowed.length ; i++) {
+      if(this.userService.usersFollowed[i].username == this.userPage.username ) {
+        return true;
+      }
+    }
+    return false;
+  }
 
 }

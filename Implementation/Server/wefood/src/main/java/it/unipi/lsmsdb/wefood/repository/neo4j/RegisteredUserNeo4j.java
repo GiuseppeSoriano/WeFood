@@ -29,9 +29,9 @@ public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
         return true;
     }
 
-    public boolean deleteUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
+    public boolean deleteUserUsedIngredient(String username, List<String> ingredientNames) throws IllegalStateException, Neo4jException {
         for(String ingredientName: ingredientNames){
-            String query = "MATCH (u:User {username: '\"" + registeredUserDTO.getUsername() + "\"'})-[r:USED]->(i2:Ingredient {name: '\"" + ingredientName + "\"'})\n" +
+            String query = "MATCH (u:User {username: \"" + username + "\"})-[r:USED]->(i2:Ingredient {name: \"" + ingredientName + "\"})\n" +
                             "SET r.times = r.times - 1\n" +
                             "WITH r\n" +
                             "WHERE r.times = 0\n" +

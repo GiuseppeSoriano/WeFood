@@ -57,8 +57,6 @@ export class LoggingPopupComponent implements OnInit {
     this.onLogin();
   }
 
-  // BISOGNA EFFETTUARE DIVERSAMENTE IL LOGIN PER L'ADMIN: LE INFORMAZIONI VANNO SALVATE NEL SERVICE, LA GESTIONE SI SNELLISCE
-  // VA BENE GIUSE. Eseguo subito D:
   loginAsAdmin() {
     this.adminService.login(this.username, this.password).add(() => {
       

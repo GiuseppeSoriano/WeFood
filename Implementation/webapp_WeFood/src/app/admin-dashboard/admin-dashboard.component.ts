@@ -56,6 +56,9 @@ export class AdminDashboardComponent implements OnInit {
     this.getStatistics();
     this.getMostFollowed();
   }
+    getBannedUsers() {
+      return this.adminService.usersBanned;
+    }
 
   getMostFollowed() {
     this.userService.findMostFollowedUsers().subscribe(

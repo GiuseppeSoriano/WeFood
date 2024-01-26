@@ -120,7 +120,15 @@
       <canvas #myChart class="chart"></canvas>
     </div>
 
-    
+   <!-- find banned users -->
+   <div class="banned-users">
+    <span>Banned Users</span>
+    <div class="banned-list">
+      <span *ngFor="let user of getBannedUsers()">
+        {{user.username}}
+      </span>
+    </div>
+  </div> 
 
     <div class="side right">
       

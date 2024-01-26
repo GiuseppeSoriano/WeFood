@@ -7,6 +7,7 @@ import it.unipi.lsmsdb.wefood.apidto.RegisteredUserRequestDTO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;
+import it.unipi.lsmsdb.wefood.model.Post;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserMongoDBInterface;
 import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserNeo4jInterface;
@@ -46,8 +47,8 @@ public class RegisteredUserDAO {
         return registeredUserMongoDB.addPost(user, postDTO);
     }
 
-    public static boolean removePost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
-        return registeredUserMongoDB.removePost(user, postDTO);
+    public static boolean removePost(Post post, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
+        return registeredUserMongoDB.removePost(post, postDTO);
     }
 
     public static boolean cancelUserMongoDB(String registeredUsername) throws MongoException, IllegalArgumentException, IllegalStateException {
@@ -60,8 +61,8 @@ public class RegisteredUserDAO {
         return registeredUserNeo4j.createUserUsedIngredient(registeredUserDTO, ingredientNames);
     }
 
-    public static boolean deleteUserUsedIngredient(RegisteredUserDTO registeredUserDTO, List<String> ingredientNames) throws IllegalStateException, Neo4jException{
-        return registeredUserNeo4j.deleteUserUsedIngredient(registeredUserDTO, ingredientNames);        
+    public static boolean deleteUserUsedIngredient(String username, List<String> ingredientNames) throws IllegalStateException, Neo4jException{
+        return registeredUserNeo4j.deleteUserUsedIngredient(username, ingredientNames);
     }
 
     public static boolean followUser(RegisteredUserDTO user, String usernameToFollow) throws IllegalStateException, Neo4jException{

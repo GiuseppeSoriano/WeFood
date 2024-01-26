@@ -30,6 +30,7 @@
       <app-browse-most-recent-posts-by-calories (sendPosts)="updatePosts($event)" (loadPosts)="isLoading = !isLoading"></app-browse-most-recent-posts-by-calories>
       <app-find-post-by-recipe-name (sendPosts)="updatePosts($event)" (loadPosts)="isLoading = !isLoading"></app-find-post-by-recipe-name>
       <app-find-recipe-by-ingredients (sendPosts)="updatePosts($event)" (loadPosts)="isLoading = !isLoading"></app-find-recipe-by-ingredients>
+      <app-find-user-by-username></app-find-user-by-username>
     </div>
     
     <div *ngIf="isLoading" class="loading-container">
@@ -51,5 +52,5 @@
 
 </html>
 
-<app-view-post *ngIf="post_visible" [postDTO]="postDTO_to_be_viewed" (closePost)="closePost()"></app-view-post>
+<app-view-post *ngIf="post_visible" [postDTO]="postDTO_to_be_viewed" (closePost)="closePost()" (goUserFromPost)="isLoading = true" ></app-view-post>
 <app-upload-post *ngIf="creatingPost" (closePost)="closePost()"></app-upload-post>

@@ -1,11 +1,16 @@
 <div class="popup-overlay">
     <span class="close-btn" (click)="close()">&times;</span>
-    <label class="title">Users</label>
+    <label class="title">{{labelUsers}}</label>
+    <label *ngIf="users.length !== 0" class="number-of-users">{{users.length}}</label>
 
     <div class="popup-content">
-        <div *ngFor="let item of users" class="item">
+        <div *ngIf="users.length == 0" class="no-users item">
+            No Users Found
+        </div>
+        <div *ngFor="let item of users" class="item" (click)="goToUserPage(item)">
             {{ item.username }}
         </div>
+
     </div>
 </div>
 

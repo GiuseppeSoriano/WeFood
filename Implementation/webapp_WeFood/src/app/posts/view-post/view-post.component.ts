@@ -11,6 +11,8 @@ import { StarRankingService } from 'src/app/services/star_ranking_service/star-r
 import { RegisteredUser, RegisteredUserInterface } from 'src/app/models/registered-user.model';
 import { RegisteredUserService } from 'src/app/services/registered_user_service/registered-user.service';
 import { AdminService } from 'src/app/services/admin_service/admin.service';
+import { RegisteredUserDTOInterface } from 'src/app/models/registered-user-dto.model';
+import { NavigationExtras, Router } from '@angular/router';
 
 @Component({
   selector: 'app-view-post',
@@ -40,7 +42,7 @@ export class ViewPostComponent implements OnInit {
 
   personalVote: StarRankingInterface = new StarRanking();
 
-  constructor(private postService: PostService, private eRef:ElementRef, private commentService: CommentService, private starRankingService: StarRankingService, private userService: RegisteredUserService, private adminService: AdminService) { }
+  constructor(private router:Router, private postService: PostService, private eRef:ElementRef, private commentService: CommentService, private starRankingService: StarRankingService, private userService: RegisteredUserService, private adminService: AdminService) { }
 
   ngOnInit(): void {
     this.postService.findPostByPostDTO(this.postDTO).subscribe((data: PostInterface) => {
@@ -142,7 +144,7 @@ export class ViewPostComponent implements OnInit {
 
   getTimeStamp(timestamp: any) {
     const dt = new Date(timestamp);
-    return (dt.getDay()+1).toString().padStart(2, '0')+"/"+(dt.getMonth()+1).toString().padStart(2, '0')+"/"+dt.getFullYear() + ", "+ dt.getHours().toString().padStart(2, '0')+":"+dt.getMinutes().toString().padStart(2, '0');
+    return (dt.getUTCDate()).toString().padStart(2, '0')+"/"+(dt.getUTCMonth()+1).toString().padStart(2, '0')+"/"+dt.getFullYear() + ", "+ dt.getHours().toString().padStart(2, '0')+":"+dt.getMinutes().toString().padStart(2, '0');
   }
 
   toogleComments() {
@@ -154,11 +156,11 @@ export class ViewPostComponent implements OnInit {
   }
 
   canDelete() {
-    return this.getUser().username == this.post.username && !this.comments_visible && !this.starRankings_visible;
+    return (this.adminService.info.username !== "" || (this.getUser().username == this.post.username)) && !this.comments_visible && !this.starRankings_visible;
   }
 
   deletePost() {
-    this.postService.deletePost(this.post, this.postDTO, this.userService.info).subscribe((data: boolean) => {
+    this.postService.deletePost(this.post, this.postDTO).subscribe((data: boolean) => {
       if(data) {
         this.close();
       } else {
@@ -224,6 +226,21 @@ export class ViewPostComponent implements OnInit {
   
   isCommentBeingModified(comment: CommentInterface) {
     return this.editingComment == comment;
+  }
+
+  @Output() goUserFromPost: EventEmitter<void> = new EventEmitter();
+
+  goToUserPage() {
+    this.close();
+    if(this.getUser().username == this.post.username) {
+      this.router.navigate(['/user-personal-page']);
+    }
+    const navigationExtras: NavigationExtras = {
+      state: {
+        username: this.post.username
+      }
+    };
+    this.router.navigate(['/user-page-loading'], navigationExtras);
   }
 
 }

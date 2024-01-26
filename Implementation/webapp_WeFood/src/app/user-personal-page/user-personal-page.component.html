@@ -25,7 +25,7 @@
     
     <div class="side left">
       
-      <div class="most-used-ingredients">
+      <div *ngIf="top_ingredients.length !== 0"  class="most-used-ingredients">
         <span>Most Used Ingredients</span>
         <div class="ingredient-list">
           <span *ngFor="let ingredient of top_ingredients | keyvalue; let i = index" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
@@ -35,7 +35,7 @@
       </div>
 
        <!-- avgTotalCalByUser -->
-      <div class="avg-calories">
+      <div *ngIf="list_of_posts.length !== 0" class="avg-calories">
         <label>Average Total Calories</label>
         <span class="average"> {{avgTotalCalories.toFixed(2)}} <span>kcal</span></span>
       </div>
@@ -59,7 +59,7 @@
     <div class="side right">
 
       <!-- find users to follow based on user's friends -->
-      <div class="suggest-by-friends">
+      <div *ngIf="usersToFollowBasedOnFriends.length !== 0" class="suggest-by-friends">
         <span>You may know</span>
         <div class="container-suggested">
           <div class="suggested-list">
@@ -85,6 +85,6 @@
 
 </html>
 
-<app-view-list-of-users *ngIf="showUsersPopup" [users]="users" (closePopup)="closePopup()"></app-view-list-of-users>
+<app-view-list-of-users *ngIf="showUsersPopup" [labelUsers]="labelUsers" [users]="users" (closePopup)="closePopup()"></app-view-list-of-users>
 <app-view-post *ngIf="post_visible" [postDTO]="postDTO_to_be_viewed" (closePost)="closePost()"></app-view-post>
 <app-modify-personal-information *ngIf="modifyPersonalInfoPopup" (closePopup)="closePopup()"></app-modify-personal-information>

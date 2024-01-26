@@ -568,3 +568,45 @@ span.average > span {
 .suggest-by-friends .suggested-list > span:hover {
     background-color: #D00000;
 }
+
+
+.side.right {
+    top: 120px;
+    position: sticky;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.side.right .container-button {
+    display: flex;
+    flex-direction: column;
+    justify-self: flex-start;
+    align-items: center;
+    width: 50%;
+}
+
+.side.right .container-button button {
+    width: 100%;   
+}
+
+
+.side.right .container-button button.interaction {
+    border: 3px solid transparent;
+}
+
+.side.right .container-button button.interaction.undo {
+    border: 3px solid #6A040F;
+    background-color: white;
+    color: #370617;
+}
+
+#friendsButton {
+    margin-top: 80px;
+}
+
+.side.right .container-button button.info {
+    padding: 15px 0;
+}

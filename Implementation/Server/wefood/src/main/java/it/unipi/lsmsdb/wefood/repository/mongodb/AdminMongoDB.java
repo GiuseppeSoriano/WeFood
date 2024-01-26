@@ -63,7 +63,7 @@ public class AdminMongoDB implements AdminMongoDBInterface {
 
             for(Document document : result) {
                 registeredUsers.add(new RegisteredUserDTO(
-                        document.getString("_id"),
+                        document.getObjectId("_id").toHexString(),
                         document.getString("username")
                 ));
             }

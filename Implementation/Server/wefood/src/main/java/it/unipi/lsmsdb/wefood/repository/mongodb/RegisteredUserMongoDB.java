@@ -3,6 +3,7 @@ package it.unipi.lsmsdb.wefood.repository.mongodb;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unipi.lsmsdb.wefood.model.Post;
 import org.bson.Document;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
@@ -189,9 +190,9 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         return true;
     }
 
-    public boolean removePost(RegisteredUser user, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
+    public boolean removePost(Post post, PostDTO postDTO) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({" + //
-                       "    _id: " + user.editedGetId() + //
+                       "    username: \"" + post.getUsername() + "\"" +//
                        "}, {" + //
                        "    $pull: {" + //
                        "        posts: {" + //

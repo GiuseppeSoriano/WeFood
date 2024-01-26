@@ -1,7 +1,8 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { RegisteredUserDTO } from '../models/registered-user-dto.model';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
+import { RegisteredUserPage } from '../models/registered-user-page.model';
 
 @Component({
   selector: 'app-view-list-of-users',
@@ -9,6 +10,7 @@ import { RegisteredUserService } from '../services/registered_user_service/regis
   styleUrls: ['./view-list-of-users.component.css']
 })
 export class ViewListOfUsersComponent implements OnInit {
+  @Input() labelUsers: string = '';
   @Input() users: RegisteredUserDTO[] = [];
   @Output() closePopup: EventEmitter<void> = new EventEmitter();
   constructor(private router: Router, private userService: RegisteredUserService, private eRef: ElementRef) { }
@@ -29,6 +31,18 @@ export class ViewListOfUsersComponent implements OnInit {
     if (!this.eRef.nativeElement.contains(event.target)) {
       this.close();
     }
+  }
+
+  @Output() goUserFromListOfUsers: EventEmitter<void> = new EventEmitter();
+
+  goToUserPage(user: RegisteredUserDTO) {
+    this.close();
+    const navigationExtras: NavigationExtras = {
+      state: {
+        username: user.username
+      }
+    };
+    this.router.navigate(['/user-page-loading'], navigationExtras);
   }
 }
 

@@ -99,11 +99,11 @@ public class PostService {
         }
     }
 
-    private boolean deletePostMongoDB(PostDTO postDTO, RegisteredUser user){
+    private boolean deletePostMongoDB(PostDTO postDTO, Post post){
         try{
             PostDAO.deletePost(postDTO);
             try{
-                return RegisteredUserDAO.removePost(user, postDTO);
+                return RegisteredUserDAO.removePost(post, postDTO);
             }
             // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
             catch(Exception e){
@@ -119,7 +119,7 @@ public class PostService {
         }
     }
 
-    private boolean deletePostNeo4j(RegisteredUser user, PostDTO postDTO, Post post){
+    private boolean deletePostNeo4j(PostDTO postDTO, Post post){
         List<String> ingredients = new ArrayList<String>();
         for (Map.Entry<String, Double> entry : post.getRecipe().getIngredients().entrySet()) {
             ingredients.add(entry.getKey());
@@ -128,7 +128,7 @@ public class PostService {
         try{
             RecipeDAO.deleteRecipe(postDTO);
             try{
-                RegisteredUserDAO.deleteUserUsedIngredient(new RegisteredUserDTO(user.getId(), user.getUsername()), ingredients);
+                RegisteredUserDAO.deleteUserUsedIngredient(post.getUsername(), ingredients);
                 return true;
             }
             // Other types of exceptions can be handled if necessary: Neo4jException, IllegalStateException
@@ -149,13 +149,13 @@ public class PostService {
     public boolean deletePost(Post post, PostDTO postDTO, RegisteredUser user) {
 
         // We need to delete the Post on MongoDB
-        if(!deletePostMongoDB(postDTO, user))
+        if(!deletePostMongoDB(postDTO, post))
             // Post not deleted on MongoDB
             return false;
 
         // We need to delete the Post on Neo4j (by launching a Thread)
         Thread neo4jThread = new Thread(() -> {
-            deletePostNeo4j(user, postDTO, post);
+            deletePostNeo4j(postDTO, post);
         });
         neo4jThread.start();
 

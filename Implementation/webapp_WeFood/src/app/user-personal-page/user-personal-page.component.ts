@@ -20,6 +20,7 @@ export class UserPersonalPageComponent implements OnInit {
   avgTotalCalories: number = 0;
   usersToFollowBasedOnFriends: RegisteredUserDTOInterface[] = [];
   mostFollowed: RegisteredUserDTOInterface[] = [];
+  labelUsers: string = '';
   
   constructor(private router: Router, private userService: RegisteredUserService, private ingredientService: IngredientService, private postService: PostService) { }
   isLoading: boolean = false;
@@ -117,6 +118,7 @@ export class UserPersonalPageComponent implements OnInit {
     this.userService.findFollowers().subscribe(
       data => {
         this.users = data;
+        this.labelUsers = 'Followers';
         this.openPopup();
       },
       error => {
@@ -130,6 +132,7 @@ export class UserPersonalPageComponent implements OnInit {
 
   showFollowed() {
     this.users = this.userService.usersFollowed;
+    this.labelUsers = 'Followed';
     this.openPopup();
   }
 
@@ -137,6 +140,7 @@ export class UserPersonalPageComponent implements OnInit {
     this.userService.findFriends().subscribe(
       data => {
         this.users = data;
+        this.labelUsers = 'Friends';
         this.openPopup();
       },
       error => {
@@ -191,20 +195,15 @@ export class UserPersonalPageComponent implements OnInit {
   }
 
   goToUserPage(user: RegisteredUserDTOInterface) {
-    this.userService.findRegisteredUserPageByUsername(user.username).subscribe(
-      data => {
-        const navigationExtras: NavigationExtras = {
-          state: {
-            userPage: data
-          }
-        };
-        console.log("HELLO");
-        this.router.navigate(['/user-page'], navigationExtras);
-      },
-      error => {
-        alert('Error in loading page');
+    if(this.getUser().username == user.username) {
+      this.router.navigate(['/user-personal-page']);
+    }
+    const navigationExtras: NavigationExtras = {
+      state: {
+        username: user.username
       }
-    );
+    };
+    this.router.navigate(['/user-page-loading'], navigationExtras);
   }
 }
 

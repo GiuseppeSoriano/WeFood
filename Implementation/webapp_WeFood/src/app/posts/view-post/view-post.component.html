@@ -1,7 +1,7 @@
 <div class="popup-overlay">
     <span class="close-btn" (click)="close()">&times;</span>
 
-    <label class="username">{{ post.username }}</label>
+    <label class="username" (click)="goToUserPage()" >{{ post.username }}</label>
     <label class="timestamp">{{ getTimeStamp(post.timestamp) }}</label>
     
     <div class="recipeInfo">
@@ -64,8 +64,8 @@
                     <div class="container-header-comment">
                         <label class="usernameComment">{{ comment.username }} <label class="commentTimestamp"> | {{getTimeStamp(comment.timestamp)}}</label></label>
                         <div>
-                            <img *ngIf="!isCommentBeingModified(comment)" class="modifyInteraction" src="../../../assets/images/pencil.png" (click)="startModifyComment(comment)">
-                            <img *ngIf="isCommentBeingModified(comment)" class="modifyInteraction" src="../../../assets/images/check.png" (click)="modifyComment(comment)">
+                            <img *ngIf="(!isCommentBeingModified(comment)) && (comment.username === getUser().username)" class="modifyInteraction" src="../../../assets/images/pencil.png" (click)="startModifyComment(comment)">
+                            <img *ngIf="isCommentBeingModified(comment) && comment.username === getUser().username" class="modifyInteraction" src="../../../assets/images/check.png" (click)="modifyComment(comment)">
                             <img class="deleteInteraction" src="../../../assets/images/recycle-bin.png" *ngIf="canDeleteComment(comment)" (click)="deleteComment(comment)">
                         </div>
                     </div>

@@ -40,11 +40,11 @@ export class PostService {
       );
   }
 
-  deletePost(post: PostInterface, postDTO: PostDTOInterface, info: RegisteredUserInterface) {
+  deletePost(post: PostInterface, postDTO: PostDTOInterface) { 
     const requestData = {
       post: post,
       postDTO: postDTO,
-      user: info
+      user: this.userService.info // value isn't used, but it's necessary to pass a value
     };
     return this.http.post<boolean>('http://localhost:8080/post/deletePost', requestData)
       .pipe(

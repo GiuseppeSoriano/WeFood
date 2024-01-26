@@ -11,10 +11,8 @@
       </div>
       <div class="menu">
         <button *ngIf="isUser()" class="homeButton" (click)="goToHomePage()"><img src="../../assets/images/home.png">FEED</button>
+        <button *ngIf="isUser()" id="profileButton" (click)="goToPersonalPage()">PROFILE</button>
         <button *ngIf="isAdmin()" class="homeButton" (click)="goToDashboard()">DASHBOARD</button>
-        <button id="friendsButton" (click)="showFriends()">FRIENDS</button>
-        <button id="followersButton" (click)="showFollowers()">FOLLOWERS</button>
-        <button id="followedButton" (click)="showFollowed()">FOLLOWED</button>
         <button id="logoutButton" (click)="logout()">LOGOUT</button>
       </div>
     </nav>
@@ -58,6 +56,17 @@
     
     <div class="side right">
 
+      <div class="container-button">
+        <button *ngIf="isAdmin() && !isBanned()"  class="interaction">BAN</button>
+        <button *ngIf="isAdmin() && isBanned()" class="interaction undo">UNBAN</button>
+        <button *ngIf="isUser() && !isFollowed()" class="interaction">FOLLOW</button>
+        <button *ngIf="isUser() && isFollowed()" class="interaction undo">UNFOLLOW</button>
+  
+        <button class="info" id="friendsButton" (click)="showFriends()">FRIENDS</button>
+        <button class="info" id="followersButton" (click)="showFollowers()">FOLLOWERS</button>
+        <button class="info" id="followedButton" (click)="showFollowed()">FOLLOWED</button>        
+      </div>
+
       <!-- find users to follow based on user's friends
       <div class="suggest-by-friends">
         <span>You may know</span>
@@ -85,7 +94,7 @@
 
 </html>
 
-<app-view-list-of-users *ngIf="showUsersPopup" [users]="users" (closePopup)="closePopup()"></app-view-list-of-users>
+<app-view-list-of-users *ngIf="showUsersPopup" [labelUsers]="labelUsers" [users]="users" (closePopup)="closePopup()"></app-view-list-of-users>
 <app-view-post *ngIf="post_visible" [postDTO]="postDTO_to_be_viewed" (closePost)="closePost()"></app-view-post>
 <app-modify-personal-information *ngIf="modifyPersonalInfoPopup" (closePopup)="closePopup()"></app-modify-personal-information>
 

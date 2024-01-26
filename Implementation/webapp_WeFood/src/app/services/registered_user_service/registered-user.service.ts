@@ -51,6 +51,7 @@ export class RegisteredUserService {
 
   logout() {
     localStorage.removeItem('userCredentials');
+    localStorage.removeItem('userFollowed');
     this.info = new RegisteredUser();
   }
 
@@ -108,13 +109,12 @@ export class RegisteredUserService {
     this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/registereduser/findFollowed', registeredUserDTO).subscribe(
       data => {
         this.usersFollowed = data;
-        localStorage.setItem('userFollows', JSON.stringify(data));
+        localStorage.setItem('userFollowed', JSON.stringify(data));
       },
       error => {
         alert('Error in loading followed');
       }
     );
-
   }
 
   findFollowed(registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username)) {

@@ -25,17 +25,33 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    margin-top: 10px; /* Aggiunto per spaziare il contenuto dal titolo */
+    margin-top: 22px; /* Aggiunto per spaziare il contenuto dal titolo */
     flex-grow: 1;
     overflow-y: auto;
 }
 
 .title {
+    margin-top: -15px;
+    text-transform: uppercase; 
     font-weight: bolder; /* Rende il testo corsivo */
     color: white; /* Utilizza il colore desiderato per il testo */
-    font-size: 28px;
-    margin-bottom: 10px; /* Ridotto il margine per evitare spazi eccessivi */
+    font-size: 23px;
+    margin-bottom: 0px; /* Ridotto il margine per evitare spazi eccessivi */
 }
+
+.no-users.item {
+    cursor: default;
+    font-size: 20px;
+    margin-top: 20px;
+}
+
+.number-of-users {
+    margin-top: 3px;
+    font-size: 16px;
+    color: white;
+    margin-bottom: 0px;
+}
+
 
 .item {
     margin-bottom: 17px;
