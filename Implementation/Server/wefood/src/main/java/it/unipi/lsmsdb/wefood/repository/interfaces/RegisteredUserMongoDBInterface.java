@@ -19,6 +19,8 @@ public interface RegisteredUserMongoDBInterface {
 
     RegisteredUserPageDTO findRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException;
 
+    RegisteredUserPageDTO adminFindRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException;
+
     boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException;
 
     boolean deleteUser(String _id) throws MongoException, IllegalArgumentException, IllegalStateException;

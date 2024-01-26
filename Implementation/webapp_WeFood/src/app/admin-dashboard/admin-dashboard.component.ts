@@ -4,12 +4,12 @@ import { AdminService } from '../services/admin_service/admin.service';
 import { PostService } from '../services/post_service/post.service';
 import { IngredientService } from '../services/ingredient_service/ingredient.service';
 import { PostDTOInterface } from '../models/post-dto.model';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
 
 // Importa Chart.js
 import { Chart } from 'chart.js/auto';
-import { RegisteredUserDTOInterface } from '../models/registered-user-dto.model';
+import { RegisteredUserDTO, RegisteredUserDTOInterface } from '../models/registered-user-dto.model';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -17,6 +17,7 @@ import { RegisteredUserDTOInterface } from '../models/registered-user-dto.model'
   styleUrls: ['./admin-dashboard.component.css']
 })
 export class AdminDashboardComponent implements OnInit {
+  
 
   isLoading = false;
   list_of_posts: PostDTOInterface[] = [];
@@ -56,9 +57,10 @@ export class AdminDashboardComponent implements OnInit {
     this.getStatistics();
     this.getMostFollowed();
   }
-    getBannedUsers() {
-      return this.adminService.usersBanned;
-    }
+
+  getBannedUsers() {
+    return this.adminService.usersBanned;
+  }
 
   getMostFollowed() {
     this.userService.findMostFollowedUsers().subscribe(
@@ -222,4 +224,14 @@ export class AdminDashboardComponent implements OnInit {
   
   interactionKeys = ["avgOfStarRanking", "ratioOfComments", "ratioOfStarRankings"];
   */
+
+  goToUserPage(user: RegisteredUserDTO) {
+    const navigationExtras: NavigationExtras = {
+      state: {
+        username: user.username
+      }
+    };
+    this.router.navigate(['/user-page-loading'], navigationExtras);
+  }
+  
 }

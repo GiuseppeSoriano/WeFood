@@ -50,7 +50,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
     };
 
     public RegisteredUserPageDTO findRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
-        String query = "db.User.find({username: \"" + username + "\"}, {username:1, posts:1})";
+        String query = "db.User.find({username: \"" + username + "\"}, {username:1, posts:1, deleted:1})";
 
         List<Document> result = BaseMongoDB.executeQuery(query);
 
@@ -61,7 +61,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         Document user_doc = result.get(0);
 
         if(user_doc.containsKey("deleted") && user_doc.getBoolean("deleted"))
-            // The user has been deleted
+            // The user has been deleted or banned
             return null;
 
         List<PostDTO> postDTOs = new ArrayList<PostDTO>();
@@ -75,6 +75,35 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         
         RegisteredUserPageDTO user = new RegisteredUserPageDTO(user_doc.getObjectId("_id").toHexString(), user_doc.getString("username"), postDTOs);
         
+        return user;
+    }
+
+    public RegisteredUserPageDTO adminFindRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
+        String query = "db.User.find({username: \"" + username + "\"}, {username:1, posts:1, name:1, deleted:1})";
+
+        List<Document> result = BaseMongoDB.executeQuery(query);
+
+        if(result.isEmpty())
+            // It does not exist a user with this username
+            return null;
+
+        Document user_doc = result.get(0);
+
+        if(user_doc.containsKey("deleted") && user_doc.getBoolean("deleted") && !user_doc.containsKey("name"))
+            // The user has been deleted
+            return null;
+
+        List<PostDTO> postDTOs = new ArrayList<PostDTO>();
+
+        List<Document> posts = user_doc.getList("posts", Document.class);
+        for(Document post : posts) {
+            String image = (post.get("image") == null) ? "DEFAULT" : post.get("image").toString();
+            PostDTO postDTO = new PostDTO(post.getObjectId("idPost").toHexString(), image, post.getString("name"));
+            postDTOs.add(postDTO);
+        }
+
+        RegisteredUserPageDTO user = new RegisteredUserPageDTO(user_doc.getObjectId("_id").toHexString(), user_doc.getString("username"), postDTOs);
+
         return user;
     }
 

@@ -188,8 +188,7 @@ public class PostMongoDB implements PostMongoDBInterface{
         String image = (recipe_doc.get("image") == null) ? "DEFAULT" : recipe_doc.get("image").toString();
         Recipe recipe = new Recipe(recipe_doc.get("name").toString(), image, steps, ingredients, Double.parseDouble(recipe_doc.get("totalCalories").toString()));
         
-        
-        Post post = new Post(result.get("username").toString(), result.get("description").toString(), new Date(result.getLong("timestamp")), recipe);
+        Post post = new Post(result.get("username").toString(), (!result.containsKey("description")) ? "" : result.get("description").toString(), new Date(result.getLong("timestamp")), recipe);
 
         if(result.containsKey("comments"))
             for(Document comment_doc : (ArrayList<Document>) result.get("comments")){

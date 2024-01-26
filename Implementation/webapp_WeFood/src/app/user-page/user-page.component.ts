@@ -79,7 +79,7 @@ export class UserPageComponent implements OnInit {
     getSuggestions() {
       this.userService.findUsersToFollowBasedOnUserFriends().subscribe(
         data1 => {
-          this.usersToFollowBasedOnFriends = data1;
+          this.usersToFollowBasedOnFriends = data1.filter(user => user.username != this.getUser().username);
         },
         error => {
           alert('Error in loading suggestions');
@@ -255,4 +255,19 @@ export class UserPageComponent implements OnInit {
     return false;
   }
 
+  banUser() {
+    this.adminService.banUser(new RegisteredUserDTO(this.userPage.id, this.userPage.username));
+  }
+
+  unbanUser() {
+    this.adminService.unbanUser(new RegisteredUserDTO(this.userPage.id, this.userPage.username));
+  }
+
+  followUser() {
+    this.userService.followUser(new RegisteredUserDTO(this.userPage.id, this.userPage.username));
+  }
+
+  unfollowUser() {
+    this.userService.unfollowUser(new RegisteredUserDTO(this.userPage.id, this.userPage.username));
+  }
 }

@@ -28,6 +28,10 @@ public class RegisteredUserDAO {
         return registeredUserMongoDB.findRegisteredUserPageByUsername(username);
     }
 
+    public static RegisteredUserPageDTO adminFindRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
+        return registeredUserMongoDB.adminFindRegisteredUserPageByUsername(username);
+    }
+
     public static boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
         return registeredUserMongoDB.modifyPersonalInformation(user);
     };

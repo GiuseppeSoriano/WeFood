@@ -24,7 +24,7 @@
     
     <div class="side left">
       
-      <div class="most-used-ingredients">
+      <div *ngIf="top_ingredients.length !== 0" class="most-used-ingredients">
         <span>Most Used Ingredients</span>
         <div class="ingredient-list">
           <span *ngFor="let ingredient of top_ingredients | keyvalue; let i = index" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <div class="avg-calories">
+      <div *ngIf="list_of_posts.length !== 0" class="avg-calories">
         <label>Average Total Calories</label>
         <span class="average"> {{avgTotalCalories.toFixed(2)}} <span>kcal</span></span>
       </div>
@@ -57,10 +57,10 @@
     <div class="side right">
 
       <div class="container-button">
-        <button *ngIf="isAdmin() && !isBanned()"  class="interaction">BAN</button>
-        <button *ngIf="isAdmin() && isBanned()" class="interaction undo">UNBAN</button>
-        <button *ngIf="isUser() && !isFollowed()" class="interaction">FOLLOW</button>
-        <button *ngIf="isUser() && isFollowed()" class="interaction undo">UNFOLLOW</button>
+        <button *ngIf="isAdmin() && !isBanned()" (click)="banUser()" class="interaction">BAN</button>
+        <button *ngIf="isAdmin() && isBanned()" (click)="unbanUser()" class="interaction undo">UNBAN</button>
+        <button *ngIf="isUser() && !isFollowed()" (click)="followUser()" class="interaction">FOLLOW</button>
+        <button *ngIf="isUser() && isFollowed()" (click)="unfollowUser()" class="interaction undo">UNFOLLOW</button>
   
         <button class="info" id="friendsButton" (click)="showFriends()">FRIENDS</button>
         <button class="info" id="followersButton" (click)="showFollowers()">FOLLOWERS</button>

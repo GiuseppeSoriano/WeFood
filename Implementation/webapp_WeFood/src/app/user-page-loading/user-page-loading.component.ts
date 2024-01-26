@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
+import { AdminService } from '../services/admin_service/admin.service';
 
 @Component({
   selector: 'app-user-page-loading',
@@ -10,7 +11,7 @@ import { RegisteredUserService } from '../services/registered_user_service/regis
 export class UserPageLoadingComponent implements OnInit {
   username: string = '';
 
-  constructor(private router: Router, private userService: RegisteredUserService) {
+  constructor(private router: Router, private userService: RegisteredUserService, private adminService: AdminService) {
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras.state as {
       username: string
@@ -23,19 +24,42 @@ export class UserPageLoadingComponent implements OnInit {
   }
 
   goToUserPage() {
-    this.userService.findRegisteredUserPageByUsername(this.username).subscribe(
-      data => {
-        const navigationExtras: NavigationExtras = {
-          state: {
-            userPage: data
+    if(this.userService.info.username !== ""){
+      this.userService.findRegisteredUserPageByUsername(this.username).subscribe(
+        data => {
+          const navigationExtras: NavigationExtras = {
+            state: {
+              userPage: data
+            }
+          };
+          this.router.navigate(['/user-page'], navigationExtras);
+        },
+        error => {
+          if(error.status === 404){
+            alert('User not found or banned');
+            this.router.navigate(['/registered-user-feed']);
           }
-        };
-        this.router.navigate(['/user-page'], navigationExtras);
-      },
-      error => {
-        alert('Error in loading page');
-      }
-    );
+        }
+      );
+    }
+    else if (this.adminService.info.username !== ""){
+      this.adminService.adminFindRegisteredUserPageByUsername(this.username).subscribe(
+        data => {
+          const navigationExtras: NavigationExtras = {
+            state: {
+              userPage: data
+            }
+          };
+          this.router.navigate(['/user-page'], navigationExtras);
+        },
+        error => {
+          if(error.status === 404){
+            alert('User not found');
+            this.router.navigate(['/admin-dashboard']);
+          }
+        }
+      );
+    }
   }
 
 }

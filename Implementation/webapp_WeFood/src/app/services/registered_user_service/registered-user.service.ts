@@ -69,26 +69,46 @@ export class RegisteredUserService {
       );
   }
 
-  followUser(userToFollow_var: RegisteredUserInterface) {
+  followUser(userToFollow_var: RegisteredUserDTOInterface) {
     const requestData = {
       registeredUserDTO: new RegisteredUserDTO(this.info.id, this.info.username),
-      usernameToFollow: userToFollow_var
+      usernameToFollow: userToFollow_var.username
     };
-    return this.http.post<boolean>('http://localhost:8080/registereduser/followUser', requestData)
-      .pipe(
-        catchError(this.handleError)
-      );
+    this.http.post<boolean>('http://localhost:8080/registereduser/followUser', requestData).subscribe(
+      data => {
+        if(data){
+          this.usersFollowed.push(userToFollow_var);
+          localStorage.setItem('userFollowed', JSON.stringify(this.usersFollowed));
+        }
+        else{
+          alert('Error in following user');
+        }
+      },
+      error => {
+        alert('Error in loading followed');
+      }
+    );
   }
 
-  unfollowUser(userToUnfollow_var: RegisteredUserInterface) {
+  unfollowUser(userToUnfollow_var: RegisteredUserDTOInterface) {
     const requestData = {
       registeredUserDTO: new RegisteredUserDTO(this.info.id, this.info.username),
-      usernameToFollow: userToUnfollow_var
+      usernameToFollow: userToUnfollow_var.username
     };
-    return this.http.post<boolean>('http://localhost:8080/registereduser/unfollowUser', requestData)
-      .pipe(
-        catchError(this.handleError)
-      );
+    this.http.post<boolean>('http://localhost:8080/registereduser/unfollowUser', requestData).subscribe(
+      data => {
+        if(data){
+          this.usersFollowed.splice(this.usersFollowed.indexOf(userToUnfollow_var), 1);
+          localStorage.setItem('userFollowed', JSON.stringify(this.usersFollowed));
+        }
+        else{
+          alert('Error in unfollowing user');
+        }
+      },
+      error => {
+        alert('Error in loading followed');
+      }
+    );
   }
 
   findFriends(registeredUserDTO = new RegisteredUserDTO(this.info.id, this.info.username)) {

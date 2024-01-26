@@ -63,7 +63,7 @@
         <span>You may know</span>
         <div class="container-suggested">
           <div class="suggested-list">
-            <span *ngFor="let user of usersToFollowBasedOnFriends" > {{user.username}} </span>
+            <span *ngFor="let user of usersToFollowBasedOnFriends" (click)="goToUserPage(user)"> {{user.username}} </span>
           </div>
         </div>
       </div>

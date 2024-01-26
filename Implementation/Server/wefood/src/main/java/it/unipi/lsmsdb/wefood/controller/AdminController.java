@@ -2,8 +2,10 @@ package it.unipi.lsmsdb.wefood.controller;
 
 import it.unipi.lsmsdb.wefood.apidto.LoginRequestDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
+import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;
 import it.unipi.lsmsdb.wefood.model.Ingredient;
 import it.unipi.lsmsdb.wefood.service.IngredientService;
+import it.unipi.lsmsdb.wefood.service.RecipeImageService;
 import it.unipi.lsmsdb.wefood.service.RegisteredUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +26,13 @@ public class AdminController {
     private final AdminService adminService;
     private final IngredientService ingredientService;
     private RegisteredUserService registeredUserService;
+    private final RecipeImageService recipeImageService;
 
     public AdminController() {
         this.adminService = new AdminService();
         this.ingredientService = new IngredientService();
         this.registeredUserService = new RegisteredUserService();
+        this.recipeImageService = new RecipeImageService();
     }
 
     @PostMapping("/login")
@@ -57,4 +61,16 @@ public class AdminController {
         return ResponseEntity.ok(adminService.findBannedUsers());
     }
 
+    @PostMapping("/adminFindRegisteredUserPageByUsername")
+    public ResponseEntity<RegisteredUserPageDTO> findRegisteredUserPageByUsername(@RequestBody String request){
+        RegisteredUserPageDTO result = adminService.adminFindRegisteredUserPageByUsername(request);
+        if (result == null) {
+            // Return a 404 error if no user is found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        if (result.getPosts().size() >= 60)
+            result.setPosts(result.getPosts().subList(0, 60));
+        result.setPosts(recipeImageService.postDTOconverter(result.getPosts()));
+        return ResponseEntity.ok(result);
+    }
 }

@@ -54,7 +54,7 @@ export class UserPersonalPageComponent implements OnInit {
     getSuggestions() {
       this.userService.findUsersToFollowBasedOnUserFriends().subscribe(
         data1 => {
-          this.usersToFollowBasedOnFriends = data1;
+          this.usersToFollowBasedOnFriends = data1.filter(user => user.username != this.getUser().username);
         },
         error => {
           alert('Error in loading suggestions');
