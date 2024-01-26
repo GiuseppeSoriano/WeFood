@@ -1095,7 +1095,8 @@ Reading operations are:
         username: String
     }, {
         username: 1, 
-        posts: 1
+        posts: 1,
+        deleted: 1
     })
 ```
 
