@@ -26,7 +26,8 @@ public class RecipeImageService {
         
         String localPath = username + "/" + timestamp + "/" + "image.jpg";
         String relativePath = LOCAL_RECIPES_IMAGES_PATH + localPath;
-        
+        System.out.println("relativePath: " + relativePath);
+
         try {
             // Use the class loader to get the resources directory
             ClassLoader classLoader = RecipeImageService.class.getClassLoader();

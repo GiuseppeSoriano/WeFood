@@ -56,8 +56,8 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
         if(result.isEmpty())
             // It does not exist a user with this username
-            return null; 
-        
+            return null;
+
         Document user_doc = result.get(0);
 
         if(user_doc.containsKey("deleted") && user_doc.getBoolean("deleted"))
@@ -65,6 +65,11 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
             return null;
 
         List<PostDTO> postDTOs = new ArrayList<PostDTO>();
+
+        if(!user_doc.containsKey("posts")) {
+            // The User has uploaded no posts
+            return new RegisteredUserPageDTO(user_doc.getObjectId("_id").toHexString(), user_doc.getString("username"), postDTOs);
+        }
 
         List<Document> posts = user_doc.getList("posts", Document.class);
         for(Document post : posts) { 
@@ -94,6 +99,11 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
             return null;
 
         List<PostDTO> postDTOs = new ArrayList<PostDTO>();
+
+        if(!user_doc.containsKey("posts")) {
+            // The User has uploaded no posts
+            return new RegisteredUserPageDTO(user_doc.getObjectId("_id").toHexString(), user_doc.getString("username"), postDTOs);
+        }
 
         List<Document> posts = user_doc.getList("posts", Document.class);
         for(Document post : posts) {

@@ -79,9 +79,11 @@ The main functional requirements for *WeFood* can be organized by the actor that
 
 1. **Unregistered User**:
     
-    1.1. Browse *recent* recipes;
+    1.1. Browse *recent*[^1] recipes;
 
     1.2. Sign Up.
+
+[^1]: Time interval can be manipulated by the actor using a slider.
 
 2. **Registered User**:
    
@@ -115,13 +117,13 @@ The main functional requirements for *WeFood* can be organized by the actor that
 
     2.15. View the Calories of an Ingredient;
 
-    2.16. Browse most recent Posts;
+    2.16. Browse most *recent* Posts;
 
-    2.17. Browse most recent top rated Posts;
+    2.17. Browse most *recent* top rated Posts;
 
-    2.18. Browse most recent Posts by ingredients;
+    2.18. Browse most *recent* Posts by ingredients;
 
-    2.19. Browse most recent Posts by calories (minCalories and maxCalories);
+    2.19. Browse most *recent* Posts by calories (minCalories and maxCalories);
 
     2.20. View his/her own personal profile;
 
@@ -238,10 +240,10 @@ The structure of the User collection is as follows.
     password: String,
     name: String, # Not Applicable for Admin
     surname: String, # Not Applicable for Admin
-    posts: [{   
+    posts: [{ [REDUNDANCY(1)]
                 idPost: ObjectId('...'),
-                name: String, [REDUNDANCY(1)]
-                image: String [REDUNDANCY(2)]
+                name: String, 
+                image: String
     }, ...] # Not Applicable for Admin 
 }
 ```
@@ -260,14 +262,14 @@ The structure of the Post collection is a little bit more complex because it man
 {
     _id: ObjectId('...'),
     idUser: ObjectId('...'),
-    username: String, [REDUNDANCY(3)]
+    username: String, [REDUNDANCY(2)]
     description: String,
     timestamp: Long,
     recipe: {
                 name: String,
                 image: String,
                 steps: [String, ...],
-                totalCalories: Double, [REDUNDANCY(4)]
+                totalCalories: Double, [REDUNDANCY(3)]
                 ingredients: [{
                                 name: String,
                                 quantity: Double 
@@ -275,13 +277,13 @@ The structure of the Post collection is a little bit more complex because it man
     },
     starRankings: [{
                         idUser: ObjectId('...'),
-                        username: String, [REDUNDANCY(5)]
+                        username: String, [REDUNDANCY(4)]
                         vote: Double
     }, ...],
-    avgStarRanking: Double, [REDUNDANCY(6)]
+    avgStarRanking: Double, [REDUNDANCY(5)]
     comments: [{
                 idUser: ObjectId('...'),
-                username: String, [REDUNDANCY(7)]
+                username: String, [REDUNDANCY(6)]
                 text: String,
                 timestamp: Long
     }, ...]
@@ -321,7 +323,7 @@ The User node is used to store the information about the Registered Users. Each 
 ```javascript
 (User):
     - _id: String 
-    - username: String [REDUNDANCY(8)]
+    - username: String [REDUNDANCY(7)]
 ```
 
 
@@ -330,8 +332,8 @@ The Recipe node is used to store the information about the Recipes. Each node co
 ```javascript
 (Recipe):
     - _id: String
-    - name: String [REDUNDANCY(9)]
-    - image: String [REDUNDANCY(10)]
+    - name: String [REDUNDANCY(8)]
+    - image: String [REDUNDANCY(9)]
 ```
 
 
@@ -340,7 +342,7 @@ The Ingredient node is used to store the information about the Ingredients. Each
 ```javascript
 (Ingredient):
     - _id: String
-    - name: String [REDUNDANCY(11)]
+    - name: String [REDUNDANCY(10)]
 ```
 
 ### 4.2.2. Relationships
@@ -356,7 +358,7 @@ This relationship allows Users to follow other Users. Two Users become friends w
 
 ```javascript
 (User)-[:USED]->(Ingredient)
-       (times: int) [REDUNDANCY(12)]
+       (times: int) [REDUNDANCY(11)]
 ```
 
 This relationship, instead, allows to quickly retrieve the Ingredients that have been used by the Users in their Recipes. The `times` attribute, in addition to being used for counting the number of times that an Ingredient has been used by a User, is used to keep track of the fact that the relationship with the Ingredient still can exist in other Recipes after the deletion of a Recipe by a User. Only when `times` becomes 0 the relationship can be deleted.
@@ -364,11 +366,11 @@ This relationship, instead, allows to quickly retrieve the Ingredients that have
 
 ```javascript
 (Ingredient)-[:USED_WITH]->(Ingredient)
-             (times: int) [REDUNDANCY(13)]
+             (times: int) [REDUNDANCY(12)]
             [BIDIRECTIONAL]
 ```
 
-This relationship allows to quickly retrieve the Ingredients that have been used together in the Users' Recipes. The `times` attribute is used in the same way as the previous relationship: it is used for counting the number of times that two Ingredients have been used together and to keep track of the fact that the relationship between two Ingredients still can exist in other Recipes after the deletion of a Recipe. Only when `times` becomes 0 the relationship can be deleted. This relationship is bidirectional because if an Ingredient `A` has been used with an Ingredient `B`, then also the Ingredient `B` has been used with the Ingredient `A`.
+This relationship allows to quickly retrieve the Ingredients that have been used together in the Users' Recipes. Here the `times` attribute is used for counting the number of times that two Ingredients have been used together. This relationship is bidirectional because if an Ingredient `A` has been used with an Ingredient `B`, then also the Ingredient `B` has been used with the Ingredient `A`.
 
 
 ```javascript
@@ -386,55 +388,51 @@ While reading operations are more frequent for the redundancies, the writing ope
     \caption{Redundancies introduced into the database models.}
     \label{tab:redundancies} \\
     \toprule
-    \textbf{(1) \texttt{DocumentDB:User:posts:name}} \\
+    \textbf{(1) \texttt{DocumentDB:User:posts}} \\
     \textbf{Reason}: To avoid joins. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:name} \\
+    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post} \\
     \midrule
-    \textbf{(2) \texttt{DocumentDB:User:posts:image}} \\
-    \textbf{Reason}: To avoid joins. \\
-    \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:image} \\
-    \midrule
-    \textbf{(3) \texttt{DocumentDB:Post:username}} \\
+    \textbf{(2) \texttt{DocumentDB:Post:username}} \\
     \textbf{Reason}: To avoid joins. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
     \midrule
-    \textbf{(4) \texttt{DocumentDB:Post:recipe:totalCalories}} \\
+    \textbf{(3) \texttt{DocumentDB:Post:recipe:totalCalories}} \\
     \textbf{Reason}: To avoid joins and to avoid computing the total calories of a Recipe every time a Post is shown. \\
     \textbf{Original/Raw Value}: It is possible to compute the total calories of a Recipe by summing the calories of the Ingredients contained in the Recipe In particular the precise formula is the following: $\sum_i \left( quantity_i\cdot\frac{calories100g_i}{100} \right)$ where $quantity_i$ is the quantity of the $i$-th Ingredient contained in the Recipe and $calories100g_i$ is the amount of calories contained in 100 grams of the $i$-th Ingredient that can be retrieved from the \texttt{Ingredient} collection. \\
     \midrule
-    \textbf{(5) \texttt{DocumentDB:Post:starRankings:username}} \\
+    \textbf{(4) \texttt{DocumentDB:Post:starRankings:username}} \\
     \textbf{Reason}: To avoid joins. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
     \midrule
-    \textbf{(6) \texttt{DocumentDB:Post:avgStarRanking}} \\
+    \textbf{(5) \texttt{DocumentDB:Post:avgStarRanking}} \\
     \textbf{Reason}: To avoid computing the average star ranking of a Post every time is shown. \\
     \textbf{Original/Raw Value}: It is possible to compute the average star ranking of a Post by averaging the values contained in \texttt{DocumentDB:Post:starRankings:vote} \\
     \midrule
-    \textbf{(7) \texttt{DocumentDB:Post:comments:username}} \\
+    \textbf{(6) \texttt{DocumentDB:Post:comments:username}} \\
     \textbf{Reason}: To avoid joins. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
     \midrule
-    \textbf{(8) \texttt{GraphDB:(User):username}} \\
+    \textbf{(7) \texttt{GraphDB:(User):username}} \\
     \textbf{Reason}: To avoid joins with the DocumentDB. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:User:username} \\
     \midrule
-    \textbf{(9) \texttt{GraphDB:(Recipe):name}} \\
+    \textbf{(8) \texttt{GraphDB:(Recipe):name}} \\
     \textbf{Reason}: To avoid joins with the DocumentDB. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:name} \\
     \midrule
-    \textbf{(10) \texttt{GraphDB:(Recipe):image}} \\
+    \textbf{(9) \texttt{GraphDB:(Recipe):image}} \\
     \textbf{Reason}: To avoid joins with the DocumentDB. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:Post:recipe:image} \\
     \midrule
-    \textbf{(11) \texttt{GraphDB:(Ingredient):name}} \\
+    \textbf{(10) \texttt{GraphDB:(Ingredient):name}} \\
     \textbf{Reason}: To avoid joins with the DocumentDB. \\
     \textbf{Original/Raw Value}: \texttt{DocumentDB:Ingredient:name} \\
     \midrule
-    \textbf{(12) \texttt{GraphDB:(User)-[:USED]->(Ingredient):times}} \\
+    \textbf{(11) \texttt{GraphDB:(User)-[:USED]->(Ingredient):times}} \\
     \textbf{Reason}: To avoid computing the total number of times that a User used an Ingredient. \\
     \textbf{Original/Raw Value}: It is possible to compute the total number of times that a User used an Ingredient by counting the number of times that the User used that Ingredient in his/her Recipes (information that can be retrieved from the DocumentDB). \\
     \midrule
-    \textbf{(13) \texttt{GraphDB:(Ingredient)-[:USED\_WITH]->(Ingredient):times}} \\
+    \textbf{(12) \texttt{GraphDB:(Ingredient)-[:USED\_WITH]->(Ingredient):times}} \\
     \textbf{Reason}: To avoid computing the number of times that an Ingredient is used with another one. \\
     \textbf{Original/Raw Value}: It is possible to compute the number of times that an Ingredient is used with another one by counting the number of times that all the Users used these two Ingredients together in their Recipes (information that can be retrieved from the DocumentDB). \\
     \bottomrule
@@ -447,7 +445,7 @@ While reading operations are more frequent for the redundancies, the writing ope
 To populate the databases with a substantial volume of realistic data, datasets sourced from Kaggle were employed.
 
 ## 5.1. Raw Dataset
-The intial raw datasets are related to the main functionalities of *WeFood*. In particular, datasets about recipes and ingredients were found.
+The initial raw datasets are related to the main functionalities of *WeFood*. In particular, datasets about recipes and ingredients were found.
 
 - Calories per 100 grams in Food Items [`[1]`](https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams)
 
@@ -464,12 +462,12 @@ Contained in these datasets there are *almost* all the information needed to pop
 Everything else is in the datasets, and need only to be cleaned and appropriately merged to obtain the structure needed for the population of the databases.
 
 ## 5.2. Cleaning Process
-There is the need to clean the datasets because in them there are plenty of information that are not useful for the purposes of *WeFood* and would result only in a waste of space. For achieving this goal, the datasets were analyzed in detail and the information that were not useful were discarded. The cleaning process was performed using Python and Jupyter Notebook.
+There is the need to clean the datasets because in them there are plenty of information that are not useful for the purposes of *WeFood* and would result only in a waste of space. For achieving this goal, the datasets were analyzed in detail and the information that were not useful were discarded. The cleaning process was performed using Python.
 
 Below a separate description of the cleaning process for each entity identified in the design phase is provided.
 
 **Ingredient**:
-The starting point was: `ingr_map.pickle` of [`[2]`](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv). Here there are lots of fields useful for machine learning related tasks, but not for the purposes of *WeFood*. Only the fields strictly needed for the link with the recipes and with the dataset about the calories of the ingredients were kept. The final result is the following. To facilitate referencing in the subsequent merging process, each intermediate product generated during the cleaning process will be assigned a distinct name, starting with the following.
+The starting point was: `ingr_map.pickle` in [`[2]`](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv). Here there are lots of fields useful for machine learning related tasks, but not for the *WeFood* purposes. Only fields strictly needed for linking recipes with [`[1]`](https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams) have been kept. The final result is the following. To facilitate referencing in the subsequent merging process, each intermediate product generated during the cleaning process will be assigned a distinct name, starting with the following.
 
 ```javascript
 Ingredient_A: {   
@@ -479,12 +477,12 @@ Ingredient_A: {
 }
 ```
 
-The first field `raw_ingr` contains the original text of the ingredient, the one inserted by the user in the recipe. The second field `replaced` contains the unique representation of the ingredient and the last field `id` contains the unique identifier of the ingredient. 
+The first field `raw_ingr` contains the original text of the ingredient, the one inserted by the user in the recipe. The second field `replaced` contains the simplified representation of the ingredient and the last field `id` contains the unique identifier of the ingredient. 
 
 
-At this point, the file `calories.csv` of [`[1]`](https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams) was analyzed. In this file in addition to the calories per 100 grams of each ingredient there are also Food Categories associated to them. These categories were really useful because they allowed to devise a plan for dealing with the lack of the quantity of each ingredient in the recipes in a simple but effective way. The idea was the following:
+At this point, the file `calories.csv` in [`[1]`](https://www.kaggle.com/datasets/kkhandekar/calories-in-food-items-per-100-grams) was analyzed. In this file in addition to the calories per 100 grams of each ingredient there are also Food Categories associated to them. These categories were really useful because they allowed to devise a plan for dealing with the lack of the quantity of each ingredient in the recipes in a simple but effective way. The idea was the following:
 
-1. to associate to each `FoodCategory` two quantities, `quantity_min` and `quantity_max`, that are a realistic representation of the quantities used in real life for that specific `FoodCategory` (this labour intensive work was done with the support of an AI);
+1. to associate to each `FoodCategory` two quantities, `quantity_min` and `quantity_max`, that are a realistic representation of the quantities used in real life for that specific `FoodCategory` (this labour intensive work was done with the support of *ChatGPT*);
 
 2. to generate a random quantity for each ingredient in each recipe in the range `[quantity_min, quantity_max]`.
 
@@ -517,7 +515,7 @@ Recipe_A: {
 }
 ```
 
-Here the `name` is the name of the Recipe, `id` is the unique identifier of the Recipe and will be useful for linking the recipe with the interactions (i.e. comments and star rankings) of the dataset [`[2]`](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv). The `contributor_id` is the unique identifier of the User that created the Recipe. The `submitted` field is the timestamp of when the Recipe was uploaded. The `steps` field contains the steps of the Recipe, the `description` field contains the description that will be used for the Post that contains the Recipe and the `ingredients` field contains the list of the ingredients of the Recipe. Observing carefully the `steps` and the `ingredients` it is clear that they must be transformed into an array of strings because at the moment they are just strings. So the next step is the latter.
+Here the `name` is the name of the Recipe, `id` is the unique identifier of the Recipe and will be useful for linking the recipe with the interactions (i.e. comments and star rankings) of the dataset [`[2]`](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv). The `contributor_id` is the unique identifier of the User that created the Recipe. The `submitted` field is the timestamp of when the Recipe was uploaded. The `steps` field contains the steps of the Recipe, the `description` field contains the description that will be used for the Post that contains the Recipe and the `ingredients` field contains the list of the ingredients of the Recipe. Observing carefully the `steps` and the `ingredients` it is clear that they must be transformed into an array of strings because at the moment they are just strings.
 
 From `recipes.csv` of [`[3]`](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv), instead, it is possible to retrieve the URLs of the images of the Recipes. Thus only the fields `RecipeId` and `Images` are retained. Note that not all the Recipes have an image, and some of them have more than one image. Where no image is available, a default image will be applied. Viceversa, if multiple images are present, only the first image will be utilized.
 
@@ -598,7 +596,7 @@ The `_id` field will be automatically generated at the moment of the insertion i
 **Post**:
 Being the main collection of *WeFood*, the `Post` collection was also the one that takes more time to be merged. For this reason it is necessary to describe a step at a time for not complicating too much the explanation.
 
-1. Merge of `Recipe_A` and `Recipe_B` on on `id` and `RecipeId` respectively for including the URLs of the images inside the Recipes. In this way `Recipe_AB` is obtained.
+1. Merge of `Recipe_A` and `Recipe_B` on `id` and `RecipeId` respectively for including the URLs of the images inside the Recipes. In this way `Recipe_AB` is obtained.
 
 2. The subsequent task involves converting the `ingredients` array of strings within `Recipe_A` into an array of objects. Each of these objects will include in the final structure the ingredient's `name` and its corresponding `quantity` expressed in grams. It is crucial to emphasize that the `name` of the ingredient must match an entry in the Ingredient collection. For achieving this:
    
@@ -917,7 +915,7 @@ After establishing a connection with the Neo4j DBMS using the Neo4j driver for P
 \newpage
 
 # 6. Queries
-Here are all the queries required to access the databases and implement the functionalities of *WeFood*. They are grouped into basic CRUD operations and more intricate aggregations or query suggestions. 
+Here are all the queries required to access the databases and implement *WeFood* functionalities. They are grouped into basic CRUD operations and more intricate aggregations or query suggestions. 
 
 ## 6.1. CRUD operations
 The set of fundamental operations includes creating, reading, updating, and deleting data within the databases. 
@@ -1675,9 +1673,9 @@ Additional configurable options include `j` and `wtimeout`.
 Regarding reading operations, all members of the replica set *can* accept read operations, although by *default*, applications direct reads to the primary member. In the case of a social network like *WeFood*, read operations can be directed to secondary nodes, even if they are not as updated as the primary node, as MongoDB asynchronously updates data to the secondary nodes. Thus, to ensure the lowest response time for read operations, the *read concern* is set to `nearest` at the *client-level*, meaning read operations will be performed on the nearest node (i.e. the node with the lowest latency). 
 
 ### 7.1.2. Sharding
-When it comes to *Sharding*, it is crucial to assess before the potential benefits it can bring. Sharding is the horizontally partitioning of data across multiple servers, the can help in enhancing scalability and performance. However, in certain situations, opting for sharding may prove impractical or undesirable. For instance, in the current implementation of *WeFood*, sharding the Post collection based on a specific field, such as `timestamp`, could result in latency issues when querying with unrelated filters (e.g., by `totalCalories` or by `avgStarRanking`), leading to an inefficient process.
+When it comes to *Sharding*, it is crucial to assess before the potential benefits it can bring. Sharding is the horizontally partitioning of data across multiple servers, that can help in enhancing scalability and performance. However, in certain situations, opting for sharding may prove impractical or undesirable. For instance, in the current implementation of *WeFood*, sharding the Post collection based on a specific field, such as `timestamp`, could result in latency issues when querying with unrelated filters (e.g., by `totalCalories` or by `avgStarRanking`), leading to an inefficient process.
 
-To elaborate a little further, if the application was designed with predefined *Categories* for Recipes, sharding the Post collection based on the `category` field might achieve balanced load distribution among shards. However, this approach was *intentionally avoided* to offer users the flexibility to explore diverse recipes without constraints. Users indeed, in the current implementation, can search for Recipes using *various filters*, discovering Recipes *beyond* fixed categories.
+To elaborate a little further, if the application was designed with predefined *Categories* for Recipes, sharding the Post collection based on the `category` field might achieve balanced load distribution among shards. However, this approach was *intentionally avoided* to offer users the flexibility to explore diverse recipes without constraints. In the current implementation, indeed, Users can search for Recipes using *various filters*, discovering Recipes *beyond* fixed categories.
 
 Similarly, the decision not to implement the Sharding for the User collection is justified by the fact that it is realistic to expect that the User collection will not grow as much as the Post collection. For this reason, the complexity of implementing and managing the Sharding for the User collection is deemed unnecessary.
 
