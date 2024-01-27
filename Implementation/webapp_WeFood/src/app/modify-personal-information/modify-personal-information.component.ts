@@ -1,9 +1,10 @@
 // Nel tuo componente TypeScript
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
-import { RegisteredUserDTO } from '../models/registered-user-dto.model';
-import { RegisteredUser, RegisteredUserInterface } from '../models/registered-user.model';
+import { RegisteredUserInterface } from '../models/registered-user.model';
 import * as bcrypt from 'bcryptjs';
+import { Router } from '@angular/router';
+import { PostDTOInterface } from '../models/post-dto.model';
 
 @Component({
   selector: 'app-modify-personal-information',
@@ -12,8 +13,7 @@ import * as bcrypt from 'bcryptjs';
 })
 export class ModifyPersonalInformationComponent implements OnInit {
 
-
-  @Input() users: RegisteredUserDTO[] = [];
+  @Input() postDTOs: PostDTOInterface[] = [];
   @Output() closePopup: EventEmitter<void> = new EventEmitter();
 
   password: string = '';
@@ -32,7 +32,7 @@ export class ModifyPersonalInformationComponent implements OnInit {
 
   canClose: boolean = true;
 
-  constructor(private userService: RegisteredUserService, private eRef: ElementRef) {}
+  constructor(private userService: RegisteredUserService, private eRef: ElementRef, private router: Router) {}
 
   ngOnInit(): void {
     // Chiamata a getUser() o altro codice iniziale se necessario
@@ -50,7 +50,21 @@ export class ModifyPersonalInformationComponent implements OnInit {
 
   deleteRegisteredUser() {
     // Fare logout e mandare query al server
-    alert("User deleted!");
+    this.userService.deleteUser(this.postDTOs).subscribe(
+      data => {
+        if(data) {
+          this.userService.logout();
+          this.close();
+          this.router.navigate(['/home']);
+        }
+        else {
+          alert('Error in deleting user');
+        }
+      },
+      error => {
+        alert('Error in deleting user');
+      }
+    );
   }
 
   cancelDeleteAccount() {
@@ -89,8 +103,6 @@ export class ModifyPersonalInformationComponent implements OnInit {
           surname: this.newSurname,
           password: this.newPassword == '' ? this.currentPassword : this.newPassword
         };    
-    
-        console.log(this.userService.info.id);
     
         this.userService.modifyPersonalInformation(newCredentials)
           .subscribe(response => {

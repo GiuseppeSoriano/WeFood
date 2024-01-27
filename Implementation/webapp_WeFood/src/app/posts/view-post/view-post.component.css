@@ -436,10 +436,12 @@ label.usernameComment {
     color: #6A040F;
     font-weight: bold;
     font-size: 15px;
+    cursor: pointer;
 }
 
 label.commentTimestamp {
     font-weight: normal;
+    cursor: default;
 }
 
 img.deleteInteraction {
@@ -582,6 +584,7 @@ label.usernameStarRanking {
     font-weight: bold;
     font-size: 15px;
     margin-left: 5px;
+    cursor: pointer;
 }
 
 label.noStarRankings {

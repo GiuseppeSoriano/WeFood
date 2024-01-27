@@ -37,7 +37,6 @@ export class AdminService {
   login(username: string, password: string) {
     return this.http.post<AdminInterface>('http://localhost:8080/admin/login', { username, password }).subscribe(
       data => {
-        console.log(data);
         this.setCredentials(data);
         this.retrieveBanned();
       },
@@ -100,14 +99,10 @@ export class AdminService {
   retrieveBanned() {
     this.http.post<RegisteredUserDTOInterface[]>('http://localhost:8080/admin/findBannedUsers', {}).subscribe(
       data => {
-        console.log("CIAO");
-        console.log(data);
-        if(data){
-          console.log(data); 
+        if(data)
           this.usersBanned = data;
-        }
-        else this.usersBanned = [];
-//        this.usersBanned;
+        else 
+          this.usersBanned = [];
         localStorage.setItem('userBanned', JSON.stringify(this.usersBanned));
       },
       error => {

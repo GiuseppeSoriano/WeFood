@@ -4,6 +4,7 @@ import { IngredientService } from 'src/app/services/ingredient_service/ingredien
 import { FilterIngredientPipe } from 'src/app/pipes/filter-ingredient.pipe';
 import { RegisteredUserService } from 'src/app/services/registered_user_service/registered-user.service';
 import { RegisteredUserDTOInterface } from 'src/app/models/registered-user-dto.model';
+import { NavigationExtras, Router } from '@angular/router';
 
 @Component({
   selector: 'app-find-users-by-ingredient-usage',
@@ -20,14 +21,13 @@ export class FindUsersByIngredientUsageComponent implements OnInit {
 
   suggestions: RegisteredUserDTOInterface[] = [];     // USED TO SHOW SUGGESTIONS
 
-  constructor(private eRef: ElementRef, private ingredientService: IngredientService, private registeredUserService: RegisteredUserService) { }
+  constructor(private router: Router, private eRef: ElementRef, private ingredientService: IngredientService, private registeredUserService: RegisteredUserService, private userService: RegisteredUserService) { }
 
   ngOnInit(): void {
     this.ingredientsList = this.ingredientService.getAllIngredients();
   }
 
   execute() {
-    console.log(this.ingredientName);
     this.showList = false;
     if(!this.ingredientsList.some(ingredient => ingredient.name === this.ingredientName)) {
       this.suggestions = [{id: "", username: "Insert a valid ingredient"}];
@@ -40,10 +40,7 @@ export class FindUsersByIngredientUsageComponent implements OnInit {
           this.suggestions = data;
       },
       error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
-        }
+        console.log(error);
       }
     );
   }
@@ -112,5 +109,22 @@ export class FindUsersByIngredientUsageComponent implements OnInit {
   //   // Emetti l'evento con i dati
   //   this.findUsersByIngredientUsage.emit(dataToEmit);
   // }
+
+  getUser() {
+    return this.userService.info;
+  }
+
+  goToUserPage(user: RegisteredUserDTOInterface) {
+    if(this.getUser().username === user.username) {
+      this.router.navigate(['/user-personal-page']);
+      return;
+    }
+    const navigationExtras: NavigationExtras = {
+      state: {
+        username: user.username
+      }
+    };
+    this.router.navigate(['/user-page-loading'], navigationExtras);
+  }
 
 }

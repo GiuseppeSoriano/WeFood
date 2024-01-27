@@ -1,8 +1,9 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
+import { PostDTOInterface } from 'src/app/models/post-dto.model';
 import { RegisteredUserDTO, RegisteredUserDTOInterface } from 'src/app/models/registered-user-dto.model';
-import { RegisteredUserPageInterface } from 'src/app/models/registered-user-page.model';
+import { RegisteredUserPage, RegisteredUserPageInterface } from 'src/app/models/registered-user-page.model';
 import { RegisteredUser, RegisteredUserInterface } from 'src/app/models/registered-user.model';
 
 @Injectable({
@@ -62,8 +63,9 @@ export class RegisteredUserService {
       );
   }
 
-  deleteUser() {
-    return this.http.post<boolean>('http://localhost:8080/registereduser/deleteUser', this.info)
+  deleteUser(postDTOs: PostDTOInterface[]) {
+    const registeredUserPageDTO = new RegisteredUserPage(this.info.id, this.info.username, postDTOs);
+    return this.http.post<boolean>('http://localhost:8080/registereduser/deleteUser', registeredUserPageDTO)
       .pipe(
         catchError(this.handleError)
       );

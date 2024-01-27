@@ -1,4 +1,3 @@
-// upload-post.component.ts
 import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { IngredientInterface } from 'src/app/models/ingredient.model';
 import { PostDTO } from 'src/app/models/post-dto.model';
@@ -7,12 +6,6 @@ import { Recipe, RecipeInterface } from 'src/app/models/recipe.model';
 import { IngredientService } from 'src/app/services/ingredient_service/ingredient.service';
 import { PostService } from 'src/app/services/post_service/post.service';
 import { RegisteredUserService } from 'src/app/services/registered_user_service/registered-user.service';
-//import { FileUploader, FileItem } from 'ng2-file-upload';
-
-/*
-INFO IN FONDO ALLA PAGINA
-*/
-
 
 @Component({
   selector: 'app-upload-post',
@@ -23,7 +16,7 @@ export class UploadPostComponent implements OnInit {
 
   @Output() closePost: EventEmitter<void> = new EventEmitter();
 
-  post: PostInterface = new Post();
+  post: PostInterface = new Post(this.userService.info.username);
   // recipe: RecipeInterface = new Recipe();
 
   stepBeingInserted: string = "";
@@ -49,7 +42,13 @@ export class UploadPostComponent implements OnInit {
     this.addingSteps = !this.addingSteps;
   }
   toogleIngredients() {
+    this.canCloseList = false;
+    this.showList = false;
+    this.ingredientDetailed = null;
     this.addingIngredients = !this.addingIngredients;
+    setTimeout(() => {
+      this.canCloseList = true;
+    }, 300);
   }
 
   constructor(private eRef:ElementRef, private postService: PostService, private ingredientService: IngredientService, private userService: RegisteredUserService) {}
@@ -80,7 +79,6 @@ export class UploadPostComponent implements OnInit {
 
 
   addIngredient(ingredientName: string) {
-    console.log(ingredientName);
     this.post.recipe.ingredients.set(ingredientName, 0);
     this.ingredientsRemaining = this.ingredientsRemaining.filter(ingredient => ingredient.name !== ingredientName);
     this.ingredientName = "";
@@ -145,10 +143,7 @@ export class UploadPostComponent implements OnInit {
       return;
     }
 
-    // print ingredients
-    for(let [key, value] of this.post.recipe.ingredients) {
-      console.log(key + " " + value);
-    }
+    this.post.recipe.image = this.post.recipe.image.split('base64,')[1];
     
     this.postService.uploadPost(this.post, new PostDTO(), this.userService.info).subscribe((data: boolean) => {
         if(data) {
@@ -176,9 +171,8 @@ export class UploadPostComponent implements OnInit {
           console.log('Error: ', error);
         };
       } else {
-        alert('File non immagine selezionato');
+        alert('Choose an image file');
         event.target.value = null; // Resettiamo il valore del campo di input
-        // Gestisci l'errore appropriatamente
       }
     }
   }

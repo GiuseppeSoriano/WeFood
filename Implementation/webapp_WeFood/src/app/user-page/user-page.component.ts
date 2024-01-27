@@ -28,13 +28,11 @@ export class UserPageComponent implements OnInit {
   userPage: RegisteredUserPageInterface;
 
   constructor(private router: Router, private userService: RegisteredUserService, private ingredientService: IngredientService, private postService: PostService, private adminService: AdminService) {
-    console.log("IM IN USER PAGE");
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras.state as {
       userPage: RegisteredUserPageInterface
     };
     this.userPage = state.userPage;
-    // this.userPage = new RegisteredUserPage("PIPPO", "PAPERINO", []); 
   }
 
 
@@ -161,10 +159,7 @@ export class UserPageComponent implements OnInit {
         this.openPopup();
       },
       error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
-        }
+        console.log(error);
       }
     );
   }
@@ -177,10 +172,7 @@ export class UserPageComponent implements OnInit {
         this.openPopup();
       },
       error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
-        }
+        console.log(error);
       }
     );
   }
@@ -193,10 +185,7 @@ export class UserPageComponent implements OnInit {
         this.openPopup();
       },
       error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
-        }
+        console.log(error);
       }
     );
   }

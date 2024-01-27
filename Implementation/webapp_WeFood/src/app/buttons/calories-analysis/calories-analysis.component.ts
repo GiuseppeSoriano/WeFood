@@ -18,24 +18,6 @@ export class CaloriesAnalysisComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  execute() {
-    this.showList = false;
-/*    this.ingredientService.mostPopularCombinationOfIngredients(this.ingredientName).subscribe(
-      data => {
-        // console.log(data);
-        // this.suggestions = ["No suggestions available"];
-        // if (data.length > 0)
-        //   this.suggestions = data;
-      },
-      error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
-        }
-      }
-    );*/
-  }
-
   activeDropdownIndex: boolean = false;
 
   toggleDropdown(): void {
@@ -59,18 +41,6 @@ export class CaloriesAnalysisComponent implements OnInit {
       if(this.showList) {
         this.showList = false;
       }
-      /*
-      else if (this.removingIngredient){
-        return;
-      }
-      else if (this.isActiveDropdown() && this.canCloseList) {
-        this.toggleDropdown();
-        setTimeout(() => {
-          this.ingredientsRemaining = this.ingredientsList;
-          this.ingredients_chosen = [];
-        }, 200);
-      }
-      */
     }
   }
 

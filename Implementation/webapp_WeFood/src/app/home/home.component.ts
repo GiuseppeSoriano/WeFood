@@ -38,10 +38,7 @@ export class HomeComponent implements OnInit {
         this.isLoading = false;
       },
       error => {
-//        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Error in loading page');
-//        }
+        alert('Error in loading page');
       }
     );
   }

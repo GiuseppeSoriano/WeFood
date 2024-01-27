@@ -17,7 +17,6 @@ export class IngredientService {
     this.http.post<IngredientInterface[]>('http://localhost:8080/ingredient/getAllIngredients', {}).subscribe(
       data => {
         this.ingredients = data;
-        console.log(this.ingredients);
       },
       error => {
         alert('Error in loading page');
@@ -30,7 +29,6 @@ export class IngredientService {
   }
 
   mostPopularCombinationOfIngredients(ingredient_name: string) {
-    console.log(ingredient_name);
     return this.http.post<string[]>('http://localhost:8080/ingredient/mostPopularCombinationOfIngredients', ingredient_name)
       .pipe(
         catchError(this.handleError)

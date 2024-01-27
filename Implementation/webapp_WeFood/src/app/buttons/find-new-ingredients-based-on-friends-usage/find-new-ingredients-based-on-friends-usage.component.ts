@@ -19,16 +19,12 @@ export class FindNewIngredientsBasedOnFriendsUsageComponent implements OnInit {
     if(!this.isActiveDropdown()){
       this.ingredientService.findNewIngredientsBasedOnFriendsUsage(this.registeredUserService.info).subscribe(
         data => {
-          console.log(data);
           this.suggestions = ["No suggestions available"];
           if (data.length > 0)
             this.suggestions = data;
         },
         error => {
-          if (error.status === 401) {
-            // Gestisci l'errore 401 qui
-            alert('Wrong username or password');
-          }
+          console.log(error);
         }
       );
     }

@@ -6,7 +6,7 @@
     
     <div class="recipeInfo">
         <label class="title">{{ post.recipe.name }}</label>
-        <label *ngIf="post.avgStarRanking !== -1" class="avgStarRanking"><img src="../../../assets/images/avgStarRanking.png">{{ post.avgStarRanking }}</label>
+        <label *ngIf="post.avgStarRanking !== -1" class="avgStarRanking"><img src="../../../assets/images/avgStarRanking.png">{{ post.avgStarRanking.toFixed(2) }}</label>
     </div>
 
     
@@ -62,7 +62,7 @@
                 <div class="comment" *ngFor="let comment of post.comments" >
                     
                     <div class="container-header-comment">
-                        <label class="usernameComment">{{ comment.username }} <label class="commentTimestamp"> | {{getTimeStamp(comment.timestamp)}}</label></label>
+                        <label class="usernameComment" (click)="goToUserPageByUsername(comment.username)">{{ comment.username }} <label class="commentTimestamp"> | {{getTimeStamp(comment.timestamp)}}</label></label>
                         <div>
                             <img *ngIf="(!isCommentBeingModified(comment)) && (comment.username === getUser().username)" class="modifyInteraction" src="../../../assets/images/pencil.png" (click)="startModifyComment(comment)">
                             <img *ngIf="isCommentBeingModified(comment) && comment.username === getUser().username" class="modifyInteraction" src="../../../assets/images/check.png" (click)="modifyComment(comment)">
@@ -94,7 +94,7 @@
             <div *ngIf="post.starRankings.length !== 0">
                 <div class="starRanking" *ngFor="let vote of post.starRankings">
                     <div class="container-header-starRanking">
-                        <label class="usernameStarRanking">{{vote.username}}</label> 
+                        <label class="usernameStarRanking" (click)="goToUserPageByUsername(vote.username)">{{vote.username}}</label> 
                     </div>
                     <div class="starRankingStars">
                         <span *ngFor="let star of [1, 2, 3, 4, 5]" [class.selected]="star <= vote.vote">&#9733;</span>

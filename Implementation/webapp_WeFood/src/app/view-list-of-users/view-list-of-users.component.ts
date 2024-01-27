@@ -37,6 +37,10 @@ export class ViewListOfUsersComponent implements OnInit {
 
   goToUserPage(user: RegisteredUserDTO) {
     this.close();
+    if(this.userService.info.username == user.username) {
+      this.router.navigate(['/user-personal-page']);
+      return;
+    }
     const navigationExtras: NavigationExtras = {
       state: {
         username: user.username

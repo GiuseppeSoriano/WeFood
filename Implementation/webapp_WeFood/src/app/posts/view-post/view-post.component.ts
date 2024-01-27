@@ -232,12 +232,26 @@ export class ViewPostComponent implements OnInit {
 
   goToUserPage() {
     this.close();
-    if(this.getUser().username == this.post.username) {
+    if(this.getUser().username === this.post.username) {
       this.router.navigate(['/user-personal-page']);
+      return;
     }
     const navigationExtras: NavigationExtras = {
       state: {
         username: this.post.username
+      }
+    };
+    this.router.navigate(['/user-page-loading'], navigationExtras);
+  }
+
+  goToUserPageByUsername(username: string) {
+    if(this.getUser().username === username) {
+      this.router.navigate(['/user-personal-page']);
+      return;
+    }
+    const navigationExtras: NavigationExtras = {
+      state: {
+        username: username
       }
     };
     this.router.navigate(['/user-page-loading'], navigationExtras);

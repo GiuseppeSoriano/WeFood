@@ -10,6 +10,7 @@ import { RegisteredUserService } from '../services/registered_user_service/regis
 // Importa Chart.js
 import { Chart } from 'chart.js/auto';
 import { RegisteredUserDTO, RegisteredUserDTOInterface } from '../models/registered-user-dto.model';
+import { Ingredient } from '../models/ingredient.model';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -99,7 +100,6 @@ export class AdminDashboardComponent implements OnInit {
     this.postService.interactionsAnalysis().subscribe(
       data => {
         data = new Map(Object.entries(data));
-        // console.log(data);
         this.interactionValues = {
           "avgOfStarRanking": {
             "IMAGE": data.get("IMAGEavgOfAvgStarRanking"),
@@ -115,7 +115,6 @@ export class AdminDashboardComponent implements OnInit {
           }
         };
         this.interactionKeys = Object.keys(this.interactionValues);
-        // console.log(this.interactionValues);
         this.createChart();
       },
       error => {
@@ -187,8 +186,21 @@ export class AdminDashboardComponent implements OnInit {
 
   createIngredient(): void {
     if (this.newIngredient.name && this.newIngredient.calories > 0) {
-      alert(`Ingrediente aggiunto:\nNome: ${this.newIngredient.name}\nCalorie: ${this.newIngredient.calories}`);
-      this.newIngredient = { name: '', calories: 0 };
+      const ingredient = new Ingredient(this.newIngredient.name, this.newIngredient.calories);
+      this.adminService.createIngredient(ingredient).subscribe(
+        data => {
+          if (data) {
+            this.ingredientService.initializeIngredients();
+            this.closeIngredientCreation();
+            this.newIngredient = { name: '', calories: 0 };
+          } else {
+            alert('Error in creating ingredient');
+          }
+        },
+        error => {
+          alert('Error in creating ingredient');
+        }
+      );
     } else {
       alert('Invalid input.');
     }

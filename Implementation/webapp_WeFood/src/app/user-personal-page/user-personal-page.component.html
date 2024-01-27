@@ -87,4 +87,4 @@
 
 <app-view-list-of-users *ngIf="showUsersPopup" [labelUsers]="labelUsers" [users]="users" (closePopup)="closePopup()"></app-view-list-of-users>
 <app-view-post *ngIf="post_visible" [postDTO]="postDTO_to_be_viewed" (closePost)="closePost()"></app-view-post>
-<app-modify-personal-information *ngIf="modifyPersonalInfoPopup" (closePopup)="closePopup()"></app-modify-personal-information>
+<app-modify-personal-information [postDTOs]="list_of_posts" *ngIf="modifyPersonalInfoPopup" (closePopup)="closePopup()"></app-modify-personal-information>

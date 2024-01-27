@@ -27,6 +27,7 @@ export class UserPageLoadingComponent implements OnInit {
     if(this.userService.info.username !== ""){
       this.userService.findRegisteredUserPageByUsername(this.username).subscribe(
         data => {
+          data.posts.reverse();
           const navigationExtras: NavigationExtras = {
             state: {
               userPage: data

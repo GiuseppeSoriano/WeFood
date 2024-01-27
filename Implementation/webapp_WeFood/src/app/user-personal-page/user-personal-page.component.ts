@@ -122,10 +122,7 @@ export class UserPersonalPageComponent implements OnInit {
         this.openPopup();
       },
       error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
-        }
+        console.log(error);
       }
     );
   }
@@ -144,10 +141,7 @@ export class UserPersonalPageComponent implements OnInit {
         this.openPopup();
       },
       error => {
-        if (error.status === 401) {
-          // Gestisci l'errore 401 qui
-          alert('Wrong username or password');
-        }
+        console.log(error);
       }
     );
   }
@@ -161,7 +155,7 @@ export class UserPersonalPageComponent implements OnInit {
     this.userService.findRegisteredUserPageByUsername(this.userService.info.username).subscribe(
       data => {
         // go to registered user feed
-        this.list_of_posts = data.posts;
+        this.list_of_posts = data.posts.reverse();
         this.isLoading = false;
       },
       error => {
@@ -197,6 +191,7 @@ export class UserPersonalPageComponent implements OnInit {
   goToUserPage(user: RegisteredUserDTOInterface) {
     if(this.getUser().username == user.username) {
       this.router.navigate(['/user-personal-page']);
+      return;
     }
     const navigationExtras: NavigationExtras = {
       state: {
@@ -205,5 +200,6 @@ export class UserPersonalPageComponent implements OnInit {
     };
     this.router.navigate(['/user-page-loading'], navigationExtras);
   }
+  
 }
 

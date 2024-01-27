@@ -31,7 +31,6 @@ export class MostPopularCombinationOfIngredientsComponent implements OnInit {
     }
     this.ingredientService.mostPopularCombinationOfIngredients(this.ingredientName).subscribe(
       data => {
-        console.log(data);
         this.suggestions = ["No suggestions available"];
         if (data.length > 0)
           this.suggestions = data;
