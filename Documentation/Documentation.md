@@ -2124,7 +2124,7 @@ Upon registration or login[^3], Users gain access to their personal page and all
 
 [^3]: To try the application as a Registered User, instead, it is possible to use the following credentials: username: `cody_cisneros_28`, password: `MyKkr9kQ6M`.
 
-In the center of the screen, the User can view all the posts found by their searches. Hovering over posts reveals Recipe names, and clicking on them displays a Recipe pop-up (Figure \ref{fig:userManual_5}), including the average star ranking at the top right corner. Hovering over the pop-up image reveals the calories of the Recipe, and clicking on it allows the User to enter Recipe details such as ingredients and steps (Figure \ref{fig:userManual_6}). The comments and votes sections enable User interaction with the post. Users can click on the name of the Recipe creator to enter their user page.
+In the center of the screen, the User can view all the Posts found by their searches. Hovering over posts reveals Recipe names, and clicking on them displays a Recipe pop-up (Figure \ref{fig:userManual_5}), including the average star ranking at the top right corner. Hovering over the pop-up image reveals the calories of the Recipe, and clicking on it allows the User to enter Recipe details such as ingredients and steps (Figure \ref{fig:userManual_6}). The comments and votes sections enable User interaction with the Post. Users can click on the name of the Recipe creator to enter their user page.
 
 \newpage
 
@@ -2180,7 +2180,7 @@ By clicking on the *username* in the top left corner, Users can modify personal 
 \newpage
 
 
-When checking out the profile of another Registered User, their posts appear at the center of the screen (Figure \ref{fig:userManual_10}). The display includes general statistics about the user, their friends/followers/followed, and a button to follow the user (which turns to "*unfollow*" after clicking). Users can return to the feed from this screen.
+When checking out the profile of another Registered User, their posts appear at the center of the screen (Figure \ref{fig:userManual_10}). The display includes general statistics about the user, their friends/followers/followed, and a button to follow the user (which turns to "*unfollow*" after clicking it). Users can return to the feed from this screen.
 
 \begin{figure}[h!]
     \centering
@@ -2202,7 +2202,7 @@ The Admin also has the capability to create new ingredients. It's crucial to not
 
 The dashboard additionally provides visibility into all banned Users. To unban a Registered User, the Admin must navigate to the banned User page and click the button to lift the ban.
 
-Clicking on the feed, the Admin gains access to posts and buttons to personalize searches, mirroring the functionality available to registered Users. Morover the Admin can interact with posts, by deleting comments or the Post itself if the *WeFood* policies are not respected.
+Clicking on the feed, the Admin gains access to posts and buttons to personalize searches, mirroring the functionality available to Registered Users. Morover the Admin can interact with Posts, by deleting comments or the Post itself if *WeFood* policy is not respected.
 
 
 \newpage
