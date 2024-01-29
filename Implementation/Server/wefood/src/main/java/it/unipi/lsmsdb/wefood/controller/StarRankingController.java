@@ -24,6 +24,6 @@ public class StarRankingController {
 
     @PostMapping("/delete")
     public ResponseEntity<Boolean> deleteVote(@RequestBody StarRankingRequestDTO request) {
-        return ResponseEntity.ok(starRankingService.deleteVote(request.getUser(), request.getStarRanking(), request.getPostDTO(), request.getPost()));
+        return ResponseEntity.ok(starRankingService.deleteVote(request.getStarRanking(), request.getPostDTO(), request.getPost()));
     }
 }

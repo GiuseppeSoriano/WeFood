@@ -92,8 +92,6 @@ export class PostService {
       );
   }
 
-  // findPostById not implemented, see if necessary 
-
   findPostsByRecipeName(recipeName: string){
     return this.http.post<PostDTOInterface[]>('http://localhost:8080/post/findPostsByRecipeName', recipeName)
       .pipe(

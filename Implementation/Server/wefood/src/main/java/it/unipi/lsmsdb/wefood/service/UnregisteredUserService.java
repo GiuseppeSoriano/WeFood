@@ -2,8 +2,6 @@ package it.unipi.lsmsdb.wefood.service;
 
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 
-import org.neo4j.driver.exceptions.Neo4jException;
-import com.mongodb.MongoException;
 import org.springframework.stereotype.Service;
 
 import it.unipi.lsmsdb.wefood.dao.UnregisteredUserDAO;

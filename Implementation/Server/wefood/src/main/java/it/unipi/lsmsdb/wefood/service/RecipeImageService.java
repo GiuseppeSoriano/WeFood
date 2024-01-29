@@ -64,10 +64,7 @@ public class RecipeImageService {
             byte[] imageBytes = IOUtils.toByteArray(inputStream);
 
             // Encode the image bytes to Base64
-            String encodedImage = Base64.getEncoder().encodeToString(imageBytes);
-
-
-            return encodedImage;
+            return Base64.getEncoder().encodeToString(imageBytes);
         }
         catch(IOException e){
             // System.out.println("IOException in getWebImage: " + e);
@@ -104,12 +101,10 @@ public class RecipeImageService {
             byte[] imageBytes = IOUtils.toByteArray(inputStream);
 
             // Encode the image bytes to Base64
-            String encodedImage = Base64.getEncoder().encodeToString(imageBytes);
-            
-            return encodedImage;
+            return Base64.getEncoder().encodeToString(imageBytes);
         }
         catch(IOException e){
-            System.out.println("IOException in localImageCoverter: " + e);
+            System.out.println("IOException in localImageConverter: " + e);
             return null;
         }
     }
@@ -134,15 +129,5 @@ public class RecipeImageService {
             post.getRecipe().setImage(getLocalImage(post.getRecipe().getImage()));
         return post;
     } 
-
-
-    public static void main(String[] args) {
-        // https://img.sndimg.com/food/image/upload/w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg
-        RecipeImageService recipeImageService = new RecipeImageService();
-        // String temp = recipeImageService.getWebImage("https://img.sndimg.com/food/image/upload/w_555,h_416,c_fit,fl_progressive,q_95/v1/img/recipes/19/44/91/3xjO4aXTeiZpOajAsBRX_0S9A6246.jpg");
-
-        // System.out.println(recipeImageService.storePostImage("Pippo", "123", temp));
-        System.out.println(recipeImageService.getLocalImage("Pippo/123/image.jpg"));
-    }
 
 }

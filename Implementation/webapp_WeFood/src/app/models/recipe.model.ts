@@ -1,5 +1,3 @@
-import { PostDTOInterface } from "./post-dto.model";
-
 export interface RecipeInterface {
     name: string;
     image: string;

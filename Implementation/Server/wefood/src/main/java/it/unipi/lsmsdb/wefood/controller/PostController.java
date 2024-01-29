@@ -53,7 +53,7 @@ public class PostController {
         Post post = recipeImageService.postConverter(request.getPost());
         PostDTO postDTO = request.getPostDTO();
         postDTO.setImage(post.getRecipe().getImage());
-        return ResponseEntity.ok(postService.deletePost(post, postDTO, request.getUser()));
+        return ResponseEntity.ok(postService.deletePost(post, postDTO));
     }
 
     @PostMapping("/browseMostRecentTopRatedPosts")

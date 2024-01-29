@@ -5,8 +5,6 @@ import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.MongoException;
-
 import it.unipi.lsmsdb.wefood.dao.AdminDAO;
 import it.unipi.lsmsdb.wefood.model.Admin;
 

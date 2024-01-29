@@ -35,7 +35,6 @@ export class ModifyPersonalInformationComponent implements OnInit {
   constructor(private userService: RegisteredUserService, private eRef: ElementRef, private router: Router) {}
 
   ngOnInit(): void {
-    // Chiamata a getUser() o altro codice iniziale se necessario
     this.newName = this.userService.info.name;
     this.newSurname = this.userService.info.surname;
   }

@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
-import { Ingredient, IngredientInterface } from 'src/app/models/ingredient.model';
+import { IngredientInterface } from 'src/app/models/ingredient.model';
 import { IngredientService } from 'src/app/services/ingredient_service/ingredient.service';
 import { PostService } from 'src/app/services/post_service/post.service';
 
@@ -14,8 +14,8 @@ export class BrowseMostRecentTopRatedPostByIngredientsComponent implements OnIni
 
   ingredients_chosen: string[] = [];
   ingredientName: string = "";
-  ingredientsList: IngredientInterface[] = [];    // LIST WITH ALL INGREDIENTS. INITIALIZED IN ngOnInit() WITH THE CALL TO THE SERVICE
-  ingredientsRemaining: IngredientInterface[] = [];    // LIST WITH ALL INGREDIENTS. INITIALIZED IN ngOnInit() WITH THE CALL TO THE SERVICE
+  ingredientsList: IngredientInterface[] = []; 
+  ingredientsRemaining: IngredientInterface[] = []; 
   ingredientDetailed: any = null;   // USED TO SHOW CALORIES
 
   showList: boolean = false;      // USED TO HANDLE LIST VISIBILITY
@@ -27,7 +27,6 @@ export class BrowseMostRecentTopRatedPostByIngredientsComponent implements OnIni
   newIngredientIsBeingInserted() {
     this.showList=true;
   }
-
 
   constructor(private eRef: ElementRef, private ingredientService: IngredientService, private postService: PostService) { }
 

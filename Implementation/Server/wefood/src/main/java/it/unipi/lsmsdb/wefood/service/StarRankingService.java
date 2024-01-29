@@ -1,12 +1,9 @@
 package it.unipi.lsmsdb.wefood.service;
 
-import it.unipi.lsmsdb.wefood.dao.PostDAO;
 import it.unipi.lsmsdb.wefood.dao.StarRankingDAO;
 import it.unipi.lsmsdb.wefood.dto.PostDTO;
 
 import org.springframework.stereotype.Service;
-
-import com.mongodb.MongoException;
 
 import it.unipi.lsmsdb.wefood.model.StarRanking;
 import it.unipi.lsmsdb.wefood.model.Post;
@@ -44,7 +41,7 @@ public class StarRankingService {
         }
     }
 
-    public boolean deleteVote(RegisteredUser user, StarRanking starRanking, PostDTO postDTO, Post post) {
+    public boolean deleteVote(StarRanking starRanking, PostDTO postDTO, Post post) {
 
         try{
             StarRankingDAO.deleteVote(starRanking, postDTO);

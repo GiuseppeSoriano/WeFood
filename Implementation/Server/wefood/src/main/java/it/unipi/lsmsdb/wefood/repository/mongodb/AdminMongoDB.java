@@ -2,7 +2,6 @@ package it.unipi.lsmsdb.wefood.repository.mongodb;
 
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.model.Admin;
-import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 import it.unipi.lsmsdb.wefood.repository.base.BaseMongoDB;
 import it.unipi.lsmsdb.wefood.repository.interfaces.AdminMongoDBInterface;
 

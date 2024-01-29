@@ -25,7 +25,7 @@ public class AdminController {
     
     private final AdminService adminService;
     private final IngredientService ingredientService;
-    private RegisteredUserService registeredUserService;
+    private final RegisteredUserService registeredUserService;
     private final RecipeImageService recipeImageService;
 
     public AdminController() {

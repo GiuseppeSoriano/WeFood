@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
-import { PostDTO, PostDTOInterface } from 'src/app/models/post-dto.model';
+import { PostDTOInterface } from 'src/app/models/post-dto.model';
 import { PostService } from 'src/app/services/post_service/post.service';
 
 @Component({

@@ -34,23 +34,19 @@
             <div class="loading"></div>
         </div>
         <div *ngIf="!isLoading" [ngClass]="{'noposts': list_of_posts.length === 0}" class="grid-container">
-            <!-- <div class="grid-row"> -->
-                <div class="grid-col" *ngFor="let item of list_of_posts">
-                    <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
-                    <div class="label">{{ item.recipeName }}</div>
-                </div>
-            <!-- </div> -->
+
+            <div class="grid-col" *ngFor="let item of list_of_posts">
+                <img src="data:image/jpeg;base64,{{item.image}}" alt="Immagine ricetta">
+                <div class="label">{{ item.recipeName }}</div>
+            </div>
+
             <img *ngIf="list_of_posts.length === 0" src="../../assets/images/SadBread.png" alt="No Posts Found" class="noposts">
             <label *ngIf="list_of_posts.length === 0" class="noposts">No Posts Found</label>
         </div>    
         <div class="side"></div>    
     </main>
-    <footer>
-        <!-- Informazioni sul footer -->
-    </footer>
 </body>
 </html>
 
-<!-- home.component.html -->
 <app-logging-popup *ngIf="showLoginPopup" (close)="closePopup()" (closePopup)="closePopup()"></app-logging-popup>
 

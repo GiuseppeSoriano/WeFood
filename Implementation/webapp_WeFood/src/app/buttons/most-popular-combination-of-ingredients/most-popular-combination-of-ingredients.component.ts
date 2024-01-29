@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { IngredientInterface } from 'src/app/models/ingredient.model';
 import { IngredientService } from 'src/app/services/ingredient_service/ingredient.service';
 

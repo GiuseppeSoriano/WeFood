@@ -47,7 +47,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
 
         }
 
-    };
+    }
 
     public RegisteredUserPageDTO findRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.find({username: \"" + username + "\"}, {username:1, posts:1, deleted:1})";
@@ -78,9 +78,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
             postDTOs.add(postDTO);
         }
         
-        RegisteredUserPageDTO user = new RegisteredUserPageDTO(user_doc.getObjectId("_id").toHexString(), user_doc.getString("username"), postDTOs);
-        
-        return user;
+        return new RegisteredUserPageDTO(user_doc.getObjectId("_id").toHexString(), user_doc.getString("username"), postDTOs);
     }
 
     public RegisteredUserPageDTO adminFindRegisteredUserPageByUsername(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
@@ -112,9 +110,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
             postDTOs.add(postDTO);
         }
 
-        RegisteredUserPageDTO user = new RegisteredUserPageDTO(user_doc.getObjectId("_id").toHexString(), user_doc.getString("username"), postDTOs);
-
-        return user;
+        return new RegisteredUserPageDTO(user_doc.getObjectId("_id").toHexString(), user_doc.getString("username"), postDTOs);
     }
 
     public boolean modifyPersonalInformation(RegisteredUser user) throws MongoException, IllegalArgumentException, IllegalStateException {
@@ -133,7 +129,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         System.out.println(result.get(0).toJson());
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;
-    };
+    }
 
     public boolean deleteUser(String _id) throws MongoException, IllegalArgumentException, IllegalStateException {
         // We have to unset the following fields: password, name, surname and posts,
@@ -158,7 +154,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
         System.out.println(result.get(0).toJson());
         // If it does not throw an exception, it means that the query has been executed successfully
         return true;
-    };
+    }
 
     public boolean banUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({" + //
@@ -177,7 +173,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
             // The user has been banned
             // If it does not throw an exception, it means that the query has been executed successfully
             return true;
-    };
+    }
 
     public boolean unbanUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.updateOne({" + //
@@ -197,7 +193,7 @@ public class RegisteredUserMongoDB implements RegisteredUserMongoDBInterface {
             // The user has been unbanned
             // If it does not throw an exception, it means that the query has been executed successfully
             return true;
-    };
+    }
 
     public boolean cancelUserMongoDB(String registeredUsername) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.User.deleteOne({" + //

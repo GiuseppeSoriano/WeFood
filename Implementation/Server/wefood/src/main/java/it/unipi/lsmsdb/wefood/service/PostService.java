@@ -146,7 +146,7 @@ public class PostService {
         }
     }
 
-    public boolean deletePost(Post post, PostDTO postDTO, RegisteredUser user) {
+    public boolean deletePost(Post post, PostDTO postDTO) {
 
         // We need to delete the Post on MongoDB
         if(!deletePostMongoDB(postDTO, post))

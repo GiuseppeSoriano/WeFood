@@ -6,7 +6,6 @@ import it.unipi.lsmsdb.wefood.dto.PostDTO;
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserPageDTO;
 import it.unipi.lsmsdb.wefood.model.Post;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
-//import it.unipi.lsmsdb.wefood.model.Post;
 
 public interface RegisteredUserMongoDBInterface {
 

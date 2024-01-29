@@ -29,7 +29,6 @@ public class UnregisteredUserMongoDB implements UnregisteredUserMongoDBInterface
         
         String _id = result.get(0).get("_id").toString();
         
-        RegisteredUser user = new RegisteredUser(_id, username, hashedPassword, name, surname);
-        return user;
+        return new RegisteredUser(_id, username, hashedPassword, name, surname);
     }
 }

@@ -35,75 +35,7 @@ public abstract class BaseMongoDB {
     private static final String READ_PREFERENCE = "nearest";
     private static final String mongoString = String.format("mongodb://%s/%s?w=%s&wtimeout=%s&readPreference=%s", MONGODB_HOST, MONGODB_DATABASE, WRITE_CONCERN, WTIMEOUT, READ_PREFERENCE);
 
-    private static final String SET_REGEX = "\\$set:";
-    private static final String UNSET_REGEX = "\\$unset:";
-    private static final String PUSH_REGEX = "\\$push:";
-    private static final String PULL_REGEX = "\\$pull:";
-
-
     private static volatile MongoClient client;
-
-    private static enum QueryType {
-        UNSET_COMMENT(
-                "db.Ingredient.updateOne({\n" +
-                        "   \"name\": \"Pippo\"\n" +
-                        "}," +
-                        "{$unset: {\"comments\": \"\" }}" +
-                        ")"
-        ),
-        SET_COMMENT(
-                "db.Ingredient.updateOne({\n" +
-                        "   \"name\": \"Pippo\"\n" +
-                        "}," +
-                        "{$set: {\"comments\": [{\"author\": \"pippo\"}] }}" +
-                        ")"
-        ),
-        PUSH_COMMENT(
-                "db.Ingredient.updateOne({\n" +
-                        "   \"name\": \"Pippo\"\n" +
-                        "}," +
-                        "{$push: {\"comments\": {\"author\": \"pluto\"} }}" +
-                        ")"
-        ),
-        PULL_COMMENT(
-                "db.Ingredient.updateOne({\n" +
-                        "   \"name\": \"Pippo\"\n" +
-                        "}," +
-                        "{$pull: {\"comments\": {\"author\": \"pippo\"} }}" +
-                        ")"
-        ),
-        FIND(
-                "db.Post.find({ timestamp: { $gte: 1389712493188 } }).sort({avgStarRanking:-1}).limit(15)"
-        ),
-        AGGREGATE(
-                "db.Ingredient.aggregate([\n" +
-                        "   {$match: {\"name\": \"Pippo\"}},\n" +
-                        "   {$sort: {\"name\": 1}},\n" +
-                        "   {$limit: 1}\n" +
-                        "])"
-        ),
-        INSERT_ONE(
-                "db.Ingredient.insertOne({\n" +
-                        "   \"name\": \"Pippo\"\n" +
-                        "})"
-        ),
-        DELETE_ONE(
-                "db.Ingredient.deleteOne({\n" +
-                        "   \"name\": \"Pippo\"\n" +
-                        "})"
-        );
-
-        private final String query;
-
-        QueryType(String query) {
-            this.query = query;
-        }
-
-        public String getQuery() {
-            return query;
-        }
-    };
-
 
     // Singleton pattern for MongoClient
     public static void openMongoClient() {
@@ -335,8 +267,7 @@ public abstract class BaseMongoDB {
         InsertOneResult result = collection.insertOne(query_insert);
         
         // Ottieni l'ID del documento inserito
-//        BsonValue insertedId = result.getInsertedId();
-        String insertedId = result.getInsertedId().asObjectId().getValue().toString();      // DA PROVARE
+        String insertedId = result.getInsertedId().asObjectId().getValue().toString();
         // Converti l'ID del documento in un oggetto Document
         documents.add(new Document("_id", insertedId));
             
@@ -344,93 +275,6 @@ public abstract class BaseMongoDB {
     }
 
     // UPDATE
-
-/*    private static List<Document> updateOne(String collectionName, String query)
-            throws MongoException, IllegalArgumentException, IllegalStateException{
-        // Possible operations: $set, $unset, $push, $pull
-
-        Document filter = null;
-        Document update = null;
-        Document[] tmp = null;
-        Bson updateOperation = new Document();
-        List<Document> documents = new ArrayList<>(); 
-
-        Matcher set_matcher = Pattern.compile(SET_REGEX).matcher(query);
-        Matcher unset_matcher = Pattern.compile(UNSET_REGEX).matcher(query);
-        Matcher push_matcher = Pattern.compile(PUSH_REGEX).matcher(query);
-        Matcher pull_matcher = Pattern.compile(PULL_REGEX).matcher(query);
-
-        tmp = extractFilterAndUpdate(query);
-        filter = tmp[0];
-        update = tmp[1];
-
-        if (set_matcher.find()) {
-            for (String key : update.keySet()) {
-                updateOperation = Updates.combine(updateOperation, Updates.set(key, update.get(key)));
-            }
-        }
-        else if (unset_matcher.find()) {
-            for (String key : update.keySet()) {
-                updateOperation = Updates.combine(updateOperation, Updates.unset(key));
-            }
-        }
-        else if (push_matcher.find()) {
-            for (String key : update.keySet()) {
-                Document value = update.get(key, Document.class);
-                updateOperation = Updates.combine(updateOperation, Updates.push(key, value));
-            }
-        }
-        else if (pull_matcher.find()) {
-            for (String key : update.keySet()) {
-                Document value = update.get(key, Document.class);
-                updateOperation = Updates.combine(updateOperation, Updates.pull(key, value));
-            }
-        }
-
-        MongoCollection<Document> collection = client.getDatabase(MONGODB_DATABASE).getCollection(collectionName);
-        UpdateResult result = collection.updateOne(filter, updateOperation);
-        
-        // Converti l'ID del documento in un oggetto Document
-        documents.add(new Document("result", result.getMatchedCount()));
-        
-        return documents;
-    }
-
-    private static Document[] extractFilterAndUpdate(String query) throws IllegalArgumentException {
-        String[] result = new String[2];
-        result[0] = "";
-        result[1] = "";
-        int braceCount = 0;
-        int startOuter = -1;
-        int startInner = -1;
-
-        for (int i = 0; i < query.length(); i++) {
-            if (query.charAt(i) == '{') {
-                braceCount++;
-                if (braceCount == 1 && startOuter == -1) {
-                    startOuter = i; // Inizio della prima sottostringa
-                } else if (braceCount == 2 && startInner == -1) {
-                    startInner = i; // Inizio della sottostringa interna
-                }
-            } else if (query.charAt(i) == '}') {
-                if (braceCount == 2) {
-                    // Fine della sottostringa interna
-                    result[1] = query.substring(startInner, i + 1);
-                    startInner = -1; // Reimposta l'inizio per la prossima sottostringa interna
-                }
-                braceCount--;
-                if (braceCount == 0 && startOuter != -1) {
-                    // Fine della sottostringa esterna
-                    if (result[0].isEmpty()) {
-                        result[0] = query.substring(startOuter, i + 1);
-                        startOuter = -1; // Reimposta l'inizio per la prossima sottostringa esterna
-                    }
-                }
-            }
-        }
-
-        return new Document[]{Document.parse(result[0]), Document.parse(result[1])};
-    } */
     private static List<Document> updateOne(String collectionName, String query)
             throws MongoException, IllegalArgumentException, IllegalStateException{
         // Possible operations: $set, $unset, $push, $pull
@@ -517,7 +361,7 @@ public abstract class BaseMongoDB {
 
         return result;
     }
-    // {$unset: {"comments": "" }, $set: {"author": {name: "Name", surname:"Surname"} }}
+
     public static Map<String, Document> extractKeyValuePairs(String jsonString) {
         Map<String, Document> resultMap = new HashMap<>();
         int i = 0;

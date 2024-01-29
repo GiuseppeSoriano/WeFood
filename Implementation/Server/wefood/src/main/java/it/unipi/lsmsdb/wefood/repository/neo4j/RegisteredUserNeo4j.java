@@ -9,7 +9,6 @@ import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;
 import it.unipi.lsmsdb.wefood.repository.base.BaseNeo4j;
 import it.unipi.lsmsdb.wefood.repository.interfaces.RegisteredUserNeo4jInterface;
 
-    //correggere le etichette con le nuove info
 public class RegisteredUserNeo4j implements RegisteredUserNeo4jInterface {
 
     public boolean deleteRegisteredUser(RegisteredUserDTO registeredUserDTO) throws IllegalStateException, Neo4jException {

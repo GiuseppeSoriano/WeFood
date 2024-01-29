@@ -67,26 +67,6 @@
         <button class="info" id="followedButton" (click)="showFollowed()">FOLLOWED</button>        
       </div>
 
-      <!-- find users to follow based on user's friends
-      <div class="suggest-by-friends">
-        <span>You may know</span>
-        <div class="container-suggested">
-          <div class="suggested-list">
-            <span *ngFor="let user of usersToFollowBasedOnFriends" > {{user.username}} </span>
-          </div>
-        </div>
-      </div>-->
-      
-      <!-- find most followed users
-      <div class="suggest-most-followed-users">
-        <span>Most Followed Users</span>
-        <div class="suggested-list">
-          <span *ngFor="let user of mostFollowed; let i = index" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
-            {{user.username}}
-          </span>
-        </div>
-      </div>-->
-
     </div>    
   
   </main>

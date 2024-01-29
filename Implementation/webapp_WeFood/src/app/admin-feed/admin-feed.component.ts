@@ -33,13 +33,7 @@ export class AdminFeedComponent implements OnInit {
   }
   
   constructor(private router:Router, private postService: PostService, private adminService: AdminService) {
-    // const navigation = this.router.getCurrentNavigation();
-    // if(navigation){
-    //   const state = navigation.extras.state as {
-    //     User: RegisteredUserInterface
-    //   };
-    //   this.info = state.User;
-    // }
+    
   }
 
   ngOnInit(): void {
@@ -77,4 +71,8 @@ export class AdminFeedComponent implements OnInit {
     this.postDTO_to_be_viewed = new PostDTO();
   }
 
+  updatePosts(event: any) {
+    this.list_of_posts = event.posts;
+    this.isLoading = false;
+  }
 }

@@ -2,7 +2,6 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Outpu
 import { RegisteredUserDTO } from '../models/registered-user-dto.model';
 import { NavigationExtras, Router } from '@angular/router';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
-import { RegisteredUserPage } from '../models/registered-user-page.model';
 
 @Component({
   selector: 'app-view-list-of-users',
@@ -16,10 +15,6 @@ export class ViewListOfUsersComponent implements OnInit {
   constructor(private router: Router, private userService: RegisteredUserService, private eRef: ElementRef) { }
 
   ngOnInit(): void {
-  }
-
-  showClickedUserPage() {
-    //da definire
   }
 
   close() {

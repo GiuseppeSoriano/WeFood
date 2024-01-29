@@ -4,10 +4,7 @@ import it.unipi.lsmsdb.wefood.model.Ingredient;
 
 import java.util.List;
 
-import org.neo4j.driver.exceptions.Neo4jException;
 import org.springframework.stereotype.Service;
-
-import com.mongodb.MongoException;
 
 import it.unipi.lsmsdb.wefood.dao.IngredientDAO;
 import it.unipi.lsmsdb.wefood.dto.IngredientDTO;
@@ -32,7 +29,7 @@ public class IngredientService {
         }
         // Other types of exceptions can be handled if necessary: MongoException, IllegalArgumentException, IllegalStateException
         catch(Exception e){
-            if(id != "")
+            if(!id.isEmpty())
                 System.err.println("Databases are not synchronized, ingredient " + id + " has been created in MongoDB but not in Neo4j");
             System.err.println("MongoException in IngredientService.createIngredient: " + e.getMessage());
             return false;

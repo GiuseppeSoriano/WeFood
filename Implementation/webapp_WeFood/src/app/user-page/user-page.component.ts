@@ -6,7 +6,7 @@ import { RegisteredUserService } from '../services/registered_user_service/regis
 import { IngredientService } from '../services/ingredient_service/ingredient.service';
 import { PostService } from '../services/post_service/post.service';
 import { RegisteredUserDTO, RegisteredUserDTOInterface } from '../models/registered-user-dto.model';
-import { RegisteredUserPage, RegisteredUserPageInterface } from '../models/registered-user-page.model';
+import { RegisteredUserPageInterface } from '../models/registered-user-page.model';
 import { AdminService } from '../services/admin_service/admin.service';
 
 @Component({
@@ -194,10 +194,6 @@ export class UserPageComponent implements OnInit {
     this.router.navigate(['/user-personal-page']);
   }
   
-  showSelectedPost() {
-    // Implementa la logica per visualizzare i post selezionati
-  }
-
   getPosts(): void {
     this.list_of_posts = this.userPage.posts;
   }

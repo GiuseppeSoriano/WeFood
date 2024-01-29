@@ -1,7 +1,7 @@
 <div>
     <button (click)="toggleDropdown()">Most recent top rated post by ingredients</button>
     <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
-      <!-- <div>Insert the ingredient</div> -->
+
       <div *ngIf="ingredients_chosen.length !== 0" class="listIngredientsAdded">
         <span *ngFor="let ingredient of ingredients_chosen" class="ingredientsAdded">
           {{ ingredient }}
@@ -35,5 +35,6 @@
 
 
       <button type="submit" (click)="onExecute()">SEARCH</button>
+    
     </div>
 </div>

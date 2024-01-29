@@ -5,8 +5,6 @@ import it.unipi.lsmsdb.wefood.dto.PostDTO;
 
 import org.springframework.stereotype.Service;
 
-import com.mongodb.MongoException;
-
 import it.unipi.lsmsdb.wefood.model.Comment;
 import it.unipi.lsmsdb.wefood.model.RegisteredUser;
 

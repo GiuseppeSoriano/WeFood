@@ -1,7 +1,5 @@
 package it.unipi.lsmsdb.wefood.repository.neo4j;
 
-import java.util.List;
-import org.neo4j.driver.Record;
 import org.neo4j.driver.exceptions.Neo4jException;
 
 import it.unipi.lsmsdb.wefood.dto.RegisteredUserDTO;

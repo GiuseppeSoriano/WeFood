@@ -1,7 +1,7 @@
 <div>
     <button (click)="toggleDropdown()">Most Popular Combinations of Ingredients</button>
     <div [ngClass]="{'dropdown-visible': isActiveDropdown()}" class="dropdown-container">
-      <!-- <div>Insert the ingredient</div> -->
+
       <input class="newIngredient" type="text" placeholder="Ingredient name" name="ingredientName" [(ngModel)]="ingredientName" (click)="newIngredientIsBeingInserted()">
     
       <div *ngIf="showList" class="dropdownList">

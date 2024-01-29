@@ -146,10 +146,6 @@ export class UserPersonalPageComponent implements OnInit {
     );
   }
 
-  showSelectedPost() {
-    // Implementa la logica per visualizzare i post selezionati
-  }
-
   getPosts(): void {
     this.isLoading = true;
     this.userService.findRegisteredUserPageByUsername(this.userService.info.username).subscribe(

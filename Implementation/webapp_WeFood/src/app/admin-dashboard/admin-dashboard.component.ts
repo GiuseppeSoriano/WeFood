@@ -1,5 +1,4 @@
-// admin-dashboard.component.ts
-import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AdminService } from '../services/admin_service/admin.service';
 import { PostService } from '../services/post_service/post.service';
 import { IngredientService } from '../services/ingredient_service/ingredient.service';
@@ -7,7 +6,6 @@ import { PostDTOInterface } from '../models/post-dto.model';
 import { NavigationExtras, Router } from '@angular/router';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
 
-// Importa Chart.js
 import { Chart } from 'chart.js/auto';
 import { RegisteredUserDTO, RegisteredUserDTOInterface } from '../models/registered-user-dto.model';
 import { Ingredient } from '../models/ingredient.model';
@@ -22,7 +20,6 @@ export class AdminDashboardComponent implements OnInit {
 
   isLoading = false;
   list_of_posts: PostDTOInterface[] = [];
-  //interactions: Map<string, number> = new Map<string, number>();
   filteredPosts: PostDTOInterface[] = [];
   hours_var: number = 87600;
   limit_var: number = 30;
@@ -35,7 +32,6 @@ export class AdminDashboardComponent implements OnInit {
   ingredientCreation: boolean = false;
   mostFollowed: RegisteredUserDTOInterface[] = [];
 
-  // info: AdminInterface = new Admin();
   logout() {
     this.adminService.logout();
     this.router.navigate(['/home']);
@@ -154,18 +150,18 @@ export class AdminDashboardComponent implements OnInit {
             scales: {
               x: {
                 ticks: {
-                  color: 'rgb(55, 6, 23)', // Change the font color of the x-axis labels
+                  color: 'rgb(55, 6, 23)', 
                   font: {
-                    weight: 'bold' // You can also set other font properties here
+                    weight: 'bold' 
                   }
                 }
               },
               y: {
                 beginAtZero: true,
                 ticks: {
-                  color: 'rgb(55, 6, 23)', // Change the font color of the y-axis labels
+                  color: 'rgb(55, 6, 23)', 
                   font: {
-                    weight: 'bold' // You can also set other font properties here
+                    weight: 'bold' 
                   }
                 }
               }              
@@ -173,7 +169,7 @@ export class AdminDashboardComponent implements OnInit {
             plugins: {
               legend: {
                 labels: {
-                  color: 'rgb(55, 6, 23)', // Change the font color of the legend labels
+                  color: 'rgb(55, 6, 23)', 
                 }
               }
             }
@@ -217,25 +213,6 @@ export class AdminDashboardComponent implements OnInit {
   goToAdminFeed() {
     this.router.navigate(['/admin-feed']);
   }
-
-  /*
-  interactionValues: any = {
-    "avgOfStarRanking": {
-      "IMAGE": this.interactions.get("IMAGEAvgOfStarRanking"),
-      "NOIMAGE": this.interactions.get("NOIMAGEAvgOfStarRanking")
-    },
-    "ratioOfComments": {
-      "IMAGE": this.interactions.get("IMAGEratioOfComments"),
-      "NOIMAGE": this.interactions.get("NOIMAGEratioOfComments")
-    },
-    "ratioOfStarRankings": {
-      "IMAGE": this.interactions.get("IMAGEratioOfStarRankings"),
-      "NOIMAGE": this.interactions.get("NOIMAGEratioOfStarRankings"),
-    }
-  };
-  
-  interactionKeys = ["avgOfStarRanking", "ratioOfComments", "ratioOfStarRankings"];
-  */
 
   goToUserPage(user: RegisteredUserDTO) {
     const navigationExtras: NavigationExtras = {

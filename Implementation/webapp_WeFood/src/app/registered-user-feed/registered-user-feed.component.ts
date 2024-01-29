@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { RegisteredUser, RegisteredUserInterface } from '../models/registered-user.model';
-import { MostPopularCombinationOfIngredientsComponent } from '../buttons/most-popular-combination-of-ingredients/most-popular-combination-of-ingredients.component';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
 import { PostDTO, PostDTOInterface } from '../models/post-dto.model';
 import { PostService } from '../services/post_service/post.service';
@@ -12,7 +10,6 @@ import { PostService } from '../services/post_service/post.service';
   styleUrls: ['./registered-user-feed.component.css']
 })
 export class RegisteredUserFeedComponent implements OnInit {
-  // info: RegisteredUserInterface = new RegisteredUser();
   isLoading = true; 
   recipeName: string = "";
   ingredientName: string = "";
@@ -34,15 +31,7 @@ export class RegisteredUserFeedComponent implements OnInit {
     this.router.navigate(['/user-personal-page']);
   }
   
-  constructor(private router:Router, private postService: PostService, private userService: RegisteredUserService) {
-    // const navigation = this.router.getCurrentNavigation();
-    // if(navigation){
-    //   const state = navigation.extras.state as {
-    //     User: RegisteredUserInterface
-    //   };
-    //   this.info = state.User;
-    // }
-  }
+  constructor(private router:Router, private postService: PostService, private userService: RegisteredUserService) {}
 
   ngOnInit(): void {
     if(this.userService.info.username == ""){

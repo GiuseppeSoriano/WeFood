@@ -74,7 +74,7 @@ public class PostDAO {
         return postMongoDB.caloriesAnalysis(recipeName);
     }
 
-    // Given a user, show the average totalCalories of recipes publishished by him/her.
+    // Given a user, show the average totalCalories of recipes published by him/her.
     public static Double averageTotalCaloriesByUser(String username) throws MongoException, IllegalArgumentException, IllegalStateException {
         return postMongoDB.averageTotalCaloriesByUser(username);
     }

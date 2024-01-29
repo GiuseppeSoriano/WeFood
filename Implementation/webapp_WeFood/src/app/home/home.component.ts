@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PostService } from '../services/post_service/post.service';
 import { PostDTOInterface } from '../models/post-dto.model';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';

@@ -16,10 +16,8 @@ public class IngredientDAO {
     private final static IngredientMongoDBInterface ingredientMongoDBInterface = new IngredientMongoDB();
     private final static IngredientNeo4jInterface ingredientNeo4jInterface = new IngredientNeo4j();
 
-    // Bisogna gestire il caso in cui fallisce la creazione del nodo in neo4j
     public static String createIngredientMongoDB(Ingredient ingredient) throws MongoException, IllegalArgumentException, IllegalStateException{
         return ingredientMongoDBInterface.createIngredient(ingredient);
-        // eccezioni lanciate da neo4j vanno gestite con try catch per evitare che il nodo venga creato solo in mongo
     }
 
     public static boolean deleteIngredientMongoDB(String _id) throws MongoException, IllegalArgumentException, IllegalStateException{

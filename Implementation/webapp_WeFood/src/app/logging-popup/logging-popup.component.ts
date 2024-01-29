@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { RegisteredUserService } from '../services/registered_user_service/registered-user.service';
-import { NavigationExtras, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AdminService } from '../services/admin_service/admin.service';
 import { UnregisteredUserService } from '../services/unregistered_user_service/unregistered-user.service';
 

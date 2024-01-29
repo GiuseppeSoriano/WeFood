@@ -23,7 +23,7 @@ public class IngredientMongoDB implements IngredientMongoDBInterface {
         System.out.println(result.get(0).toJson());
         // If it does not throw an exception, it means that the query has been executed successfully
         return result.get(0).get("_id").toString();
-    };
+    }
 
     
     public Ingredient findIngredientByName(String name) throws MongoException, IllegalArgumentException, IllegalStateException {
@@ -39,7 +39,7 @@ public class IngredientMongoDB implements IngredientMongoDBInterface {
             // Ingredient is unique
             return new Ingredient(result.get(0).getString("name"), Double.parseDouble(result.get(0).get("calories").toString()));
         }
-    };
+    }
 
     public List<Ingredient> getAllIngredients() throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.Ingredient.find({}, {_id:0})";
@@ -52,7 +52,7 @@ public class IngredientMongoDB implements IngredientMongoDBInterface {
         }
 
         return ingredients;
-    };
+    }
 
     public boolean deleteIngredient(String _id) throws MongoException, IllegalArgumentException, IllegalStateException {
         String query = "db.Ingredient.deleteOne({" + //

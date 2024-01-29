@@ -97,19 +97,6 @@ export class FindUsersByIngredientUsageComponent implements OnInit {
     }, 1000);
   }
 
-  /* USED TO RETURN OUTPUT TO REIGSTERED USER FEED COMPONENT */
-
-  // @Output() findUsersByIngredientUsage = new EventEmitter<any>();
-
-  // onExecute() {
-  //   // Prepara i dati da inviare
-  //   const dataToEmit = {
-  //     ingredientName: this.ingredientName
-  //   };
-  //   // Emetti l'evento con i dati
-  //   this.findUsersByIngredientUsage.emit(dataToEmit);
-  // }
-
   getUser() {
     return this.userService.info;
   }

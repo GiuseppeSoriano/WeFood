@@ -2,7 +2,6 @@ import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output } fro
 import { IngredientInterface } from 'src/app/models/ingredient.model';
 import { PostDTO } from 'src/app/models/post-dto.model';
 import { Post, PostInterface } from 'src/app/models/post.model';
-import { Recipe, RecipeInterface } from 'src/app/models/recipe.model';
 import { IngredientService } from 'src/app/services/ingredient_service/ingredient.service';
 import { PostService } from 'src/app/services/post_service/post.service';
 import { RegisteredUserService } from 'src/app/services/registered_user_service/registered-user.service';
@@ -17,7 +16,6 @@ export class UploadPostComponent implements OnInit {
   @Output() closePost: EventEmitter<void> = new EventEmitter();
 
   post: PostInterface = new Post(this.userService.info.username);
-  // recipe: RecipeInterface = new Recipe();
 
   stepBeingInserted: string = "";
 

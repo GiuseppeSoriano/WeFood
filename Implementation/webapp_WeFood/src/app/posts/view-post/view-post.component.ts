@@ -1,7 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { Comment, CommentInterface } from 'src/app/models/comment.model';
 import { Post, PostInterface } from 'src/app/models/post.model';
-import { Recipe, RecipeInterface } from 'src/app/models/recipe.model';
 import { StarRanking, StarRankingInterface } from 'src/app/models/star-ranking.model';
 import { PostDTO } from 'src/app/models/post-dto.model';
 import { PostService } from 'src/app/services/post_service/post.service';
@@ -11,7 +10,6 @@ import { StarRankingService } from 'src/app/services/star_ranking_service/star-r
 import { RegisteredUser, RegisteredUserInterface } from 'src/app/models/registered-user.model';
 import { RegisteredUserService } from 'src/app/services/registered_user_service/registered-user.service';
 import { AdminService } from 'src/app/services/admin_service/admin.service';
-import { RegisteredUserDTOInterface } from 'src/app/models/registered-user-dto.model';
 import { NavigationExtras, Router } from '@angular/router';
 
 @Component({
