@@ -17,8 +17,7 @@ public class WefoodApplication {
 
 		SpringApplication.run(WefoodApplication.class, args); //MAIN APPLICATION
 		
-		// BaseMongoDB.closeMongoClient();
-		// BaseNeo4j.closeNeo4jDriver();
+		
 	}
 
 }

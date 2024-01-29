@@ -174,7 +174,7 @@ The non-functional requirements for *WeFood* are as follows.
 
 2. **Availability**: the system must be available 24/7 for allowing users to use it at any time.
 
-3. **Security**: the system must be secure and protect users' data even from possible attacks. In particular, the information transmitted between client and server must be over HTTPS. Furthermore, the system must protect users' passwords by hashing them before the storing in the database.
+3. **Security**: the system must be secure and protect users' data even from possible attacks. In particular, the information transmitted between client and server must be over HTTPS. Furthermore, the system must protect users' passwords by hashing them before storing in the database.
 
 4. **Reliability**: the system must be reliable and must not lose the information uploaded by the users. It must be caple of recovering from a crash and restore the data in a consistent state, exploiting the replicas of the database.
 
@@ -1911,292 +1911,197 @@ aggiungere link github e rendere pubblico il repository
 \newpage
 
 # 8. Implementation
+The implementation phase represents the last step of the project, as it allows to transform conceptual ideas into a functional software system. This section will begin with a brief overview of the system architecture, followed by a more detailed description of the client and server components.
 
-## 8.1. System Architecture - Frameworks and components
+## 8.1. System Architecture
+The system architecture, depicted in Figure \ref{fig:system_architecture}, encompasses three main components: *client*, *server*, and *databases*. Together, these components enable the complete functionality of *WeFood*.
 
-The architecture of your application is composed by two main component:
--Client
--Server
+\begin{figure}
+    \centering
+    \includegraphics[width=0.95\textwidth]{Resources/"system_architecture.png"}
+    \caption{System Architecture.}
+    \label{fig:system_architecture}
+\end{figure} 
 
-Firstly, let's take a closer look at the Client component. The client serves as the interface through which users interact with your application. It plays a crucial role in initiating communication with the server by sending HTTP requests. The client component is responsible for creating a seamless and intuitive user experience, encapsulating the presentation and user interface logic.
+The chosen frameworks for application development involve *Angular* [`[4]`](https://angular.io/) for the client and *Spring Boot* [`[5]`](https://spring.io/) for the server. The client, responsible for user interaction, triggers communication with the server through *HTTP* requests utilizing the server's available *APIs*. In response, the server interacts with MongoDB and Neo4j databases using their respective *drivers*.
 
-Moving on to the Server component, it serves as the backbone of your application, handling the requests received from the client. The server adopts a Model-View-Controller (MVC) architecture, a widely adopted design pattern that promotes a modular and organized approach to software development. In this context, the Model represents the data and business logic and the Controller manages the flow of information. Is it common, like in this case, to no have the view, because we make use of APIs to manage the comunication between client and server.
+A fundamental aspect of the adopted communication model is its adherence to *RESTful principles*. REST, or Representational State Transfer, is an architectural style that emphasizes a *stateless* and *standardized* approach to system communication. Additionally, the communication involves encapsulating all necessary information within the body of the HTTP requests, formatted in *JSON*. This RESTful communication approach provides advantages such as scalability, flexibility, and simplicity. 
 
-The server's role is not only to process the incoming requests but also to efficiently manage the data and comunicate with our databases. The use of MVC helps to maintain a separation of concerns, making the codebase more modular, scalable, and easier to maintain. This design pattern contributes to the overall robustness and flexibility of the server-side architecture.
+## 8.2. Client
+The client component, constructed using *HTML*, *CSS*, and *TypeScript*, is a *Web Application* and serves as the user interface for interacting with the system. In this context, Angular enables the enhancement of both the development and testing phases. Moreover, it organizes the application into *components*, the building blocks of the user interface, encapsulating specific functionalities. *Services* instead are reusable and injectable objects and facilitate shared functionality (i.e. retrieval or business logic) across the application.
 
-A key characteristic of your communication model is its adherence to RESTful principles. REST, or Representational State Transfer, is an architectural style that emphasizes a stateless and standardized approach to communication between systems. In your case, all information essential for communication is encapsulated within the body of the HTTP requests, formatted in JSON (JavaScript Object Notation).
+## 8.3. Server
+The server, employing a Model-View-Controller (MVC) architecture, processes client requests and manages data. This structured design ensures modularity, scalability, and maintainability and aids in maintaining a clear *separation of concerns*, enhancing code organization.
 
-This RESTful communication approach offers advantages such as scalability, flexibility, and simplicity. By embracing a stateless communication model, your application becomes more resilient, making it easier to scale horizontally as the user base grows.
+Specifically, the server consists of the following packages:
 
-In summary, the architecture of your application revolves around a well-defined interaction between the client and server components. The client, responsible for user interaction, initiates communication through HTTP requests, while the server, structured with an MVC architecture, efficiently processes these requests and manages the application's data and business logic. The adoption of RESTful communication, with information conveyed in JSON format, adds a layer of standardization and efficiency to the overall system, contributing to a robust and scalable application design.
+- `repository`: contains the MongoDB and Neo4j drivers (i.e. `base` sub-package), along with the interfaces and classes whose task is to directly communicate with the databases by defining the low-level queries (i.e. `mongodb` and `neo4j` sub-packages);
 
-### 8.1.1. Server
+- `model`: contains the classes that define the structure of the data stored in the databases;
 
-Our server is structured in this way:
-In the deepest part of our code, there are the two Base classes, found in the repository/base package, which act as a driver to handle query in a "coherent" way. In particular the BaseMongoDB class act as a string parser, reading all the strings provided by the classes above it and building step by step the Java queries each time the parser find a new component. The parser is also able to understand the content of the document to perform different queries. This is done so that from the classes above it will be possible to send queries exaclty how a human would write the queries in the mongo shell, so that each time a new query shoul be tested or implemented, is not necessary to build the method from scratch, but it will be necessary just to send the string to the Base class and all the steps to create the query will be done inside the class.
+- `dao`: allows to define the high-level queries that will be used by the services hiding the details of the low-level queries;
 
-Going above we have all the interfaces, which provides the structure of all the classes found in the mongodb and neo4j packages, which will implement all the queries as strings (this is possible for the reasons described before).
+- `dto`: defines the classes that are used to transfer data between the different layers of the server;
 
-Going even further above, we have the DAOs and the DTOs.
-DAO classes will call all the methods found in the respective classes of the mongodb/neo4j packages. DTOs are more interesting in our case. They will provided a rapresentation of the classes found in the model package which is elaborated with respect to the original one. For instance the PostDTO rapresents what the user sees before clicking on a post, like Instagram feed page, before seeing comments or informations about the post, every user sees just the image. The image (and in our case the recipe name), is our PageDTO.
+- `service`: contains the classes that define the business logic of the server, including the management of the *intra-database* and *inter-database* consistency;
 
-In the service package we find all the classes which, in some cases, also handle the consistency in the two databases and inside the single database. In general four cases of consistency management can be found:
-User creation consistency:
-    If a user is created in MongoDB, we try the creation in Neo4j. If it fails in Neo4j, we display server-side that the databases are not synchronized.
-Ingredient creation consistency:
-    The same as described in the case of the user.
-Post consistency:
-    During the creation of a post, first of all we try the creation in MongoDB in the Post collection. After this we update the redunducies in the User collection. If the latter fails, an inconsistency in MongoDB is displayed server-side (we know the updated version of the database can be found in the Post collection).
-    After all this steps, we have to create nodes and the relations in Neo4j. This are the Recipe node, the ingredient-ingredient relations, the user-ingredient relation and the recipe-ingredient relation. We try as the first step, to create the node. If this fails, we handle the case of the failed operation in Neo4j (described at the end). If this goes through, we start the creation of the relations. If one of this creations fails, we try to delete the recipe node and we display that Neo4j remains consistent but with a failed operation. If the ingredient-ingredient operation fails, the deletion of the recipe-ingredient relation is not handled separately. In fact the deletion of the recipe node is done in a way so that also all the relations are delete (DETACH DELETE). If the creation of user-ingredient fails, the ingredient-ingredient relations are not deleted, because utilized just for statistical purposes, and the user will never directly see that his informations are not precise. But this is not a problem since the most important thing is to show to the user some "good" informations that makes him stay active in the social network. If the creation in Neo4j of all the previous described steps fails, we try a rollback in MongoDB. We try to remove the post from the User collection. If the operation fails, we display that the databases are not consistent. Otherwise, we try to delete the Post also in the Post collection. If the operation fails, we display that MongoDB is not consistent and that the databases are not synchronized. Otherwise we only display that the operations was not completed successfuly (databases in this case are synchronized and consistent). 
+- `controller`: contains the classes that define the RESTful APIs;
 
-    During the deletion of a post, we start from deleting informations from MongoDB, in particular from the User collection. If it fails, we display that the operation failed, otherwise we try also the deletion in the Post collection. If it fails we display the inconsistency in MongoDB and we display that the operation failed. If the operation is completed, we try the deletion in Neo4j, where we try to delete the recipe and all the relations to ingredients. If this operation fails, we display that the databases are not synchronized and the operation fails. Otherwise we try to delete the relation user-ingredient. If it fails, we display an inconsistency in Neo4j and the fact that the databases are not synchronized and the operation fails. Otherwise the operation is completed.
+- `apidto`: defines the classes that are used to transfer data between the server and the client.
 
-    There are several techniques to handle the inconsistency (eventual consistency) wich can remain from the steps described before while still giving the opportunity to use the social network, such as inserting a trigger at the start of Neo4j which verifies that the graph is consistent with all the informations stored in the MongoDB collections. To handle inconsistencies in MongoDB, we could try with a series of actions (routine) to run every x hours/days etc.., that restore the consistency. In general, handling the eventual consistency depends on the type of service that you want to provide to the users. For instance, we could offer a limited set of functinalities in Neo4j, like how instagram functionalities some time are blocked, or start a maintenance period where all the consistencies are restored.
+It is worth examining further the implemented *models* and the role of the *BaseMongoDB* class, which acts as the driver for managing MongoDB queries. The following paragraphs will elaborate on these aspects.
 
-Last but not least, controller package and the apidto package manage all the comunication with the client and provide a possibility for the client to interact with all the classes described before.
+### 8.3.1. Models
+Starting with the conceptual UML Class Diagram (Section **3.2**), adjustments have been made to realize the actual implementation in Java. Outlined below are the details specific to each model.
 
-
-#### BaseMongoDB: The Driver to deal with MongoDB queries
-
-The BaseMongoDB class (`it.unipi.lsmsdb.wefood.repository.base.BaseMongoDB`) is an abstract Java class providing a comprehensive suite of functionalities to interact with MongoDB. It estabilishes connections, executes queries and handles data manipulation tasks like insterions, updates and deletions. The code is structured to support various MongoDB operations through a unified interface, offering a unique method that takes as input parameter the query in the MongoShell format.
-
-##### Connection handling 
-
-At the core, the class manages a MongoDB connection using the MongoClient instance. It employs the Singleton pattern to ensure that only one instance of MongoClient exists. This approach prevents unnecessary multiple connections to the database. The connection details, such as host addresses and database name, are configured as static final strings. 
-In details, these are how parameters have been setted:
-
--   `private static final String MONGODB_DATABASE = "WeFood";`
-
--   `private static final String WRITE_CONCERN = "1";` This parameter is set to "1", indicating that the write operation will be considered successful as soon as the data is written to the primary node in the MongoDB cluster. This level of write concern balances between performance and data safety, ensuring that each write operation is acknowledged by the primary node, thus offering a moderate level of data durability without the overhead of waiting for multiple nodes to acknowledge.
-
--   `private static final String WTIMEOUT = "5000";` The write timeout is configured to 5000 milliseconds (5 seconds). This setting specifies the maximum amount of time the server will wait for a write operation to be acknowledged. If the operation is not acknowledged within this timeframe, it will result in a timeout exception. This timeout value helps in maintaining a balance between application responsiveness and waiting for database operations, ensuring that the application does not hang indefinitely on slow write operations.
-
--   `private static final String READ_PREFERENCE = "nearest";`  The read preference has been set to "nearest", which directs the server to read from the nearest member (either primary or secondary) of the MongoDB cluster based on network latency. This setting is crucial for achieving low-latency read operations, as it ensures that the application reads data from the geographically closest node, thereby reducing network latency and improving the overall read performance.
-
-##### Error handling 
-
-Throughout the class, there's a consistent approach to error handling. The methods throw exceptions like MongoException, IllegalArgumentException, and IllegalStateException to signal failures during database operations. This exception-based approach ensures robust error reporting and handling. Error handling is entrusted to calling methods.
-
-##### Query execution
-
-The central component of query execution in the `BaseMongoDB` class is the method `executeQuery`, designed to handle various MongoDB operations. This method receives a single string input, `mongosh_string`, which is crucial as it contains all the information necessary to determine the type of operation to perform and its specific parameters.
-The input string, `mongosh_string`, follows a format resembling a MongoDB shell command. It includes the collection name, the operation to be performed, and the parameters for that operation.
-Example format: `db.collection.operation({param1: value1, ...})`.
-The method starts by dissecting the `mongosh_string` to extract essential components: the collection name and the operation details. The operation name (e.g., `find`, `insertOne`) is isolated, which guides the method to invoke the corresponding operation-specific method. The parameters for the operation are extracted from the remaining part of the `mongosh_string`. This part of the string represents the operation's arguments and is in JSON format.
-Depending on the operation, the parameters extracted from `mongosh_string` may need further processing. For example, in a `find` operation, the query parameters might need to be split into individual components like `find`, `project`, `sort`, and `limit`. This is achieved through various parsing methods, regular expressions, or JSON manipulations.
-
-**FIND**
-Once the executeQuery method has isolated `operationDoc` for the find operation, it transitions into a tailored query execution process. Parsing this string involves converting the query parameters into a BSON format compatible with the MongoDB Java driver. The query criteria and any specified projection details are transformed into Document objects. Similarly, sorting instructions and the query limit are extracted and formatted appropriately. 
-Once the query components are parsed and formatted, the find method executes the query against the specified MongoDB collection. The results are then collected and returned, providing a seamless bridge between the input string format and the MongoDB query execution. 
-
-**AGGREGATE**
-Handling the aggregate operation follows a similar pattern of precision and adaptation as the find operation, yet it caters to the more complex nature of aggregation in MongoDB.
-After the executeQuery method identifies and isolates the `operationDoc` specific to the aggregate operation, the next step involves interpreting and structuring this string for execution. The `operationDoc` for an aggregation contains a sequence of MongoDB aggregation pipeline stages, represented as an array of JSON objects.
-The primary task is to parse this string into a series of Bson objects, each corresponding to a stage in the MongoDB aggregation pipeline. The parsing process ensures that stages as `$match`, `$group`, `$sort` and others are accurately converted from their string representation into Bson objects, which are the format required by the MongoDB Java driver.
-Once the stages are parsed and organized, the aggregate method proceeds to execute this pipeline against the specified MongoDB collection. The result of this aggregation is a list of Document objects, each representing a record in the final aggregated output.
-
-**INSERT ONE**
-The `operationDoc` contains the data for the document to be inserted in a JSON-like format. The core task here is to parse this data string into a Document object. 
-Once the data is parsed into a Document, the insertOne method is invoked. The operation results in an `InsertOneResult`, which includes information about the success of the operation (the `_id` of the inserted document).
-
-**UPDATE ONE**
-For the updateOne operation in the BaseMongoDB class, the process is tailored to update a single document in a MongoDB collection. 
-The critical step here is to parse the `operationDoc` into two main components: the filter criteria and the update details. The filter criteria determine which document in the collection will be updated, while the update details specify how the document should be modified.
-
--   The filter part of `operationDoc` is converted into a Document object. This conversion is essential to match the BSON format expected by the MongoDB Java driver.
-
--   The update portion, potentially containing various update operators (`$set`, `$unset`, `$push`, `$pull`), is also parsed into a BSON format.
-Each operator and its corresponding data need to be accurately represented to ensure the update is performed correctly.
-
-With these components structured correctly, the updateOne method proceeds to execute the update operation. This involves calling the appropriate method from the MongoDB Java driver, passing the filter criteria and update details. The operation results in an `UpdateResult`, which includes information about the success of the operation (the number of documents updated).
-
-**DELETE ONE**
-When the executeQuery method identifies a `deleteOne` operation, it shifts its focus to handling the `operationDoc`, which in this case contains the criteria for selecting the document to be deleted. This conversion is achieved by parsing the string into a Document object. 
-With the deletion criteria correctly formatted, the deleteOne method executes the delete operation using the MongoDB Java driver. The result of this operation is a `DeleteResult` object, which provides information about the outcome (the number of documents deleted).
-
-#### 8.1.1.2. Models
-
-More details on the classes and their attributes are as follows.
-
-**Admin**:
+Admin:
 
 - username: `String`
 - password: `String` (hashed)
 
 
-**RegisteredUser**:
+RegisteredUser:
 
+- _id: `ObjectId`
 - username: `String`
 - password: `String` (hashed)
 - name: `String`
 - surname: `String`
 
 
-**Post**:
+Post:
 
-- user: `RegisteredUser`
+- username: `String`
 - description: `String`
 - timestamp: `Date`
 - comments: `List<Comment>`
 - starRankings: `List<StarRanking>`
 - recipe: `Recipe`
+- avgStarRanking: `Double`
 
 
-**Comment**:
+Comment:
 
-- user: `RegisteredUser`
+- username: `String`
 - text: `String`
 - timestamp: `Date`
 
 
-**StarRanking**:
+StarRanking:
 
-- user: `RegisteredUser`
+- username: `String`
 - vote: `Double`
 
 
-**Recipe**:
+Recipe:
 
 - name: `String`
 - image: `String`
 - steps: `List<String>`
-- ingredients: `Map<Ingredient, Double>`
+- ingredients: `Map<String, Double>`
+- totalCalories: `Double`
 
 
-**Ingredient**:
+Ingredient:
 
 - name: `String`
 - calories: `Double`
 
-DI QUESTO HO SCRITTO SOPRA NELLA DESCRIZIONE DEL DRIVER, EVENTUALMENTE CONTROLLARE
-Fare riferimento a deployment database
-private static final String MONGODB_DATABASE = "WeFood";
-    private static final String WRITE_CONCERN = "1";
-    private static final String WTIMEOUT = "5000";
-    private static final String READ_PREFERENCE = "nearest";
-    private static final String mongoString = String.format("mongodb://%s/%s/?w=%s&wtimeout=%s&readPreference=%s", MONGODB_HOST, MONGODB_DATABASE, WRITE_CONCERN, WTIMEOUT, READ_PREFERENCE);
+
+### 8.3.2. BaseMongoDB
+The `BaseMongoDB` class, located within the `base` sub-package of the `repository` package, serves as the *MongoDB query driver*. This class offers *extra* features beyond the standard MongoDB Java driver. Specifically, this abstract Java class delivers a comprehensive set of functionalities for interacting with MongoDB. It establishes connections and executes queries through a unified interface providing a method (i.e. `executeQuery`) that accepts a query in the *MongoShell format* as its input parameter.
+
+#### 8.3.2.1. Connection Handling 
+$\newline$
+At the core, the class manages a MongoDB connection using the `MongoClient` instance. It employs the *singleton pattern* to ensure that only one instance of `MongoClient` exists. This approach prevents unnecessary multiple connections to the database. The connection details, such as host address and database name, are configured as *static final strings*. In detail, the parameters have been set in the following way:
+
+- `private static final String MONGODB_DATABASE = "WeFood"`: the name of the database;
+
+- `private static final String WRITE_CONCERN = "1"`: the *write concern* is set to `"1"`, indicating that the write operation will be considered successful as soon as the data is written to the primary node in the MongoDB cluster;
+
+- `private static final String WTIMEOUT = "5000"`: the *write timeout* is configured to `5000` milliseconds (i.e. 5 seconds). This setting specifies the maximum amount of time the server will wait for a write operation to be acknowledged. If the operation is not acknowledged within this timeframe, it will result in a *timeout exception*. This timeout value helps in maintaining a balance between application responsiveness and waiting for database operations, ensuring that the application does not hang indefinitely on slow write operations;
+
+- `private static final String READ_PREFERENCE = "nearest"`: the *read preference* has been set to `"nearest"`, which directs the server to read from the nearest member (either primary or secondary) of the MongoDB cluster based on network latency. This setting is crucial for achieving *low-latency* read operations, as it ensures that the application reads data from the geographically closest node, thereby reducing network latency and improving the overall read performance.
+
+#### 8.3.2.2. Query Execution
+$\newline$
+The central component for query execution is the method `executeQuery`. It accepts a single input, `mongosh_string`, which holds all the information needed for executing the MongoDB query. Notably, `mongosh_string` encapsulates an executable query directly within the MongoDB shell (i.e. `mongosh`), encompassing details such as the collection name, the intended operation, and associated parameters. The driver's responsibility lies in parsing this string and transforming it into a format compatible with the MongoDB Java driver. This approach ensures a high degree of *flexibility*, allowing the driver to execute a wide range of MongoDB queries, including intricate aggregation pipelines, *without requiring manual translation* of the query into the Java driver format. The string's structure follows this pattern:
+
+```javascript 
+db.collection.operation({param1: value1, ...})
+```
+The method initiates by dissecting the `mongosh_string` to extract essential components: the collection name and operation details. The operation name (e.g., `find`, `insertOne`) is isolated, guiding the method to invoke the corresponding *operation-specific* method. The parameters for the operation, which are in JSON format, are extracted from the remaining part of the string. Depending on the operation, additional processing of these parameters may be necessary, achieved through parsing methods, regular expressions, or JSON manipulations.
+
+- `find`: for the `find` operation, the `executeQuery` method isolates the `operationDoc` and proceeds with a tailored execution process. The query parameters are converted into *BSON* format compatible with the MongoDB Java driver. *Criteria*, *projection details*, *sorting instructions*, and *query limits* are extracted and formatted. The `find` method then executes the query against the specified MongoDB collection, collecting and returning the results.
+
+- `aggregate`: handling the `aggregate` operation follows a similar precision pattern but caters to the complexity of MongoDB aggregation. The `operationDoc` for an aggregate operation contains a sequence of MongoDB aggregation pipeline stages. These stages, represented as an array of JSON objects, are parsed into *BSON* objects. Each stage, such as `$match`, `$group`, and `$sort`, is accurately converted from its string representation into *BSON* objects. At this point, the aggregate method executes this pipeline against the specified MongoDB collection, resulting in a list of Document objects representing the final aggregated output.
+
+- `insertOne`: for the `insertOne` operation, the `operationDoc` contains data for the document to be inserted in a JSON-like format. Parsing this data into a Document object, the `insertOne` method is invoked, producing an `InsertOneResult` indicating the success of the operation, including the `_id` of the inserted document.
+
+- `updateOne`: the `updateOne` operation involves parsing the `operationDoc` into *filter criteria* and *update details*. The filter criteria, responsible for determining the document *target* to be updated, is converted into a Document object, matching the BSON format expected by the MongoDB Java driver. The update portion, instead, specify *how* the document should be updated and potentially can contain various operators such as `$set`, `$unset`, `$push` and `$pull`. This one needs to be parsed into a BSON format. Then, the `updateOne` method executes the update operation, producing an `UpdateResult` indicating the success of the operation and the number of documents updated.
+
+- `deleteOne`: for the deleteOne operation, the `executeQuery` method focuses on the `operationDoc`, containing criteria for selecting the document to be deleted. Parsing this into a Document object, the `deleteOne` method executes the delete operation using the MongoDB Java driver, yielding a `DeleteResult` object with information about the outcome, including the number of documents deleted.
+
+#### 8.3.2.3. Error Handling
+$\newline$
+The class adheres to a consistent approach for error handling throughout its implementation. Various methods within the class have the potential to throw exceptions, including:
+
+- `MongoException`;
+- `IllegalArgumentException`;
+- `IllegalStateException`.
+
+These exceptions play a crucial role in signaling failures during database operations, contributing to a robust system of error reporting and handling. The approach relies on calling methods to take charge of error management, ensuring a clear and effective mechanism for handling exceptions.
 
 
+## 8.4. Future Enhancements
+Upon completing the implementation, specific areas may warrant further exploration. The following points outline potential *future enhancements* to elevate the functionality of *WeFood*:
 
-Here in the server try to describe also the Driver that we have implemented.
+- *API Security*: the APIs provided by the server are not yet prepared for a real deployment. They lack proper authentication and authorization mechanisms. For a genuine deployment, it's essential to secure sensitive APIs using a JWT (JSON Web Tokens) authentication mechanism. This involves exchanging a token between the client and the server, containing user information. The server verifies the token's validity and checks if the user is authorized to access the requested API. Additionally, *roles* and *authorities* must be defined for different Users, ensuring the right access to specific APIs based on their roles.
 
-### 8.1.2. Client
+- *HTTPS Implementation*: in the current testing deployment, HTTPS has not been implemented for communication between the client and server. This is a critical aspect that must be addressed in a real-world deployment.
 
-For the Client implementation, the project was build using HTML, CSS and TypeScript.
-HTML, or HyperText Markup Language, is the standard markup language for creating web pages.
+- *Neo4j Replicas*: exploring additional replicas of Neo4j could enhance the scalability and fault tolerance of the application. Licensing limitations may be a constraint, but for a fully operational social network, overcoming this obstacle would be essential.
 
-CSS, or Cascading Style Sheets, complements HTML by providing styling and layout.
+- *Distributed Server*: the current server implementation is not distributed, limiting scalability. In a real-world deployment, distributing the server across multiple nodes could improve scalability and fault tolerance.
 
-Now, let's move on to AngularJS. AngularJS is a JavaScript framework developed by Google, designed to make both the development and testing of web applications easier. It extends HTML with new attributes and binds data to HTML with expressions, making it a powerful tool for creating dynamic and interactive user interfaces.
+- *Feature Expansion*: to broaden the feature set of the social network, introducing additional functionalities may be advisable. This could involve enhancing user interactions, introducing new content types, or refining existing features.
 
-In AngularJS, our application is organized into various components. Components are the building blocks of the user interface, each encapsulating a specific part of the application's functionality.
+- *Optimizing Response Time*: efforts should be made to further reduce the response time of the web application. This can be achieved by optimizing queries, implementing caching mechanisms, and developing more efficient algorithms for all the functions within the application.
 
-Additionally, AngularJS employs services, which are reusable, injectable objects that perform specific functions across the application. Services are ideal for encapsulating shared functionality, such as data retrieval or business logic, and promoting modularity in our codebase.
+- *Mobile App*: introducing a *mobile application* for *WeFood* would serve as a *valuable addition*, enabling users to access the social network seamlessly from their mobile devices. This transition doesn't necessitate a comprehensive redesign of the client component. Leveraging the current implementation of the web application with Angular provides the flexibility to utilize specific frameworks, like *Ionic*, to *effortlessly* transform the web application into a mobile-friendly format.
 
-Implementation Example for Login-Home and Home Functionalities:
+In conclusion, the evolutionary process within the deployment of an *authentic social network* extends well beyond the mere implementation phase. The *real-world context* introduces a myriad of aspects that require careful attention and cannot be overlooked.
 
-The central component in this implementation is the HomeComponent, serving as the foundational element of the home page. Its corresponding template, home.component.html, delineates the page structure, encompassing a navigation bar, a central content area, and a footer. Noteworthy is the seamless integration of the LoggingPopupComponent, a critical component responsible for user authentication.
-
-When a user initiates the "LOGIN" button in the navigation bar, the openPopup() method within the HomeComponent sets the showLoginPopup property to true. This action triggers the rendering of the LoggingPopupComponent through the *ngIf directive in the template. The popup is not merely a static UI element; it actively facilitates user authentication.
-
-The LoggingPopupComponent is intricately linked with the RegisteredUserService. Upon a successful login attempt, this component emits the closePopup event. Subsequently, the HomeComponent responds by capturing this event, interpreting it as a signal to close the popup, and simultaneously redirecting the user to the registered user feed.
-
-In the background, the PostService assumes a pivotal role, managing a range of post-related functionalities. From uploading and modifying posts to deletion operations, this service communicates with the backend server via HTTP requests. The browseMostRecentTopRatedPosts method stands out, fetching posts based on parameters such as recency and popularity, thereby addressing the dynamic content requirements of the application.
-
-Adding another layer of complexity is the browse-most-recent-top-rated-post-by-ingredients component. This specialized component, along with its template (browse-most-recent-top-rated-post-by-ingredients.component.html), offers users a dedicated space for post filtering based on ingredient names. It includes input fields for dynamic entry and sliders to fine-tune temporal and post limit criteria.
-
-While navigating the application's source code, a consistent theme of managing asynchronous operations becomes apparent. The isLoading property in HomeComponent ensures a seamless transition by displaying a loading spinner during data retrieval. Thoughtful error handling mechanisms are implemented to safeguard the user experience against unforeseen issues.
-
-Reflecting on the unit tests, especially those for the BrowseMostRecentTopRatedPostByIngredientsComponent, underscores a commitment to quality assurance. These tests serve as vigilant checks, validating the successful creation of components and reinforcing the application's reliability.
-
-In the client we can find actor classes, which inside have the main shell with all the commands for the users. 
-Also we have methods wich guides the user through the steps to complete an operation an this methods also call the classes found in httprequest. The latters sends an http request to the server and if the status code is 200 (ok), a conversion from the response body to the desired object is perfomed. This objects can be found in model, dto, or apidto. The print of the object is done at the end inside the method called before by the Printer or Java print (System.out.println).
-
-## 8.2. Future Works
-I have a login api in java spring and i want that other apis are accessible only after the login is performed
-DIRE in breve come si doveva fare per rendere API non pubbliche
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-e poi dire come si è fatto e perchè, per semplificare l'implementazione....
-
-Some possible future works that can be done to improve our application are the following:
-Firstly, one crucial step would be to implement Hypertext Transfer Protocol Secure (HTTPS), a secure communication protocol, to ensure a protected and encrypted experience for all users within the social network.
-
-Then the utilization of additional replicas in Neo4j could be a way to procede. Presently, this is constrained by licensing limitations. By doing so, we can enhance the scalability and fault tolerance of our application.
-
-Addressing the challenge of eventual consistency, as previously discussed during the server presentation, implementing one of the viable strategies for managing eventual consistency will contribute to a more reliable user experience.
-
-Furthermore, to expand the feature set of our social network, it is necessary to introduce additional functionalities. To do so, optimizing our parser to handle these new queries will be fundamental to achieve a more versatile and feature-rich social networking platform.
-
-In conclusion, the future trajectory of our application involves not only ensuring security through HTTPS implementation but also overcoming licensing barriers to explore multiple replicas in Neo4j. Additionally, addressing issues related to eventual consistency and expanding the functional scope with new queries in MongoDB are pivotal steps in ensuring the sustained growth and improvement of our social network.
-
-
-
----
-
-<!-- # PERFORMANCE TEST -->
 
 \newpage
 
 # 9. User Manual
 
-This guide outlines the general approach to navigating and utilizing the features of our social network application. After this introduction, you'll find comprehensive instructions on interacting with the user interface, tailored for registered users, as well as an overview for non-registered users on accessing limited functionalities. A table presents all possible commands that users can input into the interface along with their corresponding outcomes.
+Anyone without an account attempting to access *WeFood* will be automatically re-directed to the main feed, displaying the most recent and top-rated posts (Figure X). On this page, two sliders on the left side allow users to customize the time range and the total number of displayed posts. Additionally, a login button is situated in the top right corner. Upon clicking, a pop-up for registration/login will appear. If the user opts for "Sign Up Now," the pop-up will display all the necessary details that an Unregistered User must input to complete the registration process. At the bottom of the pop-up, in the login section(Figure Y), there is a specific button for the admin to enter their login credentials, providing access to their personalized screens. As the admin is already registered, there's no need for them to create a username or password; these details will be communicated to them by the developers through pre-established channels[^2].
 
-For non-registered users, browsing recent posts sorted by upload date is permitted. However, all other operations, except for registration, are restricted until users complete the registration process. Upon registration, users are greeted with an empty personal profile page, zero followers/followed, and zero posts. The interface displays a personal shell prompting users to insert commands. The subsequent table details various commands and their corresponding results.
+[^2]: In the current testing environment, the admin credentials are: username: `admin`, password: `password`.
 
-| Command | Operation |
-| --- | --- |
-| `login` | To login |
-| `logout` | To logout |
-| `findIngredientByName` | To find an ingredient by name |
-| `findIngredientsUsedWithIngredient` | To show suggestions about ingredients based on ingredient combinations |
-| `findNewIngredientsBasedOnFriendsUsage` | To show suggestions about ingredients based on friends |
-| `findUsersToFollowBasedOnUserFriends` | To show suggestions on new followers based on friends |
-| `findMostFollowedUsers` | To show suggestions about the most followed users |
-| `findUsersByIngredientUsage` | To show suggestions about users based on ingredients usage |
-| `findMostUsedIngredientByUser` | To find the most used ingredient |
-| `findMostLeastUsedIngredient` | To show an overview about ingredient usage |
-| `uploadPost` | To upload a post |
-| `modifyPost` | To modify a post |
-| `deletePost` | To delete a post |
-| `browseMostRecentTopRatedPosts` | To browse the most recent and top rated posts |
-| `browseMostRecentTopRatedPostByIngredients` | To browse the most recent and top rated posts by ingredients |
-| `browseMostRecentPostsByCalories` | To browse the most recent posts by calories |
-| `findPostByRecipeName` | To find a post by recipe name |
-| `averageTotalCaloriesByUser` | Statistics about calories |
-| `findRecipeByIngredients` | To find a recipe by ingredients |
-| `modifyPersonalInformation` | To modify personal informations |
-| `deleteUser` | To delete your personal profile |
-| `followUser` | To follow a user |
-| `unfollowUser` | To unfollow a user |
-| `findFriends` | To find your friends |
-| `findFollowers` | To find your followers |
-| `findFollowed` | To find your followed users |
-| `exit` | To exit from the site |
+Upon registration or login[^3], users gain access to their personal page and all the functionalities of WeFOod. The initial view for a registered user is a page where they can browse posts, accompanied by left-side buttons to personalize searches using sliders or ingredients (Figure Z). The interface also provides ingredient suggestions based on friends' usage.
 
-After entering a command, the user will receive on-screen guidance to complete the operation. Accuracy in providing information is crucial; any inaccuracies will result in a failed operation, necessitating a restart. Notably, there is no back button available, meaning completed operations cannot be reversed. A pop-up message informs users of the success or failure of an operation, redirecting them to the main shell.
+[^3]: To try the application as a Registered User, instead, it is possible to use the following credentials: username: `user`, password: `user`.
 
-For post browsing, a folder is dynamically created/deleted upon issuing the relevant command, and the folder's path is displayed on the screen.
+In the center of the screen, the user can view all the posts found by their searches. Hovering over posts reveals recipe names, and clicking on them displays a recipe pop-up (Figure P), including the average star ranking at the top right corner. Hovering over the pop-up image reveals the calories of the recipe, and clicking on it allows the user to enter recipe details such as ingredients and steps (Figure A). The comments and votes sections enable user interaction with the post. Users can click on the name of the recipe creator to enter their user page.
 
-The admin of the social network is pre-registered, and credentials are communicated through various channels (e.g., voice, messages). The admin interacts with a personal shell using specific commands. Similar to regular users, the admin lacks a back button, and once an operation is correctly completed, it cannot be reversed.
+On the right side of the screen, a button to upload a post is available, allowing users to add an image, recipe name, ingredients, and more (Figure V).
 
-The following table outlines admin-specific commands:
+Additionally, in the top right corner, users have a profile button providing access to the personal profile page. On this page, users find suggestions and statistics (if available) on the left/right side of the screen, along with buttons to find friends/followers/followed and the feed button to return to the feed section.
 
-| Command | Operation |
-| --- | --- |
-| `login` | To login |
-| `logout` | To logout |
-| `createIngredient` | To create a new ingredient |
-| `banUser` | To ban a user from the site |
-| `unbanUser` | To unban a user |
-| `findIngredient` | To find information about a specific ingredient |
-| `getAllIngredients` | To retrieve all information about ingredients |
-| `findIngredientsUsedWithIngredient` | To find combinations of ingredients from a starting ingredient |
-| `mostPopularCombinationOfIngredients` | Statistics about the most popular combinations of ingredients |
-| `exit` | To close the application |
+By clicking on the username in the top left corner, users can modify personal information such as name and surname or delete the personal profile. A confirmation prompt allows users to reconsider before permanently deleting the profile.
 
-This detailed guide aims to provide users, whether regular or admin, with a clear understanding of the social network's functionalities and the corresponding commands to interact effectively.
+When viewing another registered user's page, the current user sees the other user's post in the center of the screen (Figure M). The display includes general statistics about the user, their friends/followers/followed, and a button to follow the user (which turns to "unfollow" after clicking). Users can return to the feed from this screen.
 
-Da fare più mettere screen
+In the admin's personal dashboard, there are statistics presented in either a histogram format or rankings, accompanied by buttons to access the global feed section or find users.
+
+The admin also has the capability to create new ingredients. It's crucial to note that once ingredients are created, there is no option to delete them. Therefore, all steps involved in the ingredient creation process must be executed with care.
+
+The dashboard additionally provides visibility into all banned users. To unban a registered user, the admin must navigate to the banned user page and click the button to lift the ban.
+
+Clicking on the feed, the admin gains access to posts and buttons to personalize searches, mirroring the functionality available to registered users. Morover the admin can interact with posts, by deleting comments or the post itself if the policies of WeFood are not respected.
 
 
 \newpage
@@ -2208,3 +2113,7 @@ Da fare più mettere screen
 `[2]` Food.com Recipes and Interactions - \url{https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions?select=PP_recipes.csv} - Accessed: December 2023.
 
 `[3]` Food.com - Recipes and Reviews - \url{https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv} - Accessed: December 2023.
+
+`[4]` Angular - \url{https://angular.io/} - Accessed: January 2024.
+
+`[5]` Spring - \url{https://spring.io/} - Accessed: January 2024.
