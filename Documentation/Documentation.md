@@ -51,7 +51,12 @@ header-includes: |
     	\bf\\ \large{Giuseppe Soriano}\raggedleft}}
 \end{minipage}
 
-\vspace{40mm}
+\vspace{20mm}
+\begin{center}
+\large{\textbf{GitHub Repository}: \url{https://github.com/GiuseppeSoriano/WeFood/}}
+\end{center}
+\vspace{15mm}
+
 \hrulefill
 
 \begin{center}
@@ -1673,7 +1678,7 @@ Additional configurable options include `j` and `wtimeout`.
 Regarding reading operations, all members of the replica set *can* accept read operations, although by *default*, applications direct reads to the primary member. In the case of a social network like *WeFood*, read operations can be directed to secondary nodes, even if they are not as updated as the primary node, as MongoDB asynchronously updates data to the secondary nodes. Thus, to ensure the lowest response time for read operations, the *read concern* is set to `nearest` at the *client-level*, meaning read operations will be performed on the nearest node (i.e. the node with the lowest latency). 
 
 ### 7.1.2. Sharding
-When it comes to *Sharding*, it is crucial to assess before the potential benefits it can bring. Sharding is the horizontally partitioning of data across multiple servers, that can help in enhancing scalability and performance. However, in certain situations, opting for sharding may prove impractical or undesirable. For instance, in the current implementation of *WeFood*, sharding the Post collection based on a specific field, such as `timestamp`, could result in latency issues when querying with unrelated filters (e.g., by `totalCalories` or by `avgStarRanking`), leading to an inefficient process.
+When it comes to *Sharding*, it is crucial to assess before the potential benefits it can bring. Sharding is the horizontally partitioning of data across multiple servers, that can help in enhancing scalability and performance. However, in certain situations, opting for sharding may prove impractical or undesirable. For instance, in the current implementation of *WeFood*, sharding the Post collection based on a specific field, such as `timestamp`, could result in latency issues when querying with unrelated filters (e.g. by `totalCalories` or by `avgStarRanking`), leading to an inefficient process.
 
 To elaborate a little further, if the application was designed with predefined *Categories* for Recipes, sharding the Post collection based on the `category` field might achieve balanced load distribution among shards. However, this approach was *intentionally avoided* to offer users the flexibility to explore diverse recipes without constraints. In the current implementation, indeed, Users can search for Recipes using *various filters*, discovering Recipes *beyond* fixed categories.
 
@@ -1846,7 +1851,7 @@ CREATE TEXT INDEX user_index FOR (u:User) ON (u.username);
 
 
 ## 7.3. Consistency, Availability and Partition Tolerance
-The trio of properties highlighted in the title represents the fundamental characteristics of a distributed system. However, as the *CAP theorem* states, achieving all three simultaneously in a functional system is deemed impossible. Aligned with the predetermined Non-Functional Requirements (Section **2.2.**), it becomes necessary to prioritize the *Availability* and *Partition Tolerance* of the system, allowing for a measured relaxation in *Consistency constraints*. This strategic approach allows to the primary system actors, the Users, to persist in utilizing the application even if certain displayed information is *not entirely up-to-date*. In practical terms, this might translate to scenarios such as not immediately viewing the latest Recipes (e.g., during a network partition) or encountering non-updated suggestions after the upload of a new Recipe (e.g., if Neo4j is temporarily down). Nevertheless, Users are assured of *eventually* accessing the most recent information. The timeline for this "eventually" remains uncertain, as consistency updates may employ diverse approaches, and in the event of significant faults, human operator intervention may be necessary.
+The trio of properties highlighted in the title represents the fundamental characteristics of a distributed system. However, as the *CAP theorem* states, achieving all three simultaneously in a functional system is deemed impossible. Aligned with the predetermined Non-Functional Requirements (Section **2.2.**), it becomes necessary to prioritize the *Availability* and *Partition Tolerance* of the system, allowing for a measured relaxation in *Consistency constraints*. This strategic approach allows to the primary system actors, the Users, to persist in utilizing the application even if certain displayed information is *not entirely up-to-date*. In practical terms, this might translate to scenarios such as not immediately viewing the latest Recipes (e.g. during a network partition) or encountering non-updated suggestions after the upload of a new Recipe (e.g. if Neo4j is temporarily down). Nevertheless, Users are assured of *eventually* accessing the most recent information. The timeline for this "eventually" remains uncertain, as consistency updates may employ diverse approaches, and in the event of significant faults, human operator intervention may be necessary.
 
 This is the main idea behind the design of the system. Consequently, the intentional alignment of the design with the intersection of Availability and Partition Tolerance in the CAP theorem places considerable emphasis on achieving eventual consistency. The subsequent paragraphs will delve into a detailed discussion of the system's consistency management, focusing particularly on the *Intra-Database* and *Inter-Database* consistency.
 
@@ -1869,7 +1874,7 @@ When ranking a Post, the entire process is contained within the Post collection.
 
 1. the `avgStarRanking` field is then directly updated on the Post collection.
 
-While recognizing that this approach may result in a temporarily stale `avgStarRanking` due to the local client copy *and* potential votes occurring after the User viewed the Post, it is understood that this discrepancy is more likely during the initial wave of votes but diminishes over time. As time progresses, the `avgStarRanking` is expected to *converge* to the correct value, ensuring accuracy as the upload time recedes into the past. This same approach applies to the deletion of a vote, with the understanding that the observations regarding the staleness of `avgStarRanking` remain pertinent.
+While recognizing that this approach may result in a *temporarily* stale `avgStarRanking` due to the local client copy *and* potential votes occurring after the User viewed the Post, it is understood that this discrepancy is more likely during the initial wave of votes but diminishes over time. As time progresses, the `avgStarRanking` is expected to *converge* to the correct value, ensuring accuracy as the upload time recedes into the past. This same approach applies to the deletion of a vote, with the understanding that the observations regarding the staleness of `avgStarRanking` remains pertinent.
 
 ## 7.5. Inter-Database Consistency
 A more complex issue than the previous one arises when it comes to maintaining consistency across different databases. The type of consistency guaranteed depends on the nature of the operation being executed.
@@ -1903,10 +1908,6 @@ A more complex issue than the previous one arises when it comes to maintaining c
     \label{fig:eventual_consistency}
 \end{figure} 
 
----
-
-aggiungere link github e rendere pubblico il repository
-+ inserire credenziali utente e admin in manuale utente
 
 \newpage
 
@@ -1952,7 +1953,7 @@ Specifically, the server consists of the following packages:
 It is worth examining further the implemented *models* and the role of the *BaseMongoDB* class, which acts as the driver for managing MongoDB queries. The following paragraphs will elaborate on these aspects.
 
 ### 8.3.1. Models
-Starting with the conceptual UML Class Diagram (Section **3.2**), adjustments have been made to realize the actual implementation in Java. Outlined below are the details specific to each model.
+Starting with the conceptual UML Class Diagram (Section **3.2**), adjustments have been made to realize the *actual* implementation in Java. Outlined below are the details specific to each model.
 
 Admin:
 
@@ -2030,7 +2031,7 @@ The central component for query execution is the method `executeQuery`. It accep
 ```javascript 
 db.collection.operation({param1: value1, ...})
 ```
-The method initiates by dissecting the `mongosh_string` to extract essential components: the collection name and operation details. The operation name (e.g., `find`, `insertOne`) is isolated, guiding the method to invoke the corresponding *operation-specific* method. The parameters for the operation, which are in JSON format, are extracted from the remaining part of the string. Depending on the operation, additional processing of these parameters may be necessary, achieved through parsing methods, regular expressions, or JSON manipulations.
+The method initiates by dissecting the `mongosh_string` to extract essential components: the collection name and operation details. The operation name (e.g. `find`, `insertOne`) is isolated, guiding the method to invoke the corresponding *operation-specific* method. The parameters for the operation, which are in JSON format, are extracted from the remaining part of the string. Depending on the operation, additional processing of these parameters may be necessary, achieved through parsing methods, regular expressions, or JSON manipulations.
 
 - `find`: for the `find` operation, the `executeQuery` method isolates the `operationDoc` and proceeds with a tailored execution process. The query parameters are converted into *BSON* format compatible with the MongoDB Java driver. *Criteria*, *projection details*, *sorting instructions*, and *query limits* are extracted and formatted. The `find` method then executes the query against the specified MongoDB collection, collecting and returning the results.
 
@@ -2040,7 +2041,7 @@ The method initiates by dissecting the `mongosh_string` to extract essential com
 
 - `updateOne`: the `updateOne` operation involves parsing the `operationDoc` into *filter criteria* and *update details*. The filter criteria, responsible for determining the document *target* to be updated, is converted into a Document object, matching the BSON format expected by the MongoDB Java driver. The update portion, instead, specify *how* the document should be updated and potentially can contain various operators such as `$set`, `$unset`, `$push` and `$pull`. This one needs to be parsed into a BSON format. Then, the `updateOne` method executes the update operation, producing an `UpdateResult` indicating the success of the operation and the number of documents updated.
 
-- `deleteOne`: for the deleteOne operation, the `executeQuery` method focuses on the `operationDoc`, containing criteria for selecting the document to be deleted. Parsing this into a Document object, the `deleteOne` method executes the delete operation using the MongoDB Java driver, yielding a `DeleteResult` object with information about the outcome, including the number of documents deleted.
+- `deleteOne`: for the `deleteOne` operation, the `executeQuery` method focuses on the `operationDoc`, containing criteria for selecting the document to be deleted. Parsing this into a Document object, the `deleteOne` method executes the delete operation using the MongoDB Java driver, yielding a `DeleteResult` object with information about the outcome, including the number of documents deleted.
 
 #### 8.3.2.3. Error Handling
 $\newline$
@@ -2077,31 +2078,131 @@ In conclusion, the evolutionary process within the deployment of an *authentic s
 
 # 9. User Manual
 
-Anyone without an account attempting to access *WeFood* will be automatically re-directed to the main feed, displaying the most recent and top-rated posts (Figure X). On this page, two sliders on the left side allow users to customize the time range and the total number of displayed posts. Additionally, a login button is situated in the top right corner. Upon clicking, a pop-up for registration/login will appear. If the user opts for "Sign Up Now," the pop-up will display all the necessary details that an Unregistered User must input to complete the registration process. At the bottom of the pop-up, in the login section(Figure Y), there is a specific button for the admin to enter their login credentials, providing access to their personalized screens. As the admin is already registered, there's no need for them to create a username or password; these details will be communicated to them by the developers through pre-established channels[^2].
+Anyone without an account attempting to access *WeFood* will be automatically re-directed to the *main feed*, displaying the *most recent* and *top-rated* posts (Figure \ref{fig:userManual_1}). 
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Resources/"userManual_1.png"}
+    \caption{Unregistered User Feed.}
+    \label{fig:userManual_1}
+\end{figure} 
+
+On this page, two sliders on the left side allow Users to customize the *time range* and the *total number* of displayed posts. Additionally, a *login button* is situated in the top right corner. Upon clicking, a *pop-up* for registration/login will appear. 
+
+\begin{figure}[htbp]
+  \centering
+  \hspace*{\fill}
+  \begin{subfigure}{0.26\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Resources/userManual_2.png}
+    \caption{Login form.}
+    \label{fig:userManual_2}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.26\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Resources/userManual_3.png}
+    \caption{Registration form.}
+    \label{fig:userManual_3}
+  \end{subfigure}
+  \hspace*{\fill}
+  \caption{Pop-up for registration/login.}
+\end{figure}
+
+If the user opts for "*Sign Up now!*", the pop-up will display all the necessary details that an Unregistered User must input to complete the registration process (Figure \ref{fig:userManual_3}). At the bottom of the pop-up, in the login section (Figure \ref{fig:userManual_2}), there is a specific button for the Admin to enter their login credentials, providing access to their personalized screens. As the admin is already registered, there's no need for them to create a username or password; these details will be communicated to them by the developers through pre-established channels[^2].
 
 [^2]: In the current testing environment, the admin credentials are: username: `admin`, password: `password`.
 
-Upon registration or login[^3], users gain access to their personal page and all the functionalities of WeFOod. The initial view for a registered user is a page where they can browse posts, accompanied by left-side buttons to personalize searches using sliders or ingredients (Figure Z). The interface also provides ingredient suggestions based on friends' usage.
+Upon registration or login[^3], Users gain access to their personal page and all the functionalities of *WeFood*. The initial view for a Registered User is a page where they can browse posts, accompanied by left-side buttons to personalize searches using sliders or ingredients (Figure \ref{fig:userManual_4}). The interface also provides ingredient suggestions based on friends' usage.
 
-[^3]: To try the application as a Registered User, instead, it is possible to use the following credentials: username: `user`, password: `user`.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Resources/"userManual_4.png"}
+    \caption{Registered User Feed.}
+    \label{fig:userManual_4}
+\end{figure} 
 
-In the center of the screen, the user can view all the posts found by their searches. Hovering over posts reveals recipe names, and clicking on them displays a recipe pop-up (Figure P), including the average star ranking at the top right corner. Hovering over the pop-up image reveals the calories of the recipe, and clicking on it allows the user to enter recipe details such as ingredients and steps (Figure A). The comments and votes sections enable user interaction with the post. Users can click on the name of the recipe creator to enter their user page.
+[^3]: To try the application as a Registered User, instead, it is possible to use the following credentials: username: `cody_cisneros_28`, password: `MyKkr9kQ6M`.
 
-On the right side of the screen, a button to upload a post is available, allowing users to add an image, recipe name, ingredients, and more (Figure V).
+In the center of the screen, the User can view all the posts found by their searches. Hovering over posts reveals Recipe names, and clicking on them displays a Recipe pop-up (Figure \ref{fig:userManual_5}), including the average star ranking at the top right corner. Hovering over the pop-up image reveals the calories of the Recipe, and clicking on it allows the User to enter Recipe details such as ingredients and steps (Figure \ref{fig:userManual_6}). The comments and votes sections enable User interaction with the post. Users can click on the name of the Recipe creator to enter their user page.
 
-Additionally, in the top right corner, users have a profile button providing access to the personal profile page. On this page, users find suggestions and statistics (if available) on the left/right side of the screen, along with buttons to find friends/followers/followed and the feed button to return to the feed section.
+\newpage
 
-By clicking on the username in the top left corner, users can modify personal information such as name and surname or delete the personal profile. A confirmation prompt allows users to reconsider before permanently deleting the profile.
+\begin{figure}[htbp]
+  \centering
+  \hspace*{\fill}
+  \begin{subfigure}{0.40\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Resources/userManual_5.png}
+    \caption{Image and total calories.}
+    \label{fig:userManual_5}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.40\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Resources/userManual_6.png}
+    \caption{Ingredients and steps.}
+    \label{fig:userManual_6}
+  \end{subfigure}
+  \hspace*{\fill}
+  \caption{Recipe pop-up.}
+\end{figure}
 
-When viewing another registered user's page, the current user sees the other user's post in the center of the screen (Figure M). The display includes general statistics about the user, their friends/followers/followed, and a button to follow the user (which turns to "unfollow" after clicking). Users can return to the feed from this screen.
+On the right side of Figure \ref{fig:userManual_4}, a button to upload a Post is available, allowing Users to add an image, recipe name, ingredients, and more (Figure \ref{fig:userManual_7}). Ingredients are selected from a *drop-down menu* and then quantity has to be inserted. To insert a step, after having written it, the User must press `ENTER` to add it.
 
-In the admin's personal dashboard, there are statistics presented in either a histogram format or rankings, accompanied by buttons to access the global feed section or find users.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.35\textwidth]{Resources/"userManual_7.png"}
+    \caption{Uploading a new Post.}
+    \label{fig:userManual_7}
+\end{figure} 
 
-The admin also has the capability to create new ingredients. It's crucial to note that once ingredients are created, there is no option to delete them. Therefore, all steps involved in the ingredient creation process must be executed with care.
+\newpage
 
-The dashboard additionally provides visibility into all banned users. To unban a registered user, the admin must navigate to the banned user page and click the button to lift the ban.
+In Figure \ref{fig:userManual_4}, in the top right corner, Users have a profile button providing access to the personal profile page. On this page (Figure \ref{fig:userManual_8}), Users find *suggestions* and *statistics* (if available) on the left/right side of the screen, along with buttons to find friends/followers/followed and the feed button to return to the feed section.
 
-Clicking on the feed, the admin gains access to posts and buttons to personalize searches, mirroring the functionality available to registered users. Morover the admin can interact with posts, by deleting comments or the post itself if the policies of WeFood are not respected.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Resources/"userManual_8.png"}
+    \caption{Personal page.}
+    \label{fig:userManual_8}
+\end{figure} 
+
+By clicking on the *username* in the top left corner, Users can modify personal information such as name and surname or delete their personal profile (Figure \ref{fig:userManual_9}). A confirmation prompt allows users to reconsider before permanently deleting the profile.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.28\textwidth]{Resources/"userManual_9.png"}
+    \caption{Modifying personal information.}
+    \label{fig:userManual_9}
+\end{figure} 
+
+\newpage
+
+
+When checking out the profile of another Registered User, their posts appear at the center of the screen (Figure \ref{fig:userManual_10}). The display includes general statistics about the user, their friends/followers/followed, and a button to follow the user (which turns to "*unfollow*" after clicking). Users can return to the feed from this screen.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Resources/"userManual_10.png"}
+    \caption{User page.}
+    \label{fig:userManual_10}
+\end{figure} 
+
+In the Admin's personal dashboard (Figure \ref{fig:userManual_11}), there are statistics presented in either a histogram format or rankings, accompanied by buttons to access the global feed section or find Users.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Resources/"userManual_11.png"}
+    \caption{Admin dashboard.}
+    \label{fig:userManual_11}
+\end{figure} 
+
+The Admin also has the capability to create new ingredients. It's crucial to note that once ingredients are created, there is no option to delete them. Therefore, all steps involved in the ingredient creation process must be executed with care.
+
+The dashboard additionally provides visibility into all banned Users. To unban a Registered User, the Admin must navigate to the banned User page and click the button to lift the ban.
+
+Clicking on the feed, the Admin gains access to posts and buttons to personalize searches, mirroring the functionality available to registered Users. Morover the Admin can interact with posts, by deleting comments or the Post itself if the *WeFood* policies are not respected.
 
 
 \newpage
