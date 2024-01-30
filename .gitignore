@@ -12,4 +12,3 @@ Data/DatasetStructure/0Raw_Datasets/*.pkl
 Implementation/Examples/
 collections_database/*.json
 vm/data
-Implementation/Client/
