@@ -181,7 +181,7 @@ The non-functional requirements for *WeFood* are as follows.
 
 3. **Security**: the system must be secure and protect users' data even from possible attacks. In particular, the information transmitted between client and server must be over HTTPS. Furthermore, the system must protect users' passwords by hashing them before storing in the database.
 
-4. **Reliability**: the system must be reliable and must not lose the information uploaded by the users. It must be caple of recovering from a crash and restore the data in a consistent state, exploiting the replicas of the database.
+4. **Reliability**: the system must be reliable and must not lose the information uploaded by the users. It must be capable of recovering from a crash and restore the data in a consistent state, exploiting the replicas of the database.
 
 5. **Usability**: the GUI offered to the users must be easy to use and intuitive. Each user should be able to use the application without any training and in about 15 minutes.
 
@@ -462,7 +462,7 @@ Contained in these datasets there are *almost* all the information needed to pop
 
 1. Personal Information about the Users: only the username of the Users was available (`AuthorName ` in `recipes.csv` of [`[3]`](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv)).
 
-2. The quantity of each ingredient in the recipes: `RecipeIngredientQuantities` in `recipes.csv` of [`[3]`](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv) contains some numbers that could be useful for this purpose, but they are not clear and there is no documentation about them. Indeed there is no way to understand if they are the quantities of the ingredients in grams or in other units of measure (e.g. just to have an idea there numbers like the following: 1, 1/2, 3, 5, etc). Furthermore, there are a lot of `NA` values in this column.
+2. The quantity of each ingredient in the recipes: `RecipeIngredientQuantities` in `recipes.csv` of [`[3]`](https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=reviews.csv) contains some numbers that could be useful for this purpose, but they are not clear and there is no documentation about them. Indeed there is no way to understand if they are the quantities of the ingredients in grams or in other units of measure (e.g. just to have an idea there are numbers like the following: 1, 1/2, 3, 5, etc). Furthermore, there are a lot of `NA` values in this column.
 
 Everything else is in the datasets, and need only to be cleaned and appropriately merged to obtain the structure needed for the population of the databases.
 
